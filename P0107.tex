@@ -1,0 +1,197 @@
+\documentclass[11pt]{article}
+
+\usepackage{xcolor}
+\usepackage{fullpage}
+\usepackage[colorlinks, allcolors=blue]{hyperref}
+\usepackage{listings}
+\usepackage{parskip}
+
+\date{}
+\title{Better support for {\tt constexpr} in {\tt std::array}}
+
+\lstdefinelanguage{diff}{
+  morecomment=[f][\color{blue}]{@@},           % group identifier
+  morecomment=[f][\color{red}]{-},             % deleted lines
+  morecomment=[f][\color{green!50!black}]{+},  % added lines
+  morecomment=[f][\color{magenta}]{---},       % diff header lines
+  morecomment=[f][\color{magenta}]{+++},
+}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=true,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+}
+
+\newcommand{\added}[1]{\color{green}{#1}}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+}
+
+\begin{document}
+
+\maketitle\vspace{-2cm}
+
+\begin{flushright}
+  \begin{tabular}{ll}
+  Document \#:&P0107R0\\
+  Date:       &\date{2015-09-23}\\
+  Project:    &Programming Language C++\\
+              &Library Evolution Group\\
+  Reply-to:   &\author{Louis Dionne}\\
+              &\textless\href{mailto:ldionne.2@gmail.com}{ldionne.2@gmail.com}\textgreater
+  \end{tabular}
+\end{flushright}
+
+\section{Introduction}
+\cite{N3598} removed the implicit marking of {\tt constexpr} member functions as
+{\tt const}. However, the member functions of {\tt std::array} were not revisited
+after this change, leading to a surprising lack of support for {\tt constexpr} in
+{\tt std::array}'s interface. This paper fixes this omission by adding {\tt constexpr}
+to the member functions of {\tt std::array} that can support it with a minimal amount
+of work.
+
+
+\section{Motivation and Scope}
+With the advent of generalized constant expressions, it can be useful to create
+a {\tt std::array} inside a {\tt constexpr} function, and then modify it. Without
+making some member functions {\tt constexpr}, this is impossible or overly difficult. For example, the following does not compile:
+
+\begin{lstlisting}[style=base]
+template <std::size_t N, std::size_t Size>
+constexpr std::array<std::size_t, N * Size>
+    cycle_indices(std::array<std::size_t, Size> a)
+{
+    std::array<std::size_t, N * Size> result{};
+    for (std::size_t i = 0; i < N * Size; ++i) {
+        result[i] = i % Size;
+    }
+    return result;
+}
+\end{lstlisting}
+
+Adding {\tt constexpr} support for most of {\tt std::array}'s member functions
+would be trivial and would make such code compile. However, this paper does not
+propose systematically adding the {\tt constexpr} keyword to standard library
+types that could support it, and it does not even add {\tt constexpr} to all of
+{\tt std::array}'s member functions. Even though the author thinks that it should
+eventually be done, the scope of this proposal is purposefully kept minimal.
+
+
+\section{Impact on the Standard}
+This proposal is a pure library extension. It does not require any new
+language features, and it merely adds consistency to {\tt std::array}'s
+interface.
+
+\section{Proposed Wording}
+
+Add to {\tt <array>} synopsis of \cite{N4296}:
+
+\begin{lstlisting}[style=base]
+template <class T, size_t N>
+@constexpr@ bool operator==(const array<T,N>& x, const array<T,N>& y);
+
+template <class T, size_t N>
+@constexpr@ bool operator!=(const array<T,N>& x, const array<T,N>& y);
+
+template <class T, size_t N>
+@constexpr@ bool operator<(const array<T,N>& x, const array<T,N>& y);
+
+template <class T, size_t N>
+@constexpr@ bool operator>(const array<T,N>& x, const array<T,N>& y);
+
+template <class T, size_t N>
+@constexpr@ bool operator<=(const array<T,N>& x, const array<T,N>& y);
+
+template <class T, size_t N>
+@constexpr@ bool operator>=(const array<T,N>& x, const array<T,N>& y);
+\end{lstlisting}
+
+Add to \emph{23.3.2.1 class template array overview} of \cite{N4296}:
+
+\begin{lstlisting}[style=base]
+// iterators:
+@constexpr@ iterator               begin() noexcept;
+@constexpr@ const_iterator         begin() const noexcept;
+@constexpr@ iterator               end() noexcept;
+@constexpr@ const_iterator         end() const noexcept;
+@constexpr@ const_iterator         cbegin() const noexcept;
+@constexpr@ const_iterator         cend() const noexcept;
+
+// element access:
+@constexpr@ reference       operator[](size_type n);
+@constexpr@ reference       at(size_type n);
+@constexpr@ reference       front();
+@constexpr@ reference       back();
+@constexpr@ T*              data() noexcept;
+@constexpr@ const T *       data() const noexcept;
+\end{lstlisting}
+
+Add to \emph{23.3.2.5 array::data} of \cite{N4296}:
+
+\begin{lstlisting}[style=base]
+@constexpr@ T* data() noexcept;
+@constexpr@ const T* data() const noexcept;
+\end{lstlisting}
+
+
+\section{Discussion}
+One might observe that some member and non-member functions were not made {\tt constexpr}
+by this paper.
+
+\begin{itemize}
+    \item The {\tt rbegin}, {\tt rend}, {\tt crbegin}, and {\tt crend} member functions
+          are not made {\tt constexpr}. The reason is that these functions return
+          {\tt reverse\_iterator}s, which are not literal types. While we could have
+          decided to go for it and make {\tt reverse\_iterator} a literal type, this is
+          left to another proposal in order to leave this proposal small and uncontroversial.
+          While leaving these functions non-{\tt constexpr} leaves some inconsistency in
+          {\tt std::array}'s interface, this inconsistency is precedented by the overloads
+          of {\tt rbegin}, {\tt rend}, {\tt crbegin}, and {\tt crend} for builtin array
+          types, which are not {\tt constexpr} for the same reason.
+
+    \item The {\tt fill} member function is not made {\tt constexpr} by this paper. The reason
+          is that {\tt fill} can be implemented in terms of {\tt memset} for some types. Since
+          {\tt memset} is not {\tt constexpr}, requiring {\tt fill} to be {\tt constexpr} would
+          force it to be implemented using an explicit loop all the time. Such a pessimization
+          is deemed unacceptable. Overcoming this limitation would most likely require the
+          ability to overload on {\tt constexpr}, which is out of scope of this paper.
+
+    \item The {\tt swap} member function and the overload of the {\tt swap} free function
+          for {\tt std::array} is not made {\tt constexpr} by this paper. The reason is that
+          the {\tt swap} function is not required to be {\tt constexpr} for other types,
+          which means that {\tt std::array}'s {\tt swap} can't be {\tt constexpr} in the
+          general case. To keep this proposal self-contained and minimal, this inconsistency
+          could be tackled by a different paper adding general support for {\tt constexpr} in
+          {\tt std::swap}. Another possibility would be to amend this paper and make
+          {\tt swap} {\tt constexpr} for {\tt std::array} whenever it can be, i.e. whenever
+          the elements of the array are {\tt constexpr} swappable.
+\end{itemize}
+
+
+\section{Implementation Experience}
+This proposal was implemented and tested in libc++, and it seems to work just fine.
+
+
+\section{Acknowledgements}
+Thanks to Marshall Clow for providing comments, and to David Sankel for providing
+comments and accepting to champion the paper in Kona.
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+  \bibitem[N3598]{N3598}
+    Richard Smith,
+    \emph{constexpr member functions and implicit const}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3598.html}
+  \bibitem[N4296]{N4296}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4296.pdf}
+
+\end{thebibliography}
+
+\end{document}
