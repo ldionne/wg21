@@ -1,33 +1,23 @@
 \documentclass[11pt]{article}
 
 \usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
 \usepackage{fullpage}
 \usepackage[colorlinks, allcolors=blue]{hyperref}
-\usepackage{listings}
 \usepackage{parskip}
 \usepackage{csquotes}
 \usepackage{minted}
 
 \newcommand{\cc}[1]{\mintinline{c++}{#1}}
 \newminted[cpp]{c++}{}
-
+\newcommand{\deleted}[1]{\st{#1}}
+\newcommand{\added}[1]{\hl{#1}}
 
 \date{}
 \title{Lambdas in unevaluated contexts}
+\author{}
 
-\lstdefinelanguage{diff}{
-  morecomment=[f][\color{blue}]{@@},           % group identifier
-  morecomment=[f][\color{red}]{-},             % deleted lines
-  morecomment=[f][\color{green!50!black}]{+},  % added lines
-  morecomment=[f][\color{magenta}]{---},       % diff header lines
-  morecomment=[f][\color{magenta}]{+++},
-}
-
-\newcommand{\added}[1]{\color{green}{#1}}
-
-\lstset{
-  basicstyle=\footnotesize\ttfamily,
-}
 
 \begin{document}
 
@@ -35,36 +25,32 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-  Document \#:&P0315R0\\
-  Date:       &\date{2016-05-24}\\
+  Document \#:&P0315R1\\
+  Date:       &\date{2016-07-07}\\
   Project:    &Programming Language C++\\
               &Evolution Group\\
   Reply-to:   &\author{Louis Dionne} \textless\href{mailto:ldionne.2@gmail.com}{ldionne.2@gmail.com}\textgreater
   \end{tabular}
 \end{flushright}
 
+\section{Introduction}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 -- Changed the wording to work around the resolution of DR1607,
+              which conflicted with the initial wording.
+\end{itemize}
+
 
 \section{Introduction}
 Lambdas are a very powerful language feature, especially when it comes to using
 higher-order algorithms with custom predicates or expressing small, disposable
-pieces of code. Yet, they suffer from one important limitation which cripples their
-usefulness for creative use cases; they can't appear in unevaluated contexts. This
-draconian restriction was originally designed to prevent lambdas from appearing in
-signatures, which would have opened a can of worm for mangling because lambdas are
-required to have unique types. However, that restriction was neither necessary nor
-sufficient to implement that intent, a situation that has been resolved when
-\href{http://goo.gl/rJey8q}{core issue 1607} was addressed in C++14. Furthermore,
-as the core issue states, the restriction is now stale, since the core issue was
-addressed:
-
-\begin{displayquote}
-If any of these approaches were adopted, the rationale for disallowing lambda-expressions
-in unevaluated operands would be removed, so it might make sense to remove the restriction
-at the same time.
-\end{displayquote}
-
-This paper proposes repairing that oversight and lifting the restriction that lambdas
-can't appear in unevaluated contexts.
+pieces of code. Yet, they suffer from one important limitation which cripples
+their usefulness for creative use cases; they can't appear in unevaluated
+contexts. This restriction was originally designed to prevent lambdas from
+appearing in signatures, which would have opened a can of worm for mangling
+because lambdas are required to have unique types. However, the restriction is
+much stronger than it needs to be, and it is indeed possible to achieve the
+same effect without it, as evidenced by this paper.
 
 
 \section{Motivation}
@@ -136,57 +122,94 @@ While this is a valid use case, it is expected that using \cc{decltype} on
 such a complex expression is less frequent outside the realm of heterogeneous
 computations.
 
-Finally, another motivation for this paper is that the restriction is now
-obsolete, yet it needlessly prevents lambdas from being used in creative ways,
-some of which are certainly unknown to the author of this paper. Quoting
-\href{https://goo.gl/ysUIdv}{an exchange} between Richard Smith and Roland
-Bock on the std-proposal mailing list:
-
-\begin{verbatim}
-    > > > > If we remove the (now-redundant) restriction on lambdas in unevaluated
-    > > > > operands, you could write: [...]
-    > > >
-    > > > Are there plans/proposals to do that? I stumbled over this restriction
-    > > > quite a few times.
-    > >
-    > > I don't think it's on the core issues list. We discussed it while working
-    > > on core issue 1607, but I think we thought it would be best handled
-    > > separately.
-    >
-    > Can you give me a pointer as to why the restriction is redundant now?
-
-    See core issue 1607. The purpose of the restriction was to avoid lambda-
-    expressions appearing in a signature (so that implementations don't need to
-    implement declaration / statement SFINAE and don't need to mangle them), but
-    it was neither necessary nor sufficient for that. The new rules in core issue
-    1607 don't need this restriction to implement that intent.
-\end{verbatim}
-
-Hence, we feel like it would now be reasonable for the restriction to be lifted.
-
+Finally, another motivation for this paper is that the restriction is much stronger
+than it needs to be, and it prevents lambdas from being used in creative ways,
+some of which are certainly unknown to the author of this paper.
 
 \section{Proposed Wording}
-The proposed wording is probably incomplete, for the author lacks sufficiently deep
-knowledge of the standard to be sure that no other sections are impacted. However,
-preliminary survey suggests that only the following change would be required
-(based on the working paper \cite{N4296}):
+The wording is based on the working paper \cite{N4296}.
 
 \begin{itemize}
-    \item[] \textbf{In [expr.prim.lambda] 5.1.2/2:}
-    Remove \textit{unevaluated operand} from the list of things a lambda-expression
-    may not appear in.
+    \item In \textbf{[basic.link] 3.5/8}, add the following line to the example
+          after the note:
+    \begin{cpp}
+        using Closure = decltype([] {}); // no linkage
+    \end{cpp}
+    The intent is to clarify that closure types are never given a name for
+    linkage purposes, thus preventing their use in names with external linkage.
+
+    \item At the end of \textbf{[temp.alias] 14.5.7}, add the following paragraph:
+    \begin{quote}
+        The type of a lambda expression appearing in an alias template declaration
+        is unique across instantiations of that alias template, even when the
+        lambda expression is not dependent.
+        [ \textit{Example:}
+\begin{cpp}
+template <typename T>
+using A = decltype([] {});
+// A<int> and A<char> refer to different closure types
+\end{cpp}
+        \textit{-- end example} ]
+    \end{quote}
+
+    \item After \textbf{[temp.deduct] 14.8.2/8}, add the following note:
+    \begin{quote}
+        [ \textit{Note:} The body of a lambda expression appearing in a function
+        type or a template parameter is not considered part of the immediate
+        context for purposes of template argument deduction. The intent is to
+        avoid requiring implementations to deal with substitution failure
+        involving arbitrary statements. [ \textit{Example:}
+\begin{cpp}
+template <typename T>
+auto f(T) -> decltype([]() { T::invalid; } ());
+void f(...);
+f(0); // the invalid expression is not part of the immediate context, hard error
+
+template <typename T, typename = decltype([]() { T::invalid; } ())>
+void g(T);
+void g(...);
+g(0); // the invalid expression is not part of the immediate context, hard error
+
+template <typename T>
+auto h(T) -> decltype([]() -> std::void_t<typename T::invalid> { });
+void h(...);
+h(0); // deduction fails on #1, calls #2
+
+template <typename T>
+auto i(T) -> decltype([](){ } (t));
+void i(...);
+i(0); // deduction fails on #1, calls #2
+\end{cpp}
+        \textit{-- end example} ]
+        \textit{-- end note} ]
+    \end{quote}
+
+    \item In \textbf{[expr.prim.lambda] 5.1.2/2} modify the paragraph as follows:
+    \begin{quote}
+        The evaluation of a lambda-expression results in a prvalue temporary
+        (12.2). This temporary is called the closure object. \deleted{A
+        lambda-expression shall not appear in an unevaluated operand (Clause 5),
+        in a template- argument, in an alias-declaration, in a typedef declaration,
+        or in the declaration of a function or function template outside its function
+        body and default arguments. [ Note: The intention is to prevent lambdas from
+        appearing in a signature. -- end note ]} [ Note: A closure object behaves like
+        a function object (20.9). -- end note ]
+    \end{quote}
 \end{itemize}
 
 
 \section{Implementation Experience}
-This proposal was implemented in Clang. The required change is commenting a single line
-which creates a diagnostic if a lambda-expression is found inside an unevaluated context.
+This proposal was implemented naively in Clang. The required change is commenting
+a single line which creates a diagnostic if a lambda-expression is found inside an
+unevaluated context.
 
 
 \section{Acknowledgements}
-Roland Bock and Matt Calabrese for discussing use cases for lambdas in unevaluated contexts
-on the \textit{std-proposal} and \textit{Boost.Devel} mailing lists. Richard Smith for letting
-me know that the restriction was now redundant.
+Roland Bock and Matt Calabrese for discussing use cases for lambdas in unevaluated
+contexts on the \textit{std-proposal} and \textit{Boost.Devel} mailing lists.
+Richard Smith for letting me know that we could do without the restriction.
+David Vandervoorde and Hubert Tong for providing extensive guidance in the
+second iteration of the wording.
 
 
 \section{References}
