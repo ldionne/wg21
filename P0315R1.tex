@@ -7,12 +7,21 @@
 \usepackage[colorlinks, allcolors=blue]{hyperref}
 \usepackage{parskip}
 \usepackage{csquotes}
+\usepackage{listings}
 \usepackage{minted}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
 
 \newcommand{\cc}[1]{\mintinline{c++}{#1}}
 \newminted[cpp]{c++}{}
 \newcommand{\deleted}[1]{\st{#1}}
-\newcommand{\added}[1]{\hl{#1}}
+\newcommand{\added}[1]{\sethlcolor{green}{\hl{#1}}}
 
 \date{}
 \title{Lambdas in unevaluated contexts}
@@ -25,7 +34,7 @@
 
 \begin{flushright}
   \begin{tabular}{ll}
-  Document \#:&P0315R1\\
+  Document \#:&D0315R1\\
   Date:       &\date{2016-07-07}\\
   Project:    &Programming Language C++\\
               &Evolution Group\\
@@ -127,16 +136,25 @@ than it needs to be, and it prevents lambdas from being used in creative ways,
 some of which are certainly unknown to the author of this paper.
 
 \section{Proposed Wording}
-The wording is based on the working paper \cite{N4296}.
+The wording is based on the working paper \cite{N4606}.
 
 \begin{itemize}
-    \item In \textbf{[basic.link] 3.5/8}, add the following line to the example
-          after the note:
-    \begin{cpp}
-        using Closure = decltype([] {}); // no linkage
-    \end{cpp}
+    \item Modify \textbf{[decl.typedef] 7.1.3/9} as follows:
+    \begin{quote}
+        If the typedef declaration defines an unnamed class (or enum), the first
+        typedef-name declared by the declaration to be that class type (or enum type)
+        is used to denote the class type (or enum type) for linkage purposes only (3.5).
+        \added{However, a closure type is never given a name for linkage purposes.}
+        [ \textit{Example:}
+\begin{lstlisting}[style=base]
+typedef struct { } *ps, S; // S is the class name for linkage purposes
+(*@\added{typedef decltype([]\{\}) C; // the closure type has no name for linkage purposes}@*)
+\end{lstlisting}
+        \textit{-- end example} ]
+    \end{quote}
+
     The intent is to clarify that closure types are never given a name for
-    linkage purposes, thus preventing their use in names with external linkage.
+    linkage purposes, thus preventing their use inside names with external linkage.
 
     \item At the end of \textbf{[temp.alias] 14.5.7}, add the following paragraph:
     \begin{quote}
@@ -156,8 +174,8 @@ using A = decltype([] {});
     \begin{quote}
         [ \textit{Note:} The body of a lambda expression appearing in a function
         type or a template parameter is not considered part of the immediate
-        context for purposes of template argument deduction. The intent is to
-        avoid requiring implementations to deal with substitution failure
+        context for the purposes of template argument deduction. The intent is
+        to avoid requiring implementations to deal with substitution failure
         involving arbitrary statements. [ \textit{Example:}
 \begin{cpp}
 template <typename T>
@@ -165,7 +183,7 @@ auto f(T) -> decltype([]() { T::invalid; } ());
 void f(...);
 f(0); // the invalid expression is not part of the immediate context, hard error
 
-template <typename T, typename = decltype([]() { T::invalid; } ())>
+template <typename T, std::size_t = sizeof([]() { T::invalid; })>
 void g(T);
 void g(...);
 g(0); // the invalid expression is not part of the immediate context, hard error
@@ -183,6 +201,10 @@ i(0); // deduction fails on #1, calls #2
         \textit{-- end example} ]
         \textit{-- end note} ]
     \end{quote}
+
+    Note that the term "immediate context" is not defined formally in the
+    standard, which is the subject of
+    \href{http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1844}{CWG1844}.
 
     \item In \textbf{[expr.prim.lambda] 5.1.2/2} modify the paragraph as follows:
     \begin{quote}
@@ -221,10 +243,10 @@ second iteration of the wording.
     \emph{Boost.Hana, A modern metaprogramming library}\newline
     \url{https://github.com/boostorg/hana}
 
-  \bibitem[N4296]{N4296}
+  \bibitem[N4606]{N4606}
     Richard Smith,
     \emph{Working Draft, Standard for Programming Language C++}\newline
-    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4296.pdf}
+    \url{https://github.com/cplusplus/draft/blob/master/papers/n4606.pdf}
 
 \end{thebibliography}
 
