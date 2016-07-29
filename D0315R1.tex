@@ -155,7 +155,7 @@ The wording is based on the working paper \cite{N4606}:
     The evaluation of a lambda-expression results in a prvalue temporary
     (12.2). This temporary is called the closure object. \deleted{A
     lambda-expression shall not appear in an unevaluated operand (Clause 5),
-    in a template- argument, in an alias-declaration, in a typedef declaration,
+    in a template-argument, in an alias-declaration, in a typedef declaration,
     or in the declaration of a function or function template outside its function
     body and default arguments. [ Note: The intention is to prevent lambdas from
     appearing in a signature. -- end note ]} [ Note: A closure object behaves like
@@ -173,12 +173,22 @@ The wording is based on the working paper \cite{N4606}:
   encoding its complete definition, which is burdensome for implementations
   and motivated the original restrictions on lambda-expressions.
 
-  Fortunately, this specific problem can't arise, even with the above removal
-  of constraints on lambda-expressions. Indeed, according to \textbf{[basic.link]
-  3.5/8}, closure types have no linkage, and therefore (by the second part of
-  that paragraph) they cannot be used to declare functions with external linkage.
-  To make it clear that closure types are never given a name for linkage purposes,
-  we propose modifying \textbf{[decl.typedef] 7.1.3/9} as follows:
+  Fortunately, this specific problem can't arise in the case of non-template
+  functions, even with the above removal of constraints on lambda-expressions.
+  Indeed, according to \textbf{[basic.link] 3.5/8}, closure types have no linkage,
+  and therefore they cannot appear in the signature of a function with external
+  linkage (a function is a compound type):
+  \begin{quote}
+    \textit{[...]} A type is said to have linkage if and only if:\\
+    \textit{[...]}\\
+    - it is a compound type (3.9.2) other than a class or enumeration,
+      compounded exclusively from types that have linkage; or \\
+    \textit{[...]}
+  \end{quote}
+
+  However, to make it clear that closure types are never given a name for
+  linkage purposes, we propose modifying \textbf{[decl.typedef] 7.1.3/9} as
+  follows:
   \begin{quote}
     If the typedef declaration defines an unnamed class (or enum), the first
     typedef-name declared by the declaration to be that class type (or enum type)
@@ -193,8 +203,57 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
   \end{quote}
 
 
-  \item Another possible concern that quickly follows is the appearance of
-  lambda-expressions in contexts that are constrained by the ODR. For example:
+  \item Another similar problem is that of lambda-expressions appearing in the
+  signature of function templates, not by themselves but indirectly by being
+  part of an expression which references a template parameter. Indeed, per
+  \textbf{[temp.over.link] 14.5.6.1/4}:
+  \begin{quote}
+    When an expression that references a template parameter is used in the
+    function parameter list or the return type in the declaration of a function
+    template, the expression that references the template parameter is part of
+    the signature of the function template.
+  \end{quote}
+
+  Thus, a function template declaration such as the following will require the
+  implementation to make the lambda-expression part of the signature, which is
+  specifically what we would like to avoid:
+\begin{cpp}
+template <unsigned N>
+void f(const char (*s)[([]() { return N; })()]) { }
+\end{cpp}
+
+  To make sure this does not happen, we propose amending \textbf{[temp.over.link]
+  14.5.6.1/5} as follows:
+  \begin{quote}
+    Two expressions involving template parameters are considered equivalent
+    if two function definitions containing the expressions would satisfy the
+    one-definition rule (3.2), except that the tokens used to name the template
+    parameters may differ as long as a token used to name a template parameter
+    in one expression is replaced by another token that names the same template
+    parameter in the other expression. \added{Two lambda-expressions appearing
+    in full expressions involving template parameters are never considered
+    equivalent. [ \textit{Note:} The intent is to avoid lambda-expressions
+    appearing in the signature of a function template with external linkage.
+    \textit{-- end note} ]}
+  \end{quote}
+
+  Furthermore, if more clarity is desired, the following example could be added
+  after \textbf{[temp.over.link] 14.5.6.1/5}:
+\begin{cpp}
+// The program is ill-formed, because the two lambda-expressions are
+// functionally equivalent but not equivalent.
+// a.cc
+template <unsigned N>
+void foo(const char (*s)[([]() { return N; })()]);
+
+// b.cc
+template <unsigned N>
+void foo(const char (*s)[([]() { return N; })()]);
+\end{cpp}
+
+
+  \item Another possible concern is the appearance of lambda-expressions in
+  contexts that are constrained by the ODR. For example:
 
 \begin{cpp}
 // a.h:
@@ -225,10 +284,6 @@ int bar() { return f(); }
   \cc cnt variable. This turns out not to be a problem for implementations,
   because they must already handle such cases where there is an ODR context
   to attach the closure type to. Thus, no wording change is required.
-
-
-  \item In template function declarations:
-    [TODO]
 
 
   \item A concern with allowing lambda-expressions in \textit{declarations} is
