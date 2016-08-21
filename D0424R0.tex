@@ -222,9 +222,10 @@ gain more experience with what kind of machinery would be useful.
 
 
 \section{Proposed Wording}
-The wording initially proposed in \cite{N3599} still applies to the current
-draft (\cite{N4606}), and so it should be used. For convenience, it is copied
-here from the original paper:
+The wording initially proposed in \cite{N3599} still applies almost as-is to
+the current draft \cite{N4606}, and so it is used. The only change from the
+initial wording is to account for the fact that \cc u8 can now be used as the
+\textit{encoding-prefix} of a character literal. The wording follows:
 
 The term of art \textit{literal operator template} is split into two terms, 
 \textit{numeric literal operator template} and \textit{string literal operator
@@ -255,10 +256,9 @@ Change in \textbf{[lex.ext] (2.14.8)/5}:
   \added{Otherwise, \textit{S} shall contain a string literal operator template
   (13.5.8), and \textit{L} is treated as a call of the form
   $\mathtt{operator"" X<C, e's_1', e's_2', ..., e's_k'>()}$ where \textit{e} % TODO: fix quoting issue
-  is empty when the \textit{encoding-prefix} is \texttt{u8} and is otherwise
-  the \textit{encoding-prefix} of the string literal, and \textit{str} contains
-  the sequence of code units $s_1 s_2 ...s_k$ (excluding the terminating
-  null character).}
+  is the \textit{encoding-prefix} of the string literal, and \textit{str}
+  contains the sequence of code units $s_1 s_2 ...s_k$ (excluding the
+  terminating null character).}
 \end{quote}
 
 Change in \textbf{[over.literal] (13.5.8)/5}:
