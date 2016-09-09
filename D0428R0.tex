@@ -37,7 +37,7 @@
 \begin{flushright}
   \begin{tabular}{ll}
   Document \#:&D0428R0\\
-  Date:       &\date{2016-08-21}\\
+  Date:       &\date{2016-09-08}\\
   Project:    &Programming Language C++\\
   Audience:   &Evolution Working Group\\
   Reply-to:   &\author{Louis Dionne} \textless\href{mailto:ldionne.2@gmail.com}{ldionne.2@gmail.com}\textgreater
@@ -82,6 +82,56 @@ well as normal function templates. The following details such areas where
 lambdas are lacking in their current form:
 
 \begin{enumerate}
+\item
+The limited form of "pattern matching" on template argument allowed by C++
+in function templates is very useful, and it would be equally useful to allow
+it in lambda expressions. For example, writing a lambda that accepts a
+\cc{std::vector} containing elements of any type (but not another container)
+is not possible with the current syntax for generic lambdas. Instead, one
+must write a catch-all generic lambda that accepts any type, and then assume
+that it is of the proper type, or check that it is not through other means:
+
+\begin{cpp}
+template <typename T> struct is_std_vector                 : std::false_type { };
+template <typename T> struct is_std_vector<std::vector<T>> : std::true_type { };
+
+auto f = [](auto vector) {
+  static_assert(is_std_vector<decltype(vector)>::value, "");
+};
+\end{cpp}
+
+In addition to being verbose, calling the lambda with a type that is not a
+\cc{std::vector} will result in a hard error inside the body of the lambda, not
+a template argument deduction failure. This does not play nicely with other
+parts of the language such as SFINAE-based detection, and it is obviously
+not as clear as the equivalent function template.
+
+Another instance where "pattern matching" would be useful is to deconstruct
+the type of arguments that are template specializations. For example, imagine
+that we want to get the type of elements stored in the vector in the previous
+example. Right now, we'd have to write this:
+
+\begin{cpp}
+auto f = [](auto vector) {
+  using T = typename decltype(vector)::value_type;
+  // ...
+};
+\end{cpp}
+
+This is cumbersome syntax-wise, and it requires the type to provide a nested
+alias that does just the right thing. This is not a problem for \cc{std::vector},
+but most types don't provide such aliases (and in many cases it wouldn't make
+sense for them to). Hence, right now, types that do not provide nested aliases
+or accompanying metafunctions can simply not be deconstructed in lambdas.
+Instead, it would be much simpler and more flexible to write
+
+\begin{cpp}
+auto f = []<typename T>(std::vector<T> vector) {
+  // ...
+};
+\end{cpp}
+
+
 \item
 It is often useful to retrieve the type of the parameter of a generic
 lambda, e.g. for accessing a static member function or an alias nested
@@ -162,56 +212,6 @@ perfect forwarding syntax for both lambdas and normal functions:
 \begin{cpp}
 auto f = []<typename ...T>(T&& ...args) {
   return foo(std::forward<T>(args)...);
-};
-\end{cpp}
-
-
-\item
-The limited form of "pattern matching" on template argument allowed by C++
-in function templates is very useful, and it would be equally useful to allow
-it in lambda expressions. For example, writing a lambda that accepts a
-\cc{std::vector} containing elements of any type (but not another container)
-is not possible with the current syntax for generic lambdas. Instead, one
-must write a catch-all generic lambda that accepts any type, and then assume
-that it is of the proper type, or check that it is not through other means:
-
-\begin{cpp}
-template <typename T> struct is_std_vector                 : std::false_type { };
-template <typename T> struct is_std_vector<std::vector<T>> : std::true_type { };
-
-auto f = [](auto vector) {
-  static_assert(is_std_vector<decltype(vector)>::value, "");
-};
-\end{cpp}
-
-In addition to being verbose, calling the lambda with a type that is not a
-\cc{std::vector} will result in a hard error inside the body of the lambda, not
-a template argument deduction failure. This does not play nicely with other
-parts of the language such as SFINAE-based detection, and it is obviously
-not as clear as the equivalent function template.
-
-Another instance where "pattern matching" would be useful is to deconstruct
-the type of arguments that are template specializations. For example, imagine
-that we want to get the type of elements stored in the vector in the previous
-example. Right now, we'd have to write this:
-
-\begin{cpp}
-auto f = [](auto vector) {
-  using T = typename decltype(vector)::value_type;
-  // ...
-};
-\end{cpp}
-
-This is cumbersome syntax-wise, and it requires the type to provide a nested
-alias that does just the right thing. This is not a problem for \cc{std::vector},
-but most types don't provide such aliases (and in many cases it wouldn't make
-sense for them to). Hence, right now, types that do not provide nested aliases
-or accompanying metafunctions can simply not be deconstructed in lambdas.
-Instead, it would be much simpler and more flexible to write
-
-\begin{cpp}
-auto f = []<typename T>(std::vector<T> vector) {
-  // ...
 };
 \end{cpp}
 \end{enumerate}
@@ -309,10 +309,10 @@ Faced with this, the author saw two solutions
 \end{enumerate}
 
 In addition, the decision taken here should be consistent with any potential
-support for \cc{auto} parameters in normal functions. Given the uncertainty
-and the lack of a clearly good way of mixing the two syntaxes, we opted for
-the first option, which will allow us to come back later and remove the
-restriction if the right answer to this problem becomes clear in the future.
+support for \cc{auto} parameters in normal functions, and also with the proposal
+for Concepts \cite{N4553}. Given the uncertainty of what's to come, we prefer
+the first option, which will be trivial to change later on once we know exactly
+what we want.
 
 
 \section{Acknowledgements}
@@ -347,6 +347,11 @@ TODO
     Adam Butcher,
     \emph{Latest experimental polymorphic lambda patches}\newline
     \url{http://gcc.gnu.org/ml/gcc/2009-08/msg00174.html}
+
+  \bibitem[N4553]{N4553}
+    Andrew Sutton,
+    \emph{Working Draft, C++ extensions for Concepts}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4553.pdf}
 
 \end{thebibliography}
 
