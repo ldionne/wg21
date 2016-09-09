@@ -103,7 +103,7 @@ amount of verbosity:
 
 \begin{cpp}
 auto f = [](auto const& x) {
-  using T = std::remove_cv_t<std::remove_reference_t<decltype(x)>>;
+  using T = std::decay_t<decltype(x)>;
   T copy = x;
   T::static_function();
   using Iterator = typename T::iterator;
@@ -116,12 +116,13 @@ in that context to reduce verbosity:
 
 \begin{cpp}
 auto advance = [](auto& it,
-                  typename std::remove_reference_t<decltype(it)>::difference_type n) {
+                  typename std::decay_t<decltype(it)>::difference_type n) {
   // ...
 };
 \end{cpp}
 
-Instead, it would be much nicer to simply write
+Instead, it would be much nicer and closer to usual templates if we could
+simply write
 
 \begin{cpp}
 auto f = []<typename T>(T const& x) {
