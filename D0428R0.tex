@@ -226,39 +226,26 @@ Change in 5.1.5 \textbf{[expr.prim.lambda]/1}:
     \hspace{0.1cm} \textit{lambda-declarator}$_{opt}$
     \hspace{0.1cm} \textit{compound-statement}
 
-Define the term \textit{template lambda} in 5.1.5 \textbf{[expr.prim.lambda]},
-just after paragraph 5:
-
-\begin{quote}
-  \added{
-    A \textit{template lambda} is a \textit{lambda-expression} specifying a
-    \textit{template-parameter-list}. A \textit{template lambda} is a
-    \textit{generic lambda}, but not the other way around. The \texttt{auto}
-    \textit{type-specifier} shall not appear as one of the \textit{decl-specifier}s
-    in the \textit{decl-specifier-seq} of a \textit{parameter-declaration}
-    of a \textit{template lambda}.
-  }
-\end{quote}
-
-We make sure that a \textit{template lambda} is considered a \textit{generic
-lambda} so that almost all existing wording for \textit{generic lambda}s applies
-as-is to \textit{template lambda}s. Furthermore, the restriction on \cc{auto}
-not appearing in the parameters of a \textit{template lambda} is explained in
-the \nameref{discussion} below.
-
 Change in 5.1.5 \textbf{[expr.prim.lambda]/6}:
 
 \begin{quote}
   The closure type for a non-generic \textit{lambda-expression} has a public
   inline function call operator (13.5.4) whose parameters and return type are
   described by the \textit{lambda-expression}'s \textit{parameter-declaration-clause}
-  and \textit{trailing-return-type} respectively. \added{The closure type for
-  a \textit{template lambda} has a public inline function call operator member
-  template (14.5.2) whose \textit{template-parameter-list}, parameters and
-  return type are described by the \textit{lambda-expression}'s
-  \textit{template-parameter-list}, \textit{parameter-declaration-clause} and
-  \textit{trailing-return-type} respectively.} For a generic lambda \added{that
-  is not a \textit{template lambda}}, the closure type has [\dots]
+  and \textit{trailing-return-type} respectively. For a generic lambda, the
+  closure type has a public inline function call operator member template
+  (14.5.2) whose \textit{template-parameter-list} consists of \added{the
+  specified \textit{template-parameter-list}, if any, to which is appended}
+  one invented type \textit{template-parameter} for each occurrence of \cc{auto}
+  in the lambda's \textit{parameter-declaration-clause}, in order of appearance.
+  The invented type \textit{template-parameter} is a parameter pack if the
+  corresponding \textit{parameter-declaration} declares a function parameter
+  pack (8.3.5). The return type and function parameters of the function call
+  operator template are derived from the \textit{lambda-expression}'s
+  \textit{trailing-return-type} and \textit{parameter-declaration-clause} by
+  replacing each occurrence of \cc{auto} in the \textit{decl-specifier}s of
+  the \textit{parameter-declaration-clause} with the name of the corresponding
+  invented \textit{template-parameter}.
 \end{quote}
 
 Change in 5.1.5 \textbf{[expr.prim.lambda]/7}:
@@ -281,14 +268,13 @@ of an experiment \cite{GCC}. Thus, it seems implementable.
 There were very few controversial decisions to make in the writing of this
 paper. The only one was whether to allow a lambda to contain both a
 \textit{template-parameter-list} and conventional \cc{auto}-based parameters.
-If we were to allow mixing both syntaxes, we would have to decide what the
-function call operator of the closure type should look like for such lambdas.
-Some use cases suggest an easy answer, but others are more problematic:
+When allowing both syntaxes, we must make a choice regarding the position of
+the invented template parameters relative to the specified template parameters:
 
 \begin{cpp}
 []<typename T>(T, auto) // => template <typename T, typename Invented>
 []<typename T>(auto, T) // => template <typename Invented, typename T>
-[]<typename T>(auto)    // which of the above?
+[]<typename T>(auto)    // could be either of the above
 \end{cpp}
 
 Note that it \textit{does} make sense to write the third lambda expression,
@@ -298,25 +284,19 @@ thus specify a value for \cc T:
 \begin{cpp}
 auto f = []<typename T>(auto x) { };
 f.operator()<int, char>(...);
-// Should `T` be `int` or `char`? And what about the `auto` parameter?
 \end{cpp}
 
-Faced with this, the author saw two solutions
-
-\begin{enumerate}
-  \item Disallow mixing the proposed template syntax with \cc{auto}-based parameters.
-  \item Arbitrarily decide of an order.
-\end{enumerate}
-
-In addition, the decision taken here should be consistent with any potential
-support for \cc{auto} parameters in normal functions, and also with the proposal
-for Concepts \cite{N4553}. Given the uncertainty of what's to come, we prefer
-the first option, which will be trivial to change later on once we know exactly
-what we want.
-
+We decided to allow mixing both syntaxes and decided to append the invented
+template parameters to the end of the \textit{template-parameter-list}, because
+it seems like the simplest choice, it does not limit expressiveness in any way
+and it is consistent with what's done in the proposal for concepts \cite{N4553}.
+In case this choice is deemed the wrong one, this paper can easily be amended
+to disallow lambdas from using both the familiar template syntax and \cc{auto}
+parameters.
 
 \section{Acknowledgements}
-TODO
+Thanks Tom Honermann, Nicol Bolas and other members of the \textit{std-proposal}
+mailing list for providing comments to improve this paper.
 
 
 \section{References}
