@@ -9,6 +9,7 @@
 \usepackage{csquotes}
 \usepackage{listings}
 \usepackage{minted}
+\usepackage{enumitem}
 
 \lstdefinestyle{base}{
   language=c++,
@@ -204,7 +205,7 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
 
 
   \item Another similar problem is that of lambda-expressions appearing in the
-  signature of function templates, not by themselves but indirectly by being
+  signature of function templates, not by themselves, but indirectly, by being
   part of an expression which references a template parameter. Indeed, per
   \textbf{[temp.over.link] 14.5.6.1/4}:
   \begin{quote}
@@ -225,16 +226,25 @@ void f(const char (*s)[([]() { return N; })()]) { }
   To make sure this does not happen, we propose amending \textbf{[temp.over.link]
   14.5.6.1/5} as follows:
   \begin{quote}
-    Two expressions involving template parameters are considered equivalent
-    if two function definitions containing the expressions would satisfy the
-    one-definition rule (3.2), except that the tokens used to name the template
-    parameters may differ as long as a token used to name a template parameter
-    in one expression is replaced by another token that names the same template
-    parameter in the other expression. \added{Two lambda-expressions appearing
-    in full expressions involving template parameters are never considered
-    equivalent. [ \textit{Note:} The intent is to avoid lambda-expressions
-    appearing in the signature of a function template with external linkage.
-    \textit{-- end note} ]}
+    Two expressions involving template parameters are considered equivalent if\added{:}
+    \begin{enumerate}[label=\arabic*.]
+      \item two function definitions containing the expressions would satisfy the
+            one-definition rule (3.2), except that the tokens used to name the template
+            parameters may differ as long as a token used to name a template parameter
+            in one expression is replaced by another token that names the same template
+            parameter in the other expression\added{; and}
+
+      \item \added{for each pair (if any) of corresponding lambda-expressions
+            between the two expressions:}
+        \begin{itemize}
+          \item \added{the \textit{lambda-expression}s occur within a \textit{function-body},
+                a \textit{member-specification}, or an initializer of an inline variable
+                or a variable templated entity; and}
+          \item \added{each member of the pair is the corresponding counterpart to the other
+                in the definition of the same entity in different translation units.}
+        \end{itemize}
+    \end{enumerate}
+
   \end{quote}
 
   Furthermore, if more clarity is desired, the following example could be added
