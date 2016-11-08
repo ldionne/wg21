@@ -1,0 +1,319 @@
+\documentclass[11pt]{article}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage[colorlinks, allcolors=blue]{hyperref}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{textcomp}
+\usepackage{upquote}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+\newcommand{\deleted}[1]{\st{#1}}
+\newcommand{\added}[1]{\sethlcolor{green}{\hl{#1}}}
+
+\date{}
+\title{Reconsidering literal operator templates for strings}
+\author{}
+
+
+\begin{document}
+
+\maketitle\vspace{-2cm}
+
+\begin{flushright}
+  \begin{tabular}{ll}
+  Document \#:&P0424R1\\
+  Date:       &\date{2016-11-07}\\
+  Project:    &Programming Language C++\\
+  Audience:   &Evolution Working Group\\
+  Reply-to:   &\author{Louis Dionne} \textless\href{mailto:ldionne.2@gmail.com}{ldionne.2@gmail.com}\textgreater
+  \end{tabular}
+\end{flushright}
+
+
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 -- Updated the wording to account for cv-qualified string literals.
+\end{itemize}
+
+
+\section{Introduction}
+C++11 added the ability for users to define their own literals suffixes.
+Several forms of literal operators are available, but one notable omission
+is the literal operator template for string literals:
+
+\begin{cpp}
+template <typename CharT, CharT ...chars>
+auto operator"" _udl(); // invalid right now
+
+auto x = "abcd"_udl; // would call operator""_udl<char, 'a', 'b', 'c', 'd'>
+\end{cpp}
+
+Furthermore, \cite{N3599} tried to make this right in 2013 by proposing to add
+the missing literal operator, but the paper was rejected at that time with
+the following conclusion (\cite{CWG66}):
+
+\begin{quote}
+  Revise with additional machinery for compile time string processing
+\end{quote}
+
+This short paper argues that the literal operator template for string
+literals should be added as-is to C++, and that no additional machinery
+for compile-time string processing should be required for its acceptance.
+
+
+\section{Motivation}
+There are three main reasons why the author thinks \cite{N3599} should be
+accepted without requiring additional compile-time string processing machinery.
+
+First, several use cases for the literal operator template do not require any
+sort of compile-time string processing, so the feature would be useful on its
+own. Indeed, after writing the \cite{Boost.Hana} metaprogramming library,
+several metaprogramming-inclined individuals have contacted the author of this
+paper with problems that were solvable with the literal operator template; none
+of them required additional \textit{string processing} machinery that would be
+suitable for inclusion in the standard. These problems would benefit from
+having better support for metaprogramming in the standard, but that is a
+distinct topic. A simple example of this is implementing named parameters:
+
+\begin{cpp}
+template <char ...s>
+struct argument {
+  template <typename T>
+  std::pair<argument<s...>, T> operator=(T value) {
+    return {{}, value};
+  }
+
+  template <typename T, typename ...Args>
+  auto operator()(std::pair<argument<s...>, T> a, Args ...) const {
+    return a.second;
+  }
+
+  template <typename Arg, typename ...Args>
+  auto operator()(Arg, Args ...args) const {
+    static_assert(sizeof...(Args) != 0, "missing argument");
+    return (*this)(args...);
+  }
+};
+
+template <typename CharT, CharT ...s>
+argument<s...> operator"" _arg() { return {}; }
+
+template <typename ...Args>
+void create_window(Args ...args) {
+  int x = "x"_arg(args...);
+  int y = "y"_arg(args...);
+  int width = "width"_arg(args...);
+  int height = "height"_arg(args...);
+  // etc...
+}
+
+int main() {
+  create_window("x"_arg = 20, "y"_arg = 50, "width"_arg = 100, "height"_arg = 5);
+}
+\end{cpp}
+
+Note that this is for illustration only. In a real implementation, one would
+be wary of not copying the arguments unless necessary, marking functions
+\cc{constexpr} and \cc{noexcept} whenever possible, etc...
+
+Here, no string processing whatsoever is required. Also, while finding the
+first \cc{pair} of the parameter pack whose first element represents the right
+argument would benefit from additional machinery, the author believes that to
+be completely orthogonal to the current proposal. Also of interest is to note
+that the example above uses compile-time strings solely to associate a unique
+tag to a value, a pattern which arises very commonly in C++ metaprogramming.
+Thus, use cases abound and the proposed feature could for instance be used to
+eliminate the explicit declaration of tags in the following code:
+
+\begin{cpp}
+namespace tags { struct name; struct age; } // need to declare tags beforehand
+
+BOOST_FUSION_DEFINE_ASSOC_STRUCT(
+  /* global scope */, Person,
+  (std::string, name, tags::name)
+  (int, age, tags::age)
+)
+
+int main() {
+    Person john{"John", 30};
+    std::string name = at_key<tags::name>(john);
+    int age = at_key<tags::age>(john);
+}
+\end{cpp}
+
+Indeed, with the proposed feature, the above code can become
+
+\begin{cpp}
+struct Person {
+  BOOST_HANA_DEFINE_STRUCT(Person,
+    (std::string, name),
+    (int, age)
+  );
+};
+
+int main() {
+  Person john{"John", 30};
+  std::string name = at_key(john, "name"_s);
+  int age = at_key(john, "age"_s);
+}
+\end{cpp}
+
+In situations where the number of tags is large, separate tag declarations can
+be very tedious to keep in sync with the original structure. Instead, it is
+much better if the library is able to relate the \cc{name} in the structure
+definition to the \cc{name} used in the \cc{main} function without an additional
+tag declaration. Even better would be proper support for static reflection, but
+this is beyond the scope of this paper. Also, not all problems where the proposed
+feature would be useful can be solved with static reflection, so one is not a
+substitute for the other.
+
+Secondly, the proposed feature is already implemented in Clang and GCC, and it
+is getting wider and wider usage. The author assumes the feature to be easy to
+support for implementations, and thinks that it should be standardized instead
+of letting its availability vary across compilers. This would make the life of
+users easier instead of forcing them to use ugly workarounds such as the
+following to comply with the standard:
+
+\begin{cpp}
+template <char ...s>
+struct argument {
+  // ... as before ...
+};
+
+template <std::size_t ...N, typename Literal>
+argument<Literal::get(N)...> make_argument(std::index_sequence<N...>, Literal) {
+  return {};
+}
+
+#define MAKE_ARGUMENT(LITERAL)                                              \
+  make_argument(std::make_index_sequence<sizeof(LITERAL)-1>{}, []{          \
+    struct Literal {                                                        \
+      static constexpr char get(int i) { return LITERAL[i]; }               \
+    };                                                                      \
+    return Literal{};                                                       \
+  }())                                                                      \
+/**/
+
+// ... as before ...
+
+int main() {
+  create_window(MAKE_ARGUMENT("x") = 20, MAKE_ARGUMENT("y") = 50,
+                MAKE_ARGUMENT("width") = 100, MAKE_ARGUMENT("height") = 5);
+}
+\end{cpp}
+
+Finally, defining string processing machinery is so non-trivial that even
+runtime C++ lacks any useful form of it. The author thinks that dismissing
+the proposed feature for lack of such machinery is unwise, since it blocks
+a lot of use cases that are very basic in their string processing requirements
+for the benefit of a few more advanced use cases. Furthermore, going forward
+with this feature does not block us in any way from adding more advanced
+machinery to the language later on. In fact, it may very well allow us to
+gain more experience with what kind of machinery would be useful.
+
+
+\section{Proposed Wording}
+The wording initially proposed in \cite{N3599} still applies almost as-is to
+the current draft \cite{N4606}, and so it is used. The only change from the
+initial wording is to account for the fact that \cc u8 can now be used as the
+\textit{encoding-prefix} of a character literal. The wording follows:
+
+The term of art \textit{literal operator template} is split into two terms,
+\textit{numeric literal operator template} and \textit{string literal operator
+template}. The term \textit{literal operator template} is retained and refers
+to either form.
+
+Replace "literal operator template" with "numeric literal operator template"
+in \textbf{[lex.ext] (2.14.8)/3} and \textbf{[lex.ext] (2.14.8)/4}:
+
+\begin{quote}
+  [...] Otherwise, \cc S shall contain a raw literal operator or a
+  \added{numeric} literal operator template (13.5.8), but not both. [...]
+  Otherwise (\cc S contains a \added{numeric} literal operator template),
+  \cc L is treated as a call of the form [...]
+\end{quote}
+
+Change in \textbf{[lex.ext] (2.14.8)/5}:
+
+\begin{quote}
+  If \textit{L} is a \textit{user-defined-string-literal}, \added{let
+  \textit{C} be the cv-unqualified element type of the string literal as determined by its
+  \textit{encoding-prefix},} let \textit{str} be the literal without its
+  \textit{ud-suffix}\added{,} and let \textit{len} be the number of code units
+  in \textit{str} (i.e., its length excluding the terminating null character).
+  \added{If \textit{S} contains a literal operator with parameter types
+  \texttt{const C*} and \texttt{std::size\_t}, the} \deleted{The} literal
+  \textit{L} is treated as a call of the form \texttt{operator"" X(str, len)}.
+  \added{Otherwise, \textit{S} shall contain a string literal operator template
+  (13.5.8), and \textit{L} is treated as a call of the form
+  $\mathtt{operator"" X<C, e's_1', e's_2', ..., e's_k'>()}$ where \textit{e} % TODO: fix quoting issue
+  is the \textit{encoding-prefix} of the string literal, and \textit{str}
+  contains the sequence of code units $s_1 s_2 ...s_k$ (excluding the
+  terminating null character).}
+\end{quote}
+
+Change in \textbf{[over.literal] (13.5.8)/5}:
+
+\begin{quote}
+  \deleted{The declaration of a literal operator template shall have an empty
+  \textit{parameter-declaration-clause} and its \textit{template-parameter-list}
+  shall have} \added{ A \textit{numeric literal operator template} is a literal
+  operator template whose \textit{template-parameter-list} has} a single
+  \textit{template-parameter} that is a non-type template parameter pack (14.5.3)
+  with element type \texttt{char}. \added{A \textit{string literal operator template}
+  is a literal operator template whose \textit{template-parameter-list} comprises
+  a type \textit{template-parameter} \textit{C} followed by a non-type template
+  parameter pack with element type \textit{C}. The declaration of a literal
+  operator template shall have an empty \textit{parameter-declaration-clause}
+  and shall declare either a numeric literal operator template or a string
+  literal operator template.}
+\end{quote}
+
+
+\section{Acknowledgements}
+Thanks to Richard Smith for doing all the hard work in \cite{N3599}.
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+  \bibitem[N3599]{N3599}
+    Richard Smith,
+    \emph{Literal operator templates for strings}\newline
+    \url{http://open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html}
+
+  \bibitem[CWG66]{CWG66}
+    Richard Smith,
+    \emph{EWG Issue \#66}\newline
+    \url{http://cplusplus.github.io/EWG/ewg-active.html#66}
+
+  \bibitem[Boost.Hana]{Boost.Hana}
+    Louis Dionne,
+    \emph{Boost.Hana, A modern metaprogramming library}\newline
+    \url{https://github.com/boostorg/hana}
+
+  \bibitem[N4606]{N4606}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{https://github.com/cplusplus/draft/blob/master/papers/n4606.pdf}
+
+\end{thebibliography}
+
+\end{document}
