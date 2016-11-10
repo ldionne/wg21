@@ -381,7 +381,7 @@ void h(...);
 h(0); // invalid expression not part of the immediate context, hard error
 
 template <typename T>
-auto i(T) -> decltype([]() -> std::void_t<typename T::invalid> { });
+auto i(T) -> decltype([]() -> typename T::invalid { });
 void i(...);
 i(0); // invalid expression not part of the immediate context, hard error
 
