@@ -1,6 +1,4 @@
 - D0315R2
-    + Make removed text red
-    + Green an underlined for additions
     + Give lambdas linkage in some purposes
     + section 6. keep the note around the intent part only
     + In [temp.over.link], reword to something like this:
