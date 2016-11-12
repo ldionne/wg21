@@ -140,61 +140,61 @@ points of contingency to clarify them.
 
 \begin{enumerate}
   \item \label{discussion.non-template}
-  With the removal of the restrictions on lambdas in unevaluated contexts,
-  a concern is that lambda-expressions might then be able to appear in the
-  signature of functions with external linkage, which would require implementations
-  to generate a name for the associated closure type. However, since we wouldn't
-  be able to attach to another ABI entity in some cases (such as lambda-expressions
-  appearing at global scope), that would mean coming up with a mangling scheme
-  that identifies the closure type from nothing but its own form. This, in turn,
-  would require encoding its complete definition, which is burdensome for
-  implementations and motivated the original restrictions on lambda-expressions.
+    With the removal of the restrictions on lambdas in unevaluated contexts,
+    a concern is that lambda-expressions might then be able to appear in the
+    signature of functions with external linkage, which would require implementations
+    to generate a name for the associated closure type. However, since we wouldn't
+    be able to attach to another ABI entity in some cases (such as lambda-expressions
+    appearing at global scope), that would mean coming up with a mangling scheme
+    that identifies the closure type from nothing but its own form. This, in turn,
+    would require encoding its complete definition, which is burdensome for
+    implementations and motivated the original restrictions on lambda-expressions.
 
-  Fortunately, this specific problem can't arise in the case of non-template
-  functions, even with the above removal of constraints on lambda-expressions.
-  Indeed, according to \textbf{[basic.link] 3.5/8}, closure types have no linkage,
-  and therefore they cannot appear in the signature of a function with external
-  linkage (a function is a compound type):
-  \begin{quote}
-    \textit{[...]} A type is said to have linkage if and only if:\\
-    \textit{[...]}\\
-    - it is a compound type (3.9.2) other than a class or enumeration,
-      compounded exclusively from types that have linkage; or \\
-    \textit{[...]}
-  \end{quote}
+    Fortunately, this specific problem can't arise in the case of non-template
+    functions, even with the above removal of constraints on lambda-expressions.
+    Indeed, according to \textbf{[basic.link] 3.5/8}, closure types have no linkage,
+    and therefore they cannot appear in the signature of a function with external
+    linkage (a function is a compound type):
+    \begin{quote}
+      \textit{[...]} A type is said to have linkage if and only if:\\
+      \textit{[...]}\\
+      - it is a compound type (3.9.2) other than a class or enumeration,
+        compounded exclusively from types that have linkage; or \\
+      \textit{[...]}
+    \end{quote}
 
-  However, to make it clear that closure types are never given a name for
-  linkage purposes, we propose \hyperref[wording.non-template]{modifying
-  \textbf{[decl.typedef]}}.
+    However, to make it clear that closure types are never given a name for
+    linkage purposes, we propose \hyperref[wording.non-template]{modifying
+    \textbf{[decl.typedef]}}.
 
 
   \item \label{discussion.template}
-  Another similar problem is that of lambda-expressions appearing in the
-  signature of function templates, not by themselves, but indirectly, by being
-  part of an expression which references a template parameter. Indeed, per
-  \textbf{[temp.over.link] 14.5.6.1/4}:
-  \begin{quote}
-    When an expression that references a template parameter is used in the
-    function parameter list or the return type in the declaration of a function
-    template, the expression that references the template parameter is part of
-    the signature of the function template.
-  \end{quote}
+    Another similar problem is that of lambda-expressions appearing in the
+    signature of function templates, not by themselves, but indirectly, by being
+    part of an expression which references a template parameter. Indeed, per
+    \textbf{[temp.over.link] 14.5.6.1/4}:
+    \begin{quote}
+      When an expression that references a template parameter is used in the
+      function parameter list or the return type in the declaration of a function
+      template, the expression that references the template parameter is part of
+      the signature of the function template.
+    \end{quote}
 
-  Thus, a function template declaration such as the following will require the
-  implementation to make the lambda-expression part of the signature, which is
-  specifically what we would like to avoid:
+    Thus, a function template declaration such as the following will require the
+    implementation to make the lambda-expression part of the signature, which is
+    specifically what we would like to avoid:
 \begin{cpp}
 template <unsigned N>
 void f(const char (*s)[([]() { return N; })()]) { }
 \end{cpp}
 
-  To make sure this does not happen, we propose \hyperref[wording.template]
-  {amending \textbf{[temp.over.link]}}.
+    To make sure this does not happen, we propose \hyperref[wording.template]
+    {amending \textbf{[temp.over.link]}}.
 
 
   \item \label{discussion.ODR}
-  Another possible concern is the appearance of lambda-expressions in
-  contexts that are constrained by the ODR. For example:
+    Another possible concern is the appearance of lambda-expressions in
+    contexts that are constrained by the ODR. For example:
 
 \begin{cpp}
 // a.h:
@@ -217,24 +217,24 @@ int foo() { return f(); }
 int bar() { return f(); }
 \end{cpp}
 
-  Given such code, a question might be whether \cc foo and \cc bar modify
-  the same \cc cnt variable, since \cc f is defined in a header and it calls
-  \cc counter with a closure type that is supposed to be unique. However,
-  since \cc f is \cc inline, the resulting program is as-if there was a
-  single definition of it, and so both functions end up modifying the same
-  \cc cnt variable. This turns out not to be a problem for implementations,
-  because they must already handle such cases where there is an ODR context
-  to attach the closure type to. Thus, no wording change is required.
+    Given such code, a question might be whether \cc foo and \cc bar modify
+    the same \cc cnt variable, since \cc f is defined in a header and it calls
+    \cc counter with a closure type that is supposed to be unique. However,
+    since \cc f is \cc inline, the resulting program is as-if there was a
+    single definition of it, and so both functions end up modifying the same
+    \cc cnt variable. This turns out not to be a problem for implementations,
+    because they must already handle such cases where there is an ODR context
+    to attach the closure type to. Thus, no wording change is required.
 
 
   \item \label{discussion.redeclarations}
-  A concern with allowing lambda-expressions in \textit{declarations} is
-  that of dealing with entities that can be redeclared. However, we feel like
-  no \textit{normative} change to the wording is required to address that concern.
-  Indeed, it is already the case that no two lambda-expressions share the same
-  closure type within a single translation unit. By further clarifying that the
-  lambda-expressions in alias template specializations are unique to each
-  specialization even if non-dependent, we conclude the following:
+    A concern with allowing lambda-expressions in \textit{declarations} is
+    that of dealing with entities that can be redeclared. However, we feel like
+    no \textit{normative} change to the wording is required to address that concern.
+    Indeed, it is already the case that no two lambda-expressions share the same
+    closure type within a single translation unit. By further clarifying that the
+    lambda-expressions in alias template specializations are unique to each
+    specialization even if non-dependent, we conclude the following:
 
 \begin{cpp}
 static decltype([] { }) f();
@@ -256,41 +256,41 @@ static void i(B<char32_t> *) { }
 i(nullptr); // ambiguous
 \end{cpp}
 
-  To make the above interpretation of the standard more obvious, we propose
-  \hyperref[wording.redeclarations]{modifying \textbf{[temp.alias]}}.
+    To make the above interpretation of the standard more obvious, we propose
+    \hyperref[wording.redeclarations]{modifying \textbf{[temp.alias]}}.
 
 
   \item \label{discussion.sfinae}
-  A concern with allowing lambda-expressions \textit{outside the body of
-  the declaration of function templates} is the need to evaluate the validity
-  of potentially complex expressions as part of template argument deduction.
-  Indeed, without clarifying the wording, it is unclear whether implementations
-  would be expected to support \textit{SFINAE} based on the validity of
-  the body of a lambda-expression found in the declaration of a function
-  template. Since this could be unwieldy for implementations, we choose not
-  to require this in the current paper. Thus, if a lambda-expression appears
-  inside the declaration of a function template and any part of it is ill-formed,
-  then the program is ill-formed. To reflect this, we propose
-  \hyperref[wording.sfinae]{adding a note at the end of \textbf{[temp.deduct]}}.
+    A concern with allowing lambda-expressions \textit{outside the body of
+    the declaration of function templates} is the need to evaluate the validity
+    of potentially complex expressions as part of template argument deduction.
+    Indeed, without clarifying the wording, it is unclear whether implementations
+    would be expected to support \textit{SFINAE} based on the validity of
+    the body of a lambda-expression found in the declaration of a function
+    template. Since this could be unwieldy for implementations, we choose not
+    to require this in the current paper. Thus, if a lambda-expression appears
+    inside the declaration of a function template and any part of it is ill-formed,
+    then the program is ill-formed. To reflect this, we propose
+    \hyperref[wording.sfinae]{adding a note at the end of \textbf{[temp.deduct]}}.
 
   \item \label{discussion.nontype}
-  One usability question that has been raised with this paper is related
-  to the usage of lambda expressions as non-type template arguments.
+    One usability question that has been raised with this paper is related
+    to the usage of lambda expressions as non-type template arguments.
 
-  \begin{cpp}
-  // foo.h
-  template <auto> struct foo { };
-  foo<[]() {}> x;
+\begin{cpp}
+// foo.h
+template <auto> struct foo { };
+foo<[]() {}> x;
 
-  // a.cc
-  #include "foo.h"
+// a.cc
+#include "foo.h"
 
-  // b.cc
-  #include "foo.h"
-  \end{cpp}
+// b.cc
+#include "foo.h"
+\end{cpp}
 
-  With the current wording (if that's even possible?), this is an ODR violation.
-  TODO: Do we need to do anything about this?
+    With the current wording (if that's even possible?), this is an ODR violation.
+    TODO: Do we need to do anything about this?
 
 \end{enumerate}
 
