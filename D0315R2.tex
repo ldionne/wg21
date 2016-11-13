@@ -392,16 +392,16 @@ using A = decltype([] \{ \});\\
     \end{quote}
 
   \item \label{wording.sfinae} \hyperref[discussion.sfinae]{(discussion)}
-    Add the following note after \textbf{[temp.deduct] 14.8.2/8} (note that
-    the term \textit{immediate context} is not defined formally in the standard,
+    Add the following after \textbf{[temp.deduct] 14.8.2/8} (note that the
+    term \textit{immediate context} is not defined formally in the standard,
     which is the subject of \cite{CWG1844}):
     \begin{quote}
       \added{
-      [ \textit{Note:} A lambda expression appearing in a function type or a
-      template parameter is not considered part of the immediate context for the
-      purposes of template argument deduction. The intent is to avoid requiring
-      implementations to deal with substitution failure involving arbitrary
-      statements. [ \textit{Example:}
+      A lambda expression appearing in a function type or a template parameter
+      is not considered part of the immediate context for the purposes of
+      template argument deduction. [ \textit{Note:}  The intent is to avoid
+      requiring implementations to deal with substitution failure involving
+      arbitrary statements. [ \textit{Example:}
       }
 \begin{codeblock}
 @\added{
