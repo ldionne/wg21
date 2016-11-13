@@ -326,10 +326,10 @@ The wording is based on the working paper \cite{N4606}:
       is used to denote the class type (or enum type) for linkage purposes only (3.5).
       \added{However, a closure type is never given a name for linkage purposes.}
       [ \textit{Example:}
-\begin{lstlisting}[style=base]
+\begin{codeblock}
 typedef struct { } *ps, S; // S is the class name for linkage purposes
-(*@\added{typedef decltype([]\{\}) C; // the closure type has no name for linkage purposes}@*)
-\end{lstlisting}
+@\added{typedef decltype([]\{\}) C; // the closure type has no name for linkage purposes}@
+\end{codeblock}
       \textit{-- end example} ]
     \end{quote}
 
@@ -358,31 +358,37 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
 
     If more clarity is desired, we propose adding the following example after
     \textbf{[temp.over.link] 14.5.6.1/5}:
-\begin{cpp}
-// The program is ill-formed, because the two lambda-expressions are
-// functionally equivalent but not equivalent.
-// a.cc
-template <unsigned N>
-void foo(const char (*s)[([]() { return N; })()]);
-
-// b.cc
-template <unsigned N>
-void foo(const char (*s)[([]() { return N; })()]);
-\end{cpp}
+\begin{codeblock}
+@\added{
+// The program is ill-formed, because the two lambda-expressions are\\
+// functionally equivalent but not equivalent.\\
+// a.cc\\
+template <unsigned N>\\
+void foo(const char (*s)[([]() \{ return N; \})()]);\\
+\\
+// b.cc\\
+template <unsigned N>\\
+void foo(const char (*s)[([]() \{ return N; \})()]);
+}@
+\end{codeblock}
 
   \item \label{wording.redeclarations} \hyperref[discussion.redeclarations]{(discussion)}
     Add the following paragraph at the end of \textbf{[temp.alias] 14.5.7}:
     \begin{quote}
+      \added{
       The type of a lambda expression appearing in an alias template declaration
       is unique across instantiations of that alias template, even when the
       lambda expression is not dependent.
       [ \textit{Example:}
-\begin{cpp}
-template <typename T>
-using A = decltype([] {});
+      }
+\begin{codeblock}
+@\added{
+template <typename T>\\
+using A = decltype([] \{ \});\\
 // A<int> and A<char> refer to different closure types
-\end{cpp}
-      \textit{-- end example} ]
+}@
+\end{codeblock}
+      \added{\textit{-- end example} ]}
     \end{quote}
 
   \item \label{wording.sfinae} \hyperref[discussion.sfinae]{(discussion)}
@@ -390,39 +396,45 @@ using A = decltype([] {});
     the term \textit{immediate context} is not defined formally in the standard,
     which is the subject of \cite{CWG1844}):
     \begin{quote}
+      \added{
       [ \textit{Note:} A lambda expression appearing in a function type or a
       template parameter is not considered part of the immediate context for the
       purposes of template argument deduction. The intent is to avoid requiring
       implementations to deal with substitution failure involving arbitrary
       statements. [ \textit{Example:}
-\begin{cpp}
-template <typename T>
-auto f(T) -> decltype([]() { T::invalid; } ());
-void f(...);
-f(0); // invalid expression not part of the immediate context, hard error
-
-template <typename T, std::size_t = sizeof([]() { T::invalid; })>
-void g(T);
-void g(...);
-g(0); // invalid expression not part of the immediate context, hard error
-
-template <typename T>
-auto h(T) -> decltype([x=T::invalid]() { });
-void h(...);
-h(0); // invalid expression not part of the immediate context, hard error
-
-template <typename T>
-auto i(T) -> decltype([]() -> typename T::invalid { });
-void i(...);
-i(0); // invalid expression not part of the immediate context, hard error
-
-template <typename T>
-auto j(T t) -> decltype([](auto x) -> decltype(x.invalid) { } (t));
-void j(...);
-j(0); // deduction fails on #1, calls #2
-\end{cpp}
+      }
+\begin{codeblock}
+@\added{
+template <typename T>\\
+auto f(T) -> decltype([]() \{ T::invalid; \} ());\\
+void f(...);\\
+f(0); // invalid expression not part of the immediate context, hard error\\
+\\
+template <typename T, std::size_t = sizeof([]() \{ T::invalid; \})>\\
+void g(T);\\
+void g(...);\\
+g(0); // invalid expression not part of the immediate context, hard error\\
+\\
+template <typename T>\\
+auto h(T) -> decltype([x = T::invalid]() \{ \});\\
+void h(...);\\
+h(0); // invalid expression not part of the immediate context, hard error\\
+\\
+template <typename T>\\
+auto i(T) -> decltype([]() -> typename T::invalid \{ \});\\
+void i(...);\\
+i(0); // invalid expression not part of the immediate context, hard error\\
+\\
+template <typename T>\\
+auto j(T t) -> decltype([](auto x) -> decltype(x.invalid) \{ \} (t));\\
+void j(...);\\
+j(0); // deduction fails on \#1, calls \#2
+}@
+\end{codeblock}
+      \added{
       \textit{-- end example} ]
       \textit{-- end note} ]
+      }
     \end{quote}
 \end{enumerate}
 
