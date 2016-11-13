@@ -375,7 +375,7 @@ void foo(const char (*s)[([]() \{ return N; \})()]);
       }
 \begin{codeblock}
 @\added{
-template <typename T>\\
+template <class T>\\
 using A = decltype([] \{ \});\\
 // A<int> and A<char> refer to different closure types
 }@
@@ -397,27 +397,27 @@ using A = decltype([] \{ \});\\
       }
 \begin{codeblock}
 @\added{
-template <typename T>\\
+template <class T>\\
 auto f(T) -> decltype([]() \{ T::invalid; \} ());\\
 void f(...);\\
 f(0); // invalid expression not part of the immediate context, hard error\\
 \\
-template <typename T, std::size_t = sizeof([]() \{ T::invalid; \})>\\
+template <class T, std::size_t = sizeof([]() \{ T::invalid; \})>\\
 void g(T);\\
 void g(...);\\
 g(0); // invalid expression not part of the immediate context, hard error\\
 \\
-template <typename T>\\
+template <class T>\\
 auto h(T) -> decltype([x = T::invalid]() \{ \});\\
 void h(...);\\
 h(0); // invalid expression not part of the immediate context, hard error\\
 \\
-template <typename T>\\
+template <class T>\\
 auto i(T) -> decltype([]() -> typename T::invalid \{ \});\\
 void i(...);\\
 i(0); // invalid expression not part of the immediate context, hard error\\
 \\
-template <typename T>\\
+template <class T>\\
 auto j(T t) -> decltype([](auto x) -> decltype(x.invalid) \{ \} (t));\\
 void j(...);\\
 j(0); // deduction fails on \#1, calls \#2
