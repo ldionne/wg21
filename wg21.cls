@@ -19,6 +19,7 @@
 \RequirePackage{color}                  % define colors for strikeouts and underlines
 \RequirePackage{amsmath}                % additional math symbols
 \RequirePackage{mathrsfs}               % mathscr font
+\RequirePackage{etoolbox}
 \RequirePackage{microtype}
 \RequirePackage{multicol}
 \RequirePackage{xspace}
@@ -64,13 +65,10 @@
 % usage: \audience{<audience>}
 \newcommand*{\audience}[1]{\def\@audience{#1}}
 
-% defines the author of the paper
-% usage: \author{<author>}
-\renewcommand*{\author}[1]{\def\@author{#1}}
-
-% defines the email of the author
-% usage: \email{<email>}
-\newcommand*{\email}[1]{\def\@email{#1}}
+% Defines the author of the paper and their email address.
+% usage: \author{<author>}{<email>}
+\renewcommand*{\author}[2]{\def\@author{#1} \def\@email{#2}}
+\newcommand*{\authortwo}[2]{\def\@authortwo{#1} \def\@emailtwo{#2}}
 
 \renewcommand{\maketitle}{%
   \newpage \null \vskip 2em%
@@ -83,6 +81,7 @@
       Project:    &Programming Language C++\\%
       Audience:   &\@audience\\%
       Reply-to:   &\@author\ \textless\href{mailto:\@email}{\@email}\textgreater%
+                  \ifdef{\@authortwo}{\\&\@authortwo\ \textless\href{mailto:\@emailtwo}{\@emailtwo}\textgreater}{}%
     \end{tabular}%
   \end{flushright}%
 }
