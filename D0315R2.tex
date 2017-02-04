@@ -139,6 +139,7 @@ points of contingency to clarify them.
 
 \begin{enumerate}
   \item \label{discussion.non-template}
+    \hyperref[wording.non-template]{(wording)}
     With the removal of the restrictions on lambdas in unevaluated contexts,
     a concern is that lambda-expressions might then be able to appear in the
     signature of functions with external linkage, which would require implementations
@@ -168,6 +169,7 @@ points of contingency to clarify them.
 
 
   \item \label{discussion.template}
+    \hyperref[wording.template]{(wording)}
     Another similar problem is that of lambda-expressions appearing in the
     signature of function templates, not by themselves, but indirectly, by being
     part of an expression which references a template parameter. Indeed, per
@@ -227,6 +229,7 @@ int bar() { return f(); }
 
 
   \item \label{discussion.redeclarations}
+    \hyperref[wording.redeclarations]{(wording)}
     A concern with allowing lambda-expressions in \textit{declarations} is
     that of dealing with entities that can be redeclared. However, we feel like
     no \textit{normative} change to the wording is required to address that concern.
@@ -260,6 +263,7 @@ i(nullptr); // ambiguous
 
 
   \item \label{discussion.sfinae}
+    \hyperref[wording.sfinae]{(wording)}
     A concern with allowing lambda-expressions \textit{outside the body of
     the declaration of function templates} is the need to evaluate the validity
     of potentially complex expressions as part of template argument deduction.
