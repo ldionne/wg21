@@ -37,10 +37,16 @@
   \item R1 -- Changed the wording to work around the resolution of \cite{DR1607},
               which conflicted with the initial wording. Also address the
               potential additional concerns raised by this wording change.
-  \item R2 -- Modify the wording so that a lambda expression is not part of
-              the immediate context, add a discussion about lambdas as
-              non-type template arguments, extract the wording into its
-              own section, and TODO.
+  \item R2 -- The following changes were made per feedback from CWG in Issaquah:
+              \begin{itemize}
+                \item a lambda expression is not part of the immediate context
+                \item add a discussion about lambdas as non-type template arguments
+                \item clarify the difference between the types of lambda expressions
+                      in alias templates
+                \item clarify ODR-equivalence of lambda expressions declared in
+                      different TUs
+                \item extract the wording into its own section (editorial)
+              \end{itemize}
 \end{itemize}
 
 
@@ -292,8 +298,8 @@ foo<[]() {}> x;
 #include "foo.h"
 \end{cpp}
 
-    With the current wording (if that's even possible?), this is an ODR violation.
-    TODO: Do we need to do anything about this?
+    With the current wording that would be an ODR violation. Is this something
+    we want to do something about?
 
 \end{enumerate}
 
@@ -344,11 +350,13 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       one-definition rule (3.2), except that the tokens used to name the template
       parameters may differ as long as a token used to name a template parameter
       in one expression is replaced by another token that names the same template
-      parameter in the other expression. \added{Two lambda-expressions appearing
-      in full expressions involving template parameters are never considered
-      equivalent. [ \textit{Note:} The intent is to avoid lambda-expressions
-      appearing in the signature of a function template with external linkage.
-      \textit{-- end note} ]}
+      parameter in the other expression. \added{Unless both expressions occur such
+      that they are corresponding counterparts of each other within definitions of
+      the same enclosing entity in separate translation units (\textbf{[basic.def.odr]}),
+      two lambda-expressions appearing in full expressions involving template
+      parameters are never considered equivalent. [ \textit{Note:} The intent is
+      to avoid lambda-expressions appearing in the signature of a function template
+      with external linkage. \textit{-- end note} ]}
     \end{quote}
 
     If more clarity is desired, we propose adding the following example after
@@ -372,8 +380,8 @@ void foo(const char (*s)[([]() \{ return N; \})()]);
     \begin{quote}
       \added{
       The type of a lambda expression appearing in an alias template declaration
-      is unique across instantiations of that alias template, even when the
-      lambda expression is not dependent.
+      is different between instantiations of that template, even when the lambda
+      expression is not dependent.
       [ \textit{Example:}
       }
 \begin{codeblock}
@@ -463,7 +471,7 @@ providing extensive guidance for the wording.
 
   \bibitem[CWG1844]{CWG1844}
     Richard Smith,
-    \emph{Defining “immediate context”}\newline
+    \emph{Defining "immediate context"}\newline
     \url{http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1844}
 
 \end{thebibliography}
