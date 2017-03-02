@@ -1,0 +1,152 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Default constructible stateless lambdas}
+\docnumber{D0624R0}
+\audience{Evolution Working Group}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Lambda expressions are a very convenient way of creating inline function objects,
+especially for passing to higher order algorithms. Furthermore, the Standard
+treats stateless lambdas specially, giving them an implicit conversion to a
+corresponding function pointer, which is incredibly useful for storing these
+in data structures. Unfortunately, stateless lambdas are not default constructible,
+which precludes many interesting use cases. This paper proposes making stateless
+lambdas default constructible, so that code like this is valid:
+
+\begin{cpp}
+// in library.hpp
+auto greater = [](auto x, auto y) { return x > y; };
+
+// in user.cpp
+// No need to care whether `greater` is a lambda or a function object
+std::map<std::string, int, decltype(greater)> map;
+\end{cpp}
+
+
+\section{Motivation}
+The first argument for this change is consistency. Indeed, since a lambda is
+just syntactic sugar for a function object, it makes sense that the two can be
+used interchangeably as much as possible:
+
+\begin{cpp}
+auto greater = [](auto x, auto y) { return x > y; };
+std::map<std::string, int, decltype(greater)> map;
+
+// should be the same as
+
+struct {
+  template <typename X, typename Y>
+  auto operator()(X x, Y y) const { return x > y; }
+} greater;
+std::map<std::string, int, decltype(greater)> map;
+\end{cpp}
+
+Instead, the former produces an error message saying something about the use
+of the deleted default constructor of the lambda used inside the map.
+
+Apart from consistency, the second argument is that default-constructing
+stateless lambdas opens a very interesting design space for writing libraries.
+An important tenet of C++ is to give power to experts (while keeping simple
+things simple), and this tiny feature opens up a whole new class of use cases.
+For example, default-constructible lambdas allow the \cite{Type Erased} library
+to implement runtime polymorphism with value semantics (like \cc{std::function},
+but for arbitrary interfaces) at the library level:
+
+\begin{cpp}
+// Define the interface of something that can be drawn
+struct Drawable : decltype(te::requires(
+  "draw"_s = te::function<void (te::T const&, std::ostream&)>
+)) { };
+
+// Define how a type can satisfy the above concept
+template <typename T>
+auto const te::concept_map<Drawable, T> = te::make_concept_map(
+  "draw"_s = [](T const& self, std::ostream& out) { self.draw(out); }
+);
+
+// Define an object that can hold anything that can be drawn
+struct drawable {
+  // ... boilerplate that would go away with reflection ...
+};
+
+struct Square {
+  void draw(std::ostream& out) const { out << "Square"; }
+};
+
+struct Circle {
+  void draw(std::ostream& out) const { out << "Circle"; }
+};
+
+void f(drawable d) {
+  d.draw(std::cout);
+}
+
+// drawable is like std::function, but for Drawables instead of Callables
+f(Square{...});
+f(Circle{...});
+\end{cpp}
+
+While both the purpose of the library and its implementation are completely
+beyond the scope of this paper, the idea is that we need to transport the
+type of the lambda around without an instance of it, and then default-construct
+that lambda to fill an entry in the virtual table of an interface. This is one
+use case, and there are possibly many more to come, that currently require a
+gruesome hack to work (see \href{https://github.com/ldionne/te/blob/1c9ed3148c7071034942516e66a12a38615e56a6/include/te/detail/empty_object.hpp#L13}{this Gist}).
+
+
+\section{Proposed Wording}
+The wording is based on the working paper \cite{N4606}. At the beginning of
+\textbf{[expr.prim.lambda] 5.1.2/6}:
+
+\begin{quote}
+  \added{The closure type for a lambda-expression with no lambda-capture has a
+  public non-virtual defaulted default constructor.} The closure type for a
+  non-generic lambda-expression with no lambda-capture has a public non-virtual
+  non-explicit const conversion function to pointer to function with C++ language
+  linkage [...]
+\end{quote}
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+  \bibitem[Type Erased]{Type Erased}
+    Louis Dionne,
+    \emph{Type Erased: Runtime polymorphism done right}\newline
+    \url{https://github.com/ldionne/te}
+
+  \bibitem[N4606]{N4606}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{https://github.com/cplusplus/draft/blob/master/papers/n4606.pdf}
+
+\end{thebibliography}
+
+\end{document}
