@@ -37,7 +37,8 @@
   \item R1 -- Changed the wording to work around the resolution of \cite{DR1607},
               which conflicted with the initial wording. Also address the
               potential additional concerns raised by this wording change.
-  \item R2 -- The following changes were made per feedback from CWG in Issaquah:
+  \item R2 -- The following changes were made per feedback from EWG and CWG
+              in Issaquah and CWG in Kona:
               \begin{itemize}
                 \item a lambda expression is not part of the immediate context
                 \item add a discussion about lambdas as non-type template arguments
@@ -49,6 +50,18 @@
               \end{itemize}
 \end{itemize}
 
+
+% CWG FEEDBACK FROM KONA:
+% - Rebase on top of C++17 DIS, and pay special attention to re-numbering sections & al.
+% - In section 4.2, I should perhaps change the example to something like
+%     template <unsigned N>
+%     void f(const char (*s)[([]() { return 1; })() + N]) { }
+%   because otherwise the body of the lambda is not part of the full expression inside the decltype. The example in section 6.3 needs to be fixed too.
+% - In section 6.3, need to extend the wording to "Two lambda expressions involving within their bodies template parameters"
+% - Clarify that we want something like
+%     template <int N>
+%     void foo2(int (*)[N], decltype([]{}));
+%   to work. The idea is that we mangle that positionally based on the enclosing declaration.
 
 \section{Introduction}
 Lambdas are a very powerful language feature, especially when it comes to using
@@ -215,11 +228,11 @@ inline int f() {
   return counter<decltype([] {})>();
 }
 
-// t0.cc:
+// translation unit 1:
 #include "a.h"
 int foo() { return f(); }
 
-// t1.cc:
+// translation unit 2:
 #include "a.h"
 int bar() { return f(); }
 \end{cpp}
@@ -291,10 +304,10 @@ i(nullptr); // ambiguous
 template <auto> struct foo { };
 foo<[]() {}> x;
 
-// a.cc
+// translation unit 1:
 #include "foo.h"
 
-// b.cc
+// translation unit 2:
 #include "foo.h"
 \end{cpp}
 
@@ -359,17 +372,16 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       with external linkage. \textit{-- end note} ]}
     \end{quote}
 
-    If more clarity is desired, we propose adding the following example after
-    \textbf{[temp.over.link] 14.5.6.1/5}:
+    Also, add the following example after \textbf{[temp.over.link] 14.5.6.1/5}:
 \begin{codeblock}
 @\added{
-// The program is ill-formed, because the two lambda-expressions are\\
-// functionally equivalent but not equivalent.\\
-// a.cc\\
+// The program is ill-formed, no diagnostic required, because the two\\
+// lambda-expressions are functionally equivalent but not equivalent.\\
+// translation unit 1:\\
 template <unsigned N>\\
 void foo(const char (*s)[([]() \{ return N; \})()]);\\
 \\
-// b.cc\\
+// translation unit 2:\\
 template <unsigned N>\\
 void foo(const char (*s)[([]() \{ return N; \})()]);
 }@
@@ -411,22 +423,22 @@ using A = decltype([] \{ \});\\
 template <class T>\\
 auto f(T) -> decltype([]() \{ T::invalid; \} ());\\
 void f(...);\\
-f(0); // invalid expression not part of the immediate context, hard error\\
+f(0); // error: invalid expression not part of the immediate context\\
 \\
 template <class T, std::size_t = sizeof([]() \{ T::invalid; \})>\\
 void g(T);\\
 void g(...);\\
-g(0); // invalid expression not part of the immediate context, hard error\\
+g(0); // error: invalid expression not part of the immediate context\\
 \\
 template <class T>\\
 auto h(T) -> decltype([x = T::invalid]() \{ \});\\
 void h(...);\\
-h(0); // invalid expression not part of the immediate context, hard error\\
+h(0); // error: invalid expression not part of the immediate context\\
 \\
 template <class T>\\
 auto i(T) -> decltype([]() -> typename T::invalid \{ \});\\
 void i(...);\\
-i(0); // invalid expression not part of the immediate context, hard error\\
+i(0); // error: invalid expression not part of the immediate context\\
 \\
 template <class T>\\
 auto j(T t) -> decltype([](auto x) -> decltype(x.invalid) \{ \} (t));\\
