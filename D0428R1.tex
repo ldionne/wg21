@@ -1,0 +1,345 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Familiar template syntax for generic lambdas}
+\docnumber{D0428R1}
+\audience{Core Working Group}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 -- Incorporate feedback from CWG in Kona:
+              \begin{itemize}
+                \item TODO: Rebase on top of C++17 DIS
+                \item Add alternative term in the grammar for lambda expressions
+                      instead of using \textit{opt} template parameter list
+                \item Adjust wording for the template parameter list of the
+                      conversion-to-function-pointer operator
+                \item Make sure that a lambda with a template parameter list
+                      is a generic lambda
+                \item Shorten discussion
+              \end{itemize}
+\end{itemize}
+
+
+\section{Introduction}
+C++14 added the ability to define generic lambdas, i.e. lambdas where the
+\cc{operator()} of the generated \textit{closure-type} is a template. This
+addition was initially proposed in \cite{N3418}, which included many different
+features for generic lambdas, including the functionality proposed by this
+paper. However, N3418 was not accepted as-is and its successor,
+\cite{N3559}, was accepted instead. N3559 settled on the \cc{auto}-based
+syntax that we know in C++14 for defining generic lambdas, leaving the
+usual template syntax out for lack of clear use cases (according to an author
+of N3559):
+
+\begin{cpp}
+[](auto x) { /* ... */ }
+\end{cpp}
+
+Unfortunately, this syntax makes it difficult to interact with the type of the
+parameter(s) and lacks flexibility that is sometimes required, as outlined in
+the \nameref{motivation} section. Hence, this paper proposes adding the ability
+to use the familiar template syntax when defining lambda expressions:
+
+\begin{cpp}
+[]<typename T>(T x) { /* ... */ }
+[]<typename T>(T* p) { /* ... */ }
+[]<typename T, int N>(T (&a)[N]) { /* ... */ }
+\end{cpp}
+
+
+\section{Motivation} \label{motivation}
+There are a few key reasons why the current syntax for defining generic lambdas
+is deemed insufficient by the author. The gist of it is that some things that
+can be done easily with normal function templates require significant hoop
+jumping to be done with generic lambdas, or can't be done at all. The author
+thinks that lambdas are valuable enough that C++ should support them just as
+well as normal function templates. The following details such areas where
+lambdas are lacking in their current form:
+
+\begin{enumerate}
+\item
+The limited form of "pattern matching" on template argument allowed by C++
+in function templates is very useful, and it would be equally useful to allow
+it in lambda expressions. For example, writing a lambda that accepts a
+\cc{std::vector} containing elements of any type (but not another container)
+is not possible with the current syntax for generic lambdas. Instead, one
+must write a catch-all generic lambda that accepts any type, and then assume
+that it is of the proper type, or check that it is not through other means:
+
+\begin{cpp}
+template <typename T> struct is_std_vector                 : std::false_type { };
+template <typename T> struct is_std_vector<std::vector<T>> : std::true_type { };
+
+auto f = [](auto vector) {
+  static_assert(is_std_vector<decltype(vector)>::value, "");
+};
+\end{cpp}
+
+In addition to being verbose, calling the lambda with a type that is not a
+\cc{std::vector} will result in a hard error inside the body of the lambda, not
+a template argument deduction failure. This does not play nicely with other
+parts of the language such as SFINAE-based detection, and it is obviously
+not as clear as the equivalent function template.
+
+Another instance where "pattern matching" would be useful is to deconstruct
+the type of arguments that are template specializations. For example, imagine
+that we want to get the type of elements stored in the vector in the previous
+example. Right now, we'd have to write this:
+
+\begin{cpp}
+auto f = [](auto vector) {
+  using T = typename decltype(vector)::value_type;
+  // ...
+};
+\end{cpp}
+
+This is cumbersome syntax-wise, and it requires the type to provide a nested
+alias that does just the right thing. This is not a problem for \cc{std::vector},
+but most types don't provide such aliases (and in many cases it wouldn't make
+sense for them to). Hence, right now, types that do not provide nested aliases
+or accompanying metafunctions can simply not be deconstructed in lambdas.
+Instead, it would be much simpler and more flexible to write
+
+\begin{cpp}
+auto f = []<typename T>(std::vector<T> vector) {
+  // ...
+};
+\end{cpp}
+
+
+\item
+It is often useful to retrieve the type of the parameter of a generic
+lambda, e.g. for accessing a static member function or an alias nested
+inside it. However, retrieving such a type requires using \cc decltype,
+which includes its reference and cv qualifiers. This can often lead to
+unexpected results:
+
+\begin{cpp}
+auto f = [](auto const& x) {
+  using T = decltype(x);
+  T copy = x;                             // Compiles, but wrong semantics!
+  T::static_function();                   // Does not compile!
+  using Iterator = typename T::iterator;  // Does not compile!
+};
+\end{cpp}
+
+To work around this unfortunate situation, one must introduce some
+amount of verbosity:
+
+\begin{cpp}
+auto f = [](auto const& x) {
+  using T = std::decay_t<decltype(x)>;
+  T copy = x;
+  T::static_function();
+  using Iterator = typename T::iterator;
+};
+\end{cpp}
+
+Furthermore, this problem compounds when trying to make a parameter type
+dependent on a previous parameter type, because aliases can't be introduced
+in that context to reduce verbosity:
+
+\begin{cpp}
+auto advance = [](auto& it,
+                  typename std::decay_t<decltype(it)>::difference_type n) {
+  // ...
+};
+\end{cpp}
+
+Instead, it would be much nicer and closer to usual templates if we could
+simply write
+
+\begin{cpp}
+auto f = []<typename T>(T const& x) {
+  T copy = x;
+  T::static_function();
+  using Iterator = typename T::iterator;
+};
+
+auto advance = []<typename It>(It& it, typename It::difference_type n) {
+  // ...
+};
+\end{cpp}
+
+
+\item
+Perfect forwarding in generic lambdas is more verbose than it needs to
+be, and the syntax for it is different from what's usually done in normal
+function templates. While this is technically a direct corollary of the
+previous point, the author thinks this is sufficiently annoying to be
+worth mentioning separately. The problem is that since the only way to
+get an argument's type in a lambda is to use \cc decltype, we must resort
+to the following syntax for perfect forwarding:
+
+\begin{cpp}
+auto f = [](auto&& ...args) {
+  return foo(std::forward<decltype(args)>(args)...);
+};
+\end{cpp}
+
+Exactly why this works is explained in a blog post written by Scott Meyers
+\cite{Meyers}, but the very fact that Meyers had to write a blog post about
+it is telling. Indeed, the interaction between template argument deduction
+and reference collapsing rules is already sufficiently complicated that many
+C++ users would benefit from the cognitive load reduction allowed by a single
+perfect forwarding syntax for both lambdas and normal functions:
+
+\begin{cpp}
+auto f = []<typename ...T>(T&& ...args) {
+  return foo(std::forward<T>(args)...);
+};
+\end{cpp}
+\end{enumerate}
+
+
+\section{Proposed Wording}
+Change in \textbf{[expr.prim.lambda] 5.1.5/1}:
+
+\textit{lambda-expression:}\newline
+  \hspace*{0.5cm} \textit{lambda-introducer}
+    \hspace{0.1cm} \textit{lambda-declarator}$_{opt}$
+    \hspace{0.1cm} \textit{compound-statement}\newline
+  \hspace*{0.5cm} \added{\textit{lambda-introducer}
+      \hspace{0.1cm} \textbf\textless\textit{template-parameter-list}\textbf\textgreater
+      \hspace{0.1cm} \textit{lambda-declarator}$_{opt}$
+      \hspace{0.1cm} \textit{compound-statement}}
+
+Change in \textbf{[expr.prim.lambda] 5.1.5/6}:
+
+\begin{quote}
+  The closure type for a non-generic \textit{lambda-expression} has a public
+  inline function call operator (13.5.4) whose parameters and return type are
+  described by the \textit{lambda-expression}'s \textit{parameter-declaration-clause}
+  and \textit{trailing-return-type} respectively. For a generic lambda, the
+  closure type has a public inline function call operator member template
+  (14.5.2) whose \textit{template-parameter-list} consists of \added{the
+  specified \textit{template-parameter-list}, if any, to which is appended}
+  one invented type \textit{template-parameter} for each occurrence of \cc{auto}
+  in the lambda's \textit{parameter-declaration-clause}, in order of appearance.
+  The invented type \textit{template-parameter} is a parameter pack if the
+  corresponding \textit{parameter-declaration} declares a function parameter
+  pack (8.3.5). The return type and function parameters of the function call
+  operator template are derived from the \textit{lambda-expression}'s
+  \textit{trailing-return-type} and \textit{parameter-declaration-clause} by
+  replacing each occurrence of \cc{auto} in the \textit{decl-specifier}s of
+  the \textit{parameter-declaration-clause} with the name of the corresponding
+  invented \textit{template-parameter}.
+\end{quote}
+
+Change in \textbf{[expr.prim.lambda] 5.1.5/7}:
+
+\begin{quote}
+  [\dots] For a generic lambda with no \textit{lambda-capture}, the closure type
+  has a conversion function template to pointer to function. The conversion function
+  template has the same invented \changed{\textit{template-parameter-list}}{template
+  parameter list}, and the pointer to function has the same parameter types, as
+  the function call operator template. [\dots]
+\end{quote}
+
+Add in \textbf{[dcl.spec.auto] 7.1.7.4/3}:
+
+\begin{quote}
+  If the \textbf{auto} \textit{type-specifier} appears as one of the \textit{decl-specifiers}
+  in the \textit{decl-specifier-seq} of a \textit{parameter-declaration} of a
+  \textit{lambda-expression}, \added{or if the lambda has a \textit{template-parameter-list},}
+  the lambda is a \textit{generic lambda} (5.1.5).
+  \begin{example}\\
+    \tcode{
+      auto glambda\added{1} = [](int i, auto a) \{ return i; \}; // OK: a generic lambda\\
+      \added{auto glambda2 = []<class T>(T t, int i) \{ return i; \}; // OK: a generic lambda}
+    }
+  \end{example}
+\end{quote}
+
+Note that it might be cleaner to define what a generic lambda is elsewhere
+instead of in \textbf{[dcl.spec.auto]}, but this is left to another paper
+or a DR.
+
+
+\section{Implementation experience}
+This extension to generic lambdas had been implemented in GCC in 2009 as part
+of an experiment \cite{GCC}. Thus, it seems implementable.
+
+
+\section{Discussion} \label{discussion}
+There is a question of whether to allow a lambda to contain both a
+\textit{template-parameter-list} and conventional \cc{auto}-based parameters.
+When allowing both syntaxes, we must also make a choice regarding the position
+of the invented template parameters relative to the specified template parameters.
+
+We decided to allow mixing both syntaxes and decided to append the invented
+template parameters to the end of the \textit{template-parameter-list}, because
+it seems like the simplest choice, it does not limit expressiveness in any way
+and it is consistent with what's done in the proposal for concepts \cite{N4553}.
+
+
+\section{Acknowledgements}
+Thanks to Tom Honermann, Nicol Bolas and other members of the \textit{std-proposal}
+mailing list for providing comments to improve this paper.
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+  \bibitem[N4606]{N4606}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{https://github.com/cplusplus/draft/blob/master/papers/n4606.pdf}
+
+  \bibitem[Meyers]{Meyers}
+    Scott Meyers,
+    \emph{C++14 Lambdas and Perfect Forwarding}\newline
+    \url{http://scottmeyers.blogspot.com.tr/2013/05/c14-lambdas-and-perfect-forwarding.html}
+
+  \bibitem[N3418]{N3418}
+    Faisal Vali, Herb Sutter, Dave Abrahams,
+    \emph{Proposal for Generic (Polymorphic) Lambda Expressions}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3418.pdf}
+
+  \bibitem[N3559]{N3559}
+    Faisal Vali, Herb Sutter, Dave Abrahams,
+    \emph{Proposal for Generic (Polymorphic) Lambda Expressions (Revision 2)}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3559.pdf}
+
+  \bibitem[GCC]{GCC}
+    Adam Butcher,
+    \emph{Latest experimental polymorphic lambda patches}\newline
+    \url{http://gcc.gnu.org/ml/gcc/2009-08/msg00174.html}
+
+  \bibitem[N4553]{N4553}
+    Andrew Sutton,
+    \emph{Working Draft, C++ extensions for Concepts}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4553.pdf}
+
+\end{thebibliography}
+
+\end{document}

@@ -115,7 +115,7 @@
 
 \newcommand{\added}[1]{\textcolor{addclr}{\uline{#1}}}
 \newcommand{\removed}[1]{\textcolor{remclr}{\sout{#1}}}
-\newcommand{\changed}[2]{\removed{#1}\added{#2}}
+\newcommand{\changed}[2]{\removed{#1} \added{#2}}
 
 \newcommand{\nbc}[1]{[#1]\ }
 \newcommand{\addednb}[2]{\added{\nbc{#1}#2}}
