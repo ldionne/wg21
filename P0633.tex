@@ -24,7 +24,7 @@
 
 
 \title{Exploring the design space of metaprogramming and reflection}
-\docnumber{DXXXXR0}
+\docnumber{P0633R0}
 \audience{SG 7}
 \author{Daveed Vandevoorde}{daveed@edg.com}
 \authortwo{Louis Dionne}{ldionne.2@gmail.com}
@@ -142,14 +142,13 @@ that manipulate this meta information:
 \begin{cpp}
 struct Foo { int x; float y; };
 constexpr meta::info meta_info = reflexpr(Foo);
-constexpr std::array<meta::info, 2> members = get_data_members(meta_info);
+constexpr std::constexpr_vector<meta::info> members = get_data_members(meta_info);
 \end{cpp}
 
 Since the reflection operator returns objects of the same type regardless of
 the entity we reflect upon, traditional constexpr programming is applicable.
-To make this easier to work with, it would be interesting to expand the
-capabilities of constexpr to allow for variable length sequences
-(a \cc{constexpr_vector} instead of \cc{array}).
+Note that we postulate the existence of \cc{constexpr_vector}, a constexpr
+variable length sequence.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -451,16 +450,17 @@ Another possibility is to allow metaprograms to be written in "plain C++".
 Running "plain C++" at compile time is already possible today through
 \cc{constexpr} evaluation. Plain C++ operates primarily on values and
 therefore it makes sense to reflect program information into values rather
-than types. In theory, we could imagine a handful of reflection types to
-reflect different entities (e.g., a type to reflect functions, another to
-reflect types, yet another for namespaces, etc.), but it is easier to deal
-with a single reflection type -- say \cc{meta::info} -- so that a collection
-of reflection values can easily be used to represent heterogeneous program
-information (e.g., a template argument list, which may contains types,
-constants, and templates). That also means we'd want a dynamic container
-type usable during constexpr evaluation (e.g., \cc{constexpr_vector<T>} as
-described in \cite{P0597}), which is a facility useful on its own (i.e., not
-just in the context of reflective metaprogramming).
+than types. We could also imagine a handful of reflection types to reflect
+different entities (e.g., \cc{meta::type} to reflect on types, \cc{meta::decl}
+to reflect on declarations, \cc{meta::expr} to reflect on expressions, etc..).
+This would also be a valid design choice, but we should be wary of keeping
+things like representing a template argument list (which may contain types,
+constants, and templates) easy to do.
+
+That also means we'd want a variable length container type usable during
+constexpr evaluation (e.g., \cc{constexpr_vector<T>} as described in
+\cite{P0597}), which is a facility useful on its own (i.e., not just in
+the context of reflective metaprogramming).
 
 A skeleton of the \cc{hash_append} example might thus look like the following:
 
@@ -525,16 +525,16 @@ void hash_append(H& h, S const& s) {
 \end{cpp}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussions and notes}
 \subsection{About in-place program transformations}
 The ability to modify attributes of a declaration after the declaration has been
 completed is an attractive one, but it runs into many specific implementation
 difficulties. Most C++ front ends produce mostly-immutable representations of
 declarations (this is true, at least, for GCC, Clang, and EDG, but probably all
-others as well). For example, it may be very difficult to have turn a member
-function that is virtual by virtue of its declaration become non-virtual
-"a posteriori" through metaprogramming (however, the reverse transformation
-may well be less problematic).
+others as well). For example, it may be very difficult for the implementation
+to allow turning a virtual function into a non-virtual function (however, the
+reverse transformation may well be less problematic).
 
 As noted earlier, an API to perform such transformations is one of the few viable
 routes to such an ability. Because of the practical limitations on the sorts of
@@ -542,11 +542,11 @@ transformations that can be handled by mainstream implementations it seems prude
 to make such an API be very specific to the transformations that are found to be
 useful and feasible. For example, perhaps we could envision a \cc{meta::make_member_virtual(...)}
 function, but leave out a hypothetical \cc{meta::make_member_nonvirtual(...)}.
-
 Since actual synthesis of code is more cumbersome with the API approach, we can
 also consider the possibility of a compact code injection mechanism augmented
 (possibly at a later stage) with a limited program transformation API.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{About injection points}
 When metacode synthesizes ("injects") code, that code must end up in some
 specific context and scope. When template instantiation is the synthesis
@@ -641,6 +641,55 @@ template<typename T> struct X {
   }
 };
 \end{cpp}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{About constexpr blocks}
+The \cc{constexpr { ... }} block discussed above could be implemented as a
+constexpr declaration available at namespace scope, class scope, and block
+scope. Roughly speaking, the behavior within the constexpr declaration would
+match that of constexpr compound statements, which would allow for function-like
+behavior within the braces. In other words, this:
+
+\begin{cpp}
+constexpr {
+  ...
+}
+\end{cpp}
+
+would be somewhat equivalent to this:
+
+\begin{cpp}
+constexpr void __f() { ... }
+__f();
+\end{cpp}
+
+As a quick example of what that allows, if we solve the problem of generating
+new declaration names, then implementing a naive tuple (e.g. without EBO)
+might be:
+
+\begin{cpp}
+template<typename ...Args>
+struct tuple {
+  constexpr {
+    for... (auto type : enumerate(Args))
+      typename(value(type)) ("element_" + index(type));
+      //                    ^^^^^^^^^^^^^^^^^^^^^^^^^^ declarator
+  }
+};
+\end{cpp}
+
+The template problem is still vexing. When a constexpr-declaration is written
+inside a template, when would you (or should you) evaluate \cc{__f()}? Clearly,
+in the case above, only on instantiation. We could extend the notion of
+instantiation dependence to statements, so that the constexpr block is
+instantiated if and only if its compound-statement is not instantiation
+dependent. This part obviously needs to be fleshed out, but there's hope.
+
+
+\section{Acknowledgements}
+Thanks to Andrew Sutton for comments, and to everyone else in SG-7 for general
+discussion.
 
 
 \section{References}
