@@ -1,0 +1,692 @@
+\documentclass{wg21}
+
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Exploring the design space of metaprogramming and reflection}
+\docnumber{DXXXXR0}
+\audience{SG 7}
+\author{Daveed Vandevoorde}{daveed@edg.com}
+\authortwo{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\textit{Metaprogramming} is the craft of creating or modifying programs as the
+product of other programs. \textit{Reflective metaprogramming} is metaprogramming
+that incorporates data from the program being modified. For example, one can
+imagine a metaprogram that automatically generates a hash function from a
+user-defined class type: Such a metaprogram would produce the hash function
+from meta-information reflected from the user-defined type.
+
+The goal of this paper is to explore the design space for metaprogramming and
+reflection in C++. To this end, it is useful to identify the different dimensions
+of this design space. We believe those dimensions are:
+
+\begin{enumerate}
+  \item Reflection: A way to represent significant aspects of the program as
+        first class entities in the program.
+  \item Code synthesis: A way to generate new code and/or modify user-written
+        code programmatically.
+  \item Control flow: A computationally complete mechanism to guide the
+        reflection and code synthesis activities.
+\end{enumerate}
+
+There are different ways to approach each of these dimensions, and hence there
+are multiple different \textit{cuts} we may want to take in our design space.
+The rest of this paper explores that, with notes describing strengths and
+weaknesses.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{The dimensions}
+We start by exploring all the approaches we can currently think of to implement
+each dimension described above. Here's a summarized view of the whole thing:
+
+\begin{enumerate}
+  \item Reflection
+    \begin{itemize}
+      \item Type syntax (\cite{P0194})
+      \item Heterogeneous value syntax (each \cc{reflexpr()} has a different type) (\cite{P0590})
+      \item Homogeneous value syntax (\cc{reflexpr()} always returns \cc{meta::info}) (\cite{P0598})
+    \end{itemize}
+
+  \item Code synthesis
+    \begin{itemize}
+      \item Raw string injection
+      \item Token sequence injection
+      \item Programmatic API
+      \item Metaclasses
+    \end{itemize}
+
+  \item Control flow
+    \begin{itemize}
+      \item Classic template metaprogramming (type syntax)
+      \item Heterogeneous value metaprogramming (value syntax, but templates under the hood)
+      \item Constexpr programming
+    \end{itemize}
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reflection}
+This section gives an overview of the different proposed approaches for
+supporting reflection. We do not go into details here since the corresponding
+proposals already explain this.
+
+\subsubsection{Type syntax (\cite{P0194})}
+The result of the reflection operator is meta information in the form of
+\textbf{a type that is unique for each entity that we reflect upon}. We
+are provided with \cc{type_traits}-like operations to manipulate this meta
+information:
+
+\begin{cpp}
+struct Foo { int x; float y; };
+using MetaInfo = reflexpr(Foo);
+using Members = get_data_members_t<MetaInfo>;
+\end{cpp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Heterogeneous value syntax (\cite{P0590})}
+The result of the reflection operator is meta information in the form of
+\textbf{an object whose type is unique for each entity that we reflect upon}.
+We are provided with function templates that manipulate this meta information:
+
+\begin{cpp}
+struct Foo { int x; float y; };
+auto meta_info = reflexpr(Foo);
+auto members = get_data_members(meta_info);
+\end{cpp}
+
+An important thing to notice here is that the reflection operator really returns
+objects of different types depending on what it is reflecting upon:
+
+\begin{cpp}
+struct Foo { int x; float y; };
+struct Bar { char w; long z; };
+auto meta_info_Foo = reflexpr(Foo);
+auto meta_info_Bar = reflexpr(Bar);
+// The two meta_infos are objects of different types
+\end{cpp}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Homogeneous value syntax (\cite{P0598})}
+The result of the reflection operator is meta information in the form of
+\textbf{a constant expression whose type is always \cc{meta::info}}, regardless
+of the entity we reflect upon. We are provided with normal constexpr functions
+that manipulate this meta information:
+
+\begin{cpp}
+struct Foo { int x; float y; };
+constexpr meta::info meta_info = reflexpr(Foo);
+constexpr std::array<meta::info, 2> members = get_data_members(meta_info);
+\end{cpp}
+
+Since the reflection operator returns objects of the same type regardless of
+the entity we reflect upon, traditional constexpr programming is applicable.
+To make this easier to work with, it would be interesting to expand the
+capabilities of constexpr to allow for variable length sequences
+(a \cc{constexpr_vector} instead of \cc{array}).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Code synthesis}
+This section gives an overview of the different proposed approaches for
+supporting code synthesis. To showcase the three first approaches, which
+perform direct code synthesis, we solve the toy problem of programmatically
+generating a function that applies some function to each member of the
+following struct:
+
+\begin{cpp}
+struct S {
+  char x;
+  int y;
+  long z;
+};
+\end{cpp}
+
+The reason why we use this toy problem as opposed to solving the same challenge
+in the general case is that solving it in the general case requires control flow,
+which we're trying to decouple from code synthesis.
+
+\subsubsection{Raw string injection}
+The idea is to allow arbitrary strings to be fed to the implementation:
+
+\begin{cpp}
+template<typename Function>
+void challenge(S const& s, Function f) {
+  constexpr {
+    meta::queue(meta::code("f(s.", NAME_OF_X, ");"));
+    meta::queue(meta::code("f(s.", NAME_OF_Y, ");"));
+    meta::queue(meta::code("f(s.", NAME_OF_Z, ");"));
+  }
+}
+\end{cpp}
+
+Here, \cc{NAME_OF_X} \& friends denote the name of the member of the struct
+obtained through a reflection API. Given this, the intent is that \cc{meta::queue}
+queues up the string for consumption by the compiler when the constexpr evaluation
+completes (i.e., after the closing brace of \cc{constexpr { ... }}). Hence, an
+instantiation of \cc{challenge<F>} would expand to
+
+\begin{cpp}
+template<>
+void challenge<F>(S const& s, F f) {
+  { f(s.x); }
+  { f(s.y); }
+  { f(s.z); }
+}
+\end{cpp}
+
+Note that we presume the compiler would create a local scope into which each
+injected string is translated. This avoids "leakage" from one injection into
+another (and from injections into the surrounding context, which would raise
+tricky semantic questions).
+
+Also, this example postulates a \cc{constexpr { ... }} construct not seen before,
+which forces the compile-time evaluation of some statements. This conceivably be
+avoided by moving the body to a constexpr function (or lambda) and calling that
+function from a context that guarantees compile-time evaluation (e.g., a constexpr
+variable initializer), but expressing this directly seems highly desirable.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Token sequence injection}
+The idea is to allow "token sequences" to be fed to the implementation, with
+a mechanism to parameterize those token sequences:
+
+\begin{cpp}
+template<typename Function>
+void challenge(S const& s, Function f) {
+  constexpr {
+    -> { f(s.(.NAME_OF_X.)); }
+    -> { f(s.(.NAME_OF_Y.)); }
+    -> { f(s.(.NAME_OF_Z.)); }
+  }
+}
+\end{cpp}
+
+Here we assume that \cc{-> { ... }} injects the \cc{{ ... }} part of that
+construct after the closing brace of \cc{constexpr { ... }}. Note that we
+introduced a notation \cc{(. expression .)} to transform a reflected value
+back into an identifier. Other such notations would be required for a few
+other entities (e.g. \cc{typename(expression)} to produce a type name). The
+expansion would be equivalent to the version using raw string injection.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Programmatic API}
+The idea is to allow programmatic construction of an intermediate representation
+of the generated code, not unlike what is done to the DOM of HTML web pages:
+
+\begin{cpp}
+template<typename Function>
+void challenge(S const& s, Function f) {
+  constexpr {
+    meta::queue(
+      meta::expr_statement(meta::call_by_name("f",
+        meta::select_member(reflexpr(s), NAME_OF_X))));
+    meta::queue(
+      meta::expr_statement(meta::call_by_name("f",
+        meta::select_member(reflexpr(s), NAME_OF_Y))));
+    meta::queue(
+      meta::expr_statement(meta::call_by_name("f",
+        meta::select_member(reflexpr(s), NAME_OF_Z))));
+  }
+}
+\end{cpp}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Metaclasses}
+Herb Sutter and Andrew Sutton have been exploring a powerful notion of
+\textit{metaclasses} (private communication). The idea here is to associate
+some metacode to class types using a shorthand notation and have that code run
+when the class definition is about to be completed. For example (using a
+different notation from what Herb and Andrew are exploring):
+
+\begin{cpp}
+constexpr {
+  meta::register_metaclass(
+    "value",  // Metaclass name
+    [](meta::info class_info) {  // constexpr lambda
+      ...  // Check and/or modify the class represented by class_info.
+           // E.g., diagnose that all members are value types too.
+    });
+}
+
+class(value) X {
+  int x, y;
+};  // The constexpr function (or lambda) registered
+\end{cpp}
+
+The ability to "attach" metacode in such convenient ways should perhaps be
+considered to some degree when evaluating future directions for reflective
+metaprogramming.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Observations}
+Looking at these four approaches, we make the following observations:
+
+\begin{itemize}
+  \item Only a metaprogramming API provides a natural path for a "code modification"
+        system. For example, one could imagine an API to make a member function
+        virtual after it has been declared.
+  \item The API approach may require knowing details about the language, like
+        expressions and other technical terms that would have to be reflected
+        through the API. This may end up being verbose.
+  \item The string injection approach could be more powerful than the token sequence
+        approach, because strings are first-class values and could therefore be
+        composed in more sophisticated ways. On the flip side, that opens the
+        possibility of code that is hard to read and debug, because the construction
+        of the string eventually injected into the program could be completely opaque.
+  \item Although two implementations are known to already have string-injection
+        facilities for other reasons, that may not be true of other implementations.
+        The ability to replay a sequence of tokens, however, is present in all
+        implementations since it is needed to correctly deal with member function
+        bodies appearing in class definitions (they have to be stored and then
+        replayed after the complete class definition has been seen).
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Control flow}
+
+\subsubsection{Classic template metaprogramming}
+This computation mechanism based on template specialization is well known, and
+we have extensive experience using it in libraries like \cite{Boost.MPL}. It
+uses an arcane syntax, it is inflexible, and it does not scale properly.
+
+\subsubsection{Heterogeneous value metaprogramming}
+This is a newer way of metaprogramming made possible by type deduction facilities
+in C++14. This technique uses templates under the hood, just like the classic
+template metaprogramming approach, but those are hidden from the users by
+throwing a nice value-syntax API on top. This is used extensively in the
+\cite{Boost.Hana} library. It works well, but it has some tricky corners
+and does not scale in terms of compilation times, just like classic template
+metaprogramming.
+
+If we go down this road, Andrew Sutton's for-loop on tuples proposed in
+\cite{P0589} and more extended "static" control flow could make things
+more palatable.
+
+\subsubsection{Constexpr programming}
+Given a way to interoperate between types and \textbf{homogeneous} constant
+expressions, we could use the full facilities available during constexpr
+programming for metaprogramming. If this can be figured out, it would provide
+the most natural way of metaprogramming, because constexpr programming is
+simply a subset of normal runtime programming.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Possible cuts in the design space}
+This section describes possible combinations of approaches from each dimension
+discussed above to assemble a full solution. We illustrate each solution by
+using an example inspired by Andrew Sutton that composes Howard Hinnant's
+proposed \cc{hash_append} interface for members of a user-defined type.
+
+\subsection{Classic template metaprogramming with \cite{P0194}}
+\begin{itemize}
+  \item Reflection: Type syntax
+  \item Code synthesis: None needed for runtime, TODO for synthesizing types
+  \item Control flow: Classic template metaprogramming
+\end{itemize}
+
+Here is an example of what can be achieved with this approach:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H& h, S const& s) {
+  meta::for_each<meta::get_data_members_m<reflexpr(S)>>(
+    [&](auto meta_mem) {
+      using MetaMem = typename decltype(meta_mem)::type;
+      hash_append(h, s.unreflexpr(MetaMem));
+    }
+  );
+}
+\end{cpp}
+
+The advantage of this approach is that various parts of the solution are
+already available in the language; only a reflection system has to be added.
+The major disadvantages are:
+
+\begin{itemize}
+  \item Template instantiation is a resource-intensive compiler activity. We
+        have extensive experience showing it does not scale sufficiently for
+        some heavier use cases (\cite{Boost.MPL}).
+  \item Template metaprogramming uses arcane notations and conventions when
+        compared to plain C++ programming.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Heterogeneous value style with \cite{P0590}}
+\begin{itemize}
+  \item Reflection: Heterogeneous value syntax
+  \item Code synthesis: None needed for runtime, TODO for synthesizing types
+  \item Control flow: Heterogeneous value metaprogramming
+\end{itemize}
+
+This approach is very similar to the one above, but we use objects instead of
+types, which allows us to stay closer to the usual syntax used in C++. Here's
+what can be achieved with the help of the Hana library (assuming heterogeneous
+value-based reflection):
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H& h, S const& s) {
+  hana::for_each(reflexpr(S).member_variables(), [&](MemberVariable v) {
+    hash_append(h, s.*(v.pointer()));
+  });
+}
+\end{cpp}
+
+\cc{hana::for_each} is an algorithm working on tuples that basically calls the
+provided lambda with each element of the tuple, in order. Note that
+\cc{MemberVariable} is not a traditional type, but a concept name (allowing
+each expansion of the body to occur for different types). However, we could
+mitigate the notational burden by adopting a construct to expand code over the
+element of a tuple (and, potentially, tuple-like entities such as packs), as
+proposed in \cite{P0590}. Note that this construct is useful independently of
+reflection. Here's how the example looks with this construct:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H& h, S const& s) {
+  for... (MemberVariable v : reflexpr(S).member_variables()) {
+    hash_append(h, s.*(v.pointer()));
+  }
+}
+\end{cpp}
+
+This is more readable, but it still involves a template-like expansion. The
+\cc{for...} construct isn't a loop, but produces a repeated "instantiation"
+(or sorts) of its body for various values of \cc{v}, just like \cc{hana::for_each}
+does. This approach suffers from the following disadvantages:
+
+\begin{itemize}
+  \item Template instantiation is a resource-intensive compiler activity. We
+        have experience showing it does not scale sufficiently for some heavier
+        use cases (\cite{Boost.Hana}).
+  \item Unless we introduce the ability to change the type of an object, the
+        fact that we're manipulating heterogeneous objects means that we can't
+        perform mutations. While this has some nice properties, it strays away
+        from what we're used to in C++.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Homogeneous value syntax with \cite{P0598}}
+\begin{itemize}
+  \item Reflection: Homogeneous value syntax
+  \item Code synthesis: Can use anything
+  \item Control flow: Constexpr programming
+\end{itemize}
+
+Another possibility is to allow metaprograms to be written in "plain C++".
+Running "plain C++" at compile time is already possible today through
+\cc{constexpr} evaluation. Plain C++ operates primarily on values and
+therefore it makes sense to reflect program information into values rather
+than types. In theory, we could imagine a handful of reflection types to
+reflect different entities (e.g., a type to reflect functions, another to
+reflect types, yet another for namespaces, etc.), but it is easier to deal
+with a single reflection type -- say \cc{meta::info} -- so that a collection
+of reflection values can easily be used to represent heterogeneous program
+information (e.g., a template argument list, which may contains types,
+constants, and templates). That also means we'd want a dynamic container
+type usable during constexpr evaluation (e.g., \cc{constexpr_vector<T>} as
+described in \cite{P0597}), which is a facility useful on its own (i.e., not
+just in the context of reflective metaprogramming).
+
+A skeleton of the \cc{hash_append} example might thus look like the following:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H& h, S const& s) {
+  constexpr {
+    for (meta::info member: meta::data_members(reflexpr(s))) {
+      <generate a hash_append call for "member">
+    }
+  }
+}
+\end{cpp}
+
+In this example, \cc{reflexpr(s)} produces a value of a unique reflection type
+\cc{meta::info} and \cc{meta::data_members(reflexpr(s))} then produces a value
+of type \cc{constexpr_vector<meta::info>} which can be iterated over. Note that
+those values can be discarded by the compiler when it is done evaluating the
+code. For the generation of the code in the body, we can use any of the direct
+code synthesis approaches. Raw string injection:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H& h, S const& s) {
+  constexpr {
+    for (meta::info member : meta::data_members(reflexpr(s))) {
+      meta::queue(meta::code("hash_append(h, s.", meta::name(member), ");"));
+    }
+  }
+}
+\end{cpp}
+
+Token sequence injection:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H &h, S const &s) {
+  constexpr {
+    for (meta::info member : meta::data_members(reflexpr(s))) {
+      -> { hash_append(h, s.(.member.)); }
+    }
+  }
+}
+\end{cpp}
+
+Programmatic API:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void hash_append(H& h, S const& s) {
+  constexpr {
+    for (meta::info member : meta::data_members(reflexpr(s))) {
+      meta::queue(
+        meta::expr_statement(
+          meta::call_by_name(
+            "hash_append",
+            reflexpr(h),
+            meta::select_member(reflexpr(s), member))));
+    }
+  }
+}
+\end{cpp}
+
+
+\section{Discussions and notes}
+\subsection{About in-place program transformations}
+The ability to modify attributes of a declaration after the declaration has been
+completed is an attractive one, but it runs into many specific implementation
+difficulties. Most C++ front ends produce mostly-immutable representations of
+declarations (this is true, at least, for GCC, Clang, and EDG, but probably all
+others as well). For example, it may be very difficult to have turn a member
+function that is virtual by virtue of its declaration become non-virtual
+"a posteriori" through metaprogramming (however, the reverse transformation
+may well be less problematic).
+
+As noted earlier, an API to perform such transformations is one of the few viable
+routes to such an ability. Because of the practical limitations on the sorts of
+transformations that can be handled by mainstream implementations it seems prudent
+to make such an API be very specific to the transformations that are found to be
+useful and feasible. For example, perhaps we could envision a \cc{meta::make_member_virtual(...)}
+function, but leave out a hypothetical \cc{meta::make_member_nonvirtual(...)}.
+
+Since actual synthesis of code is more cumbersome with the API approach, we can
+also consider the possibility of a compact code injection mechanism augmented
+(possibly at a later stage) with a limited program transformation API.
+
+\subsection{About injection points}
+When metacode synthesizes ("injects") code, that code must end up in some
+specific context and scope. When template instantiation is the synthesis
+mechanism, those contexts correspond to the points-of-instantiation for the
+templates being expanded:
+
+\begin{enumerate}
+  \item Namespace scopes for ordinary function template instances
+  \item Class scopes for member function template instances
+  \item Somewhat more local scopes for generic lambda instances
+\end{enumerate}
+
+For more direct approaches to code synthesis, we will want correspondingly
+direct ways of specifying where the injected code ends up. In our examples
+so far, the injected code always ended up in a local scope. However, it would
+not be hard to extend the kinds of notations introduced above to target other
+scopes. For example:
+
+\begin{cpp}
+template<HashAlgorithm H, SimpleStruct S>
+void generate_default_hash_function() {
+  meta::info hash_type ...  // Compute some meta information.
+  -> :: {  // Inject in file scope
+    namespace MyLib {
+      template<> typename(hash_type) hash(...) {
+         ...
+      }
+    }
+  }
+}
+\end{cpp}
+
+or
+
+\begin{cpp}
+template<SimpleStruct S>
+void generate_helper() {
+  // ...
+  -> namespace {  // Inject in nearest namespace scope.
+    void helper(...) { ... }
+  }
+}
+\end{cpp}
+
+or
+
+\begin{cpp}
+template<SimpleStruct S>
+void generate_print_raw_member() {
+  // ... Compute some meta information.
+  -> class {  // Inject in class scope.
+    void print_raw() {
+      generate_helper<...>();  // Cascading synthesis.
+    }
+  }
+}
+\end{cpp}
+
+The last option, generating in class scopes, is interesting but also challenging
+when dealing with class templates. Consider the following example:
+
+\begin{cpp}
+template<typename T> struct X {
+  constexpr {
+    generate_mem();  // Generates a member "mem" for X<T>.
+  }
+  void f() {
+    mem();  // Error? ("mem" not found.)
+  }
+};
+\end{cpp}
+
+Here we added some metacode to insert a member \cc{mem} in every \cc{X<T>}.
+Such a member is likely to want to depend on the specific type \cc{T} for
+which \cc{X} is instantiated. That argues for running the metacode at
+instantiation time, but that means that in the generic version there is
+no member \cc{mem}, which may limit the usefulness of the added member
+(e.g., another member cannot reference it). One possible approach to this
+issue is to distinguish code injected when the template definition is first
+encountered from code injected when it is instantiated:
+
+\begin{cpp}
+template<typename T> struct X {
+  constexpr {  // Injected in template definition
+    -> class { void mem(); }
+  }
+  constexpr<> {  // Injected in template instantiation
+    generate_mem();  // Generates a member "mem" for X<T>.
+  }
+  void f() {
+    mem();  // Error? ("mem" not found.)
+  }
+};
+\end{cpp}
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+  \bibitem[P0597]{P0597}
+    Daveed Vandevoorde,
+    \emph{\cc{std::constexpr_vector<T>}}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0597r0.html}
+
+  \bibitem[P0598]{P0598}
+    Daveed Vandevoorde,
+    \emph{Reflect through values instead of types}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0598r0.html}
+
+  \bibitem[P0590]{P0590}
+    Andrew Sutton \& Herb Sutter,
+    \emph{A design for static reflection}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0590r0.pdf}
+
+  \bibitem[P0385]{P0385}
+    Matus Chochlík, Axel Naumann \& David Sankel,
+    \emph{Static reflection: Rationale, design and evolution}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0385r2.pdf}
+
+  \bibitem[P0194]{P0194}
+    Matus Chochlík, Axel Naumann \& David Sankel,
+    \emph{Static reflection}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0194r3.html}
+
+  \bibitem[Boost.Hana]{Boost.Hana}
+    Louis Dionne,
+    \emph{Boost.Hana, A modern metaprogramming library}\newline
+    \url{https://github.com/boostorg/hana}
+
+  \bibitem[Boost.MPL]{Boost.MPL}
+    Aleksey Gurtovoy \& David Abrahams,
+    \emph{Boost.MPL}\newline
+    \url{http://www.boost.org/doc/libs/release/libs/mpl/doc/index.html}
+
+  \bibitem[P0589]{P0589}
+    Andrew Sutton,
+    \emph{Tuple-based for loops}\newline
+    \url{http://open-std.org/JTC1/SC22/WG21/docs/papers/2017/p0589r0.pdf}
+
+\end{thebibliography}
+
+\end{document}
