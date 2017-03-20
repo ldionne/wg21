@@ -23,7 +23,7 @@
 
 
 \title{Default constructible stateless lambdas}
-\docnumber{D0624R0}
+\docnumber{P0624R0}
 \audience{Evolution Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
@@ -74,19 +74,19 @@ Apart from consistency, the second argument is that default-constructing
 stateless lambdas opens a very interesting design space for writing libraries.
 An important tenet of C++ is to give power to experts (while keeping simple
 things simple), and this tiny feature opens up a whole new class of use cases.
-For example, default-constructible lambdas allow the \cite{Type Erased} library
-to implement runtime polymorphism with value semantics (like \cc{std::function},
+For example, default-constructible lambdas allow the \cite{Dyno} library to
+implement runtime polymorphism with value semantics (like \cc{std::function},
 but for arbitrary interfaces) at the library level:
 
 \begin{cpp}
 // Define the interface of something that can be drawn
-struct Drawable : decltype(te::requires(
-  "draw"_s = te::function<void (te::T const&, std::ostream&)>
+struct Drawable : decltype(dyno::requires(
+  "draw"_s = dyno::function<void (dyno::T const&, std::ostream&)>
 )) { };
 
 // Define how a type can satisfy the above concept
 template <typename T>
-auto const te::concept_map<Drawable, T> = te::make_concept_map(
+auto const dyno::concept_map<Drawable, T> = dyno::make_concept_map(
   "draw"_s = [](T const& self, std::ostream& out) { self.draw(out); }
 );
 
@@ -117,7 +117,7 @@ beyond the scope of this paper, the idea is that we need to transport the
 type of the lambda around without an instance of it, and then default-construct
 that lambda to fill an entry in the virtual table of an interface. This is one
 use case, and there are possibly many more to come, that currently require a
-gruesome hack to work (see \href{https://github.com/ldionne/te/blob/1c9ed3148c7071034942516e66a12a38615e56a6/include/te/detail/empty_object.hpp#L13}{this Gist}).
+gruesome hack to work (see \href{https://github.com/ldionne/dyno/blob/03eaeded898225660787f03655edb89642a72e7c/include/dyno/detail/empty_object.hpp#L13}{this Gist}).
 
 
 \section{Proposed Wording}
@@ -132,15 +132,19 @@ The wording is based on the working paper \cite{N4606}. At the beginning of
   linkage [...]
 \end{quote}
 
+The wording needs to be rebased on top of the latest changes to
+\textbf{[expr.prim.lambda] 5.1.2/6}, which are expected to appear
+in the post-Kona mailing.
+
 
 \section{References}
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
 
-  \bibitem[Type Erased]{Type Erased}
+  \bibitem[Dyno]{Dyno}
     Louis Dionne,
-    \emph{Type Erased: Runtime polymorphism done right}\newline
-    \url{https://github.com/ldionne/te}
+    \emph{Dyno: Runtime polymorphism done right}\newline
+    \url{https://github.com/ldionne/dyno}
 
   \bibitem[N4606]{N4606}
     Richard Smith,
