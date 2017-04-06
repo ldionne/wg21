@@ -261,20 +261,23 @@ int bar() { return f(); }
 static decltype([] { }) f();
 static decltype([] { }) f(); // invalid; return type mismatch
 
-static void g(decltype([] { }) *) { }
-static void g(decltype([] { }) *) { }
-g(nullptr); // ambiguous
+static decltype([] { }) g();
+static decltype(g()) g(); // okay
+
+static void h(decltype([] { }) *) { }
+static void h(decltype([] { }) *) { }
+h(nullptr); // ambiguous
 
 using A = decltype([] { });
-static void h(A *);
-static void h(A *) { }
-h(nullptr); // okay
+static void i(A *);
+static void i(A *) { }
+i(nullptr); // okay
 
 template <typename T>
 using B = decltype([] { });
-static void i(B<char16_t> *) { }
-static void i(B<char32_t> *) { }
-i(nullptr); // ambiguous
+static void j(B<char16_t> *) { }
+static void j(B<char32_t> *) { }
+j(nullptr); // ambiguous
 \end{cpp}
 
     To make the above interpretation of the standard more obvious, we propose
