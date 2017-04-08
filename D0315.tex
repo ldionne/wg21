@@ -45,7 +45,10 @@
                 \item clarify the difference between the types of lambda expressions
                       in alias templates
                 \item clarify ODR-equivalence of lambda expressions declared in
-                      different TUs
+                      different TUs, and the meaning for function template
+                      declarations
+                \item clarify the situation for redeclarations of functions with
+                      lambda-expressions
                 \item extract the wording into its own section (editorial)
               \end{itemize}
 \end{itemize}
@@ -53,15 +56,6 @@
 
 % CWG FEEDBACK FROM KONA:
 % - Rebase on top of C++17 DIS, and pay special attention to re-numbering sections & al.
-% - In section 4.2, I should perhaps change the example to something like
-%     template <unsigned N>
-%     void f(const char (*s)[([]() { return 1; })() + N]) { }
-%   because otherwise the body of the lambda is not part of the full expression inside the decltype. The example in section 6.3 needs to be fixed too.
-% - In section 6.3, need to extend the wording to "Two lambda expressions involving within their bodies template parameters"
-% - Clarify that we want something like
-%     template <int N>
-%     void foo2(int (*)[N], decltype([]{}));
-%   to work. The idea is that we mangle that positionally based on the enclosing declaration.
 
 \section{Introduction}
 Lambdas are a very powerful language feature, especially when it comes to using
@@ -190,9 +184,10 @@ points of contingency to clarify them.
   \item \label{discussion.template}
     \hyperref[wording.template]{(wording)}
     Another similar problem is that of lambda-expressions appearing in the
-    signature of function templates, not by themselves, but indirectly, by being
-    part of an expression which references a template parameter. Indeed, per
-    \textbf{[temp.over.link] 14.5.6.1/4}:
+    signature of function templates. There are two ways this could happen.
+    First, a lambda expression could appear not by itself, but indirectly, by
+    being part of an expression which references a template parameter. Indeed,
+    per \textbf{[temp.over.link] 14.5.6.1/4}:
     \begin{quote}
       When an expression that references a template parameter is used in the
       function parameter list or the return type in the declaration of a function
@@ -204,12 +199,24 @@ points of contingency to clarify them.
     implementation to make the lambda-expression part of the signature, which is
     specifically what we would like to avoid:
 \begin{cpp}
-template <unsigned N>
-void f(const char (*s)[([]() { return N; })()]) { }
+template <int N>
+void f(const char (*s)[([]{}, N)]) { }
 \end{cpp}
 
-    To make sure this does not happen, we propose \hyperref[wording.template]
-    {amending \textbf{[temp.over.link]}}.
+    The other situation we would like to avoid is for implementations to have
+    to figure out that the two following expressions are equivalent, either
+    for linkage purposes (in different translation units) or for redeclaration
+    purposes (in the same translation unit):
+\begin{cpp}
+template <int N> void f(const char (*s)[([]{ return N; })()]) { }
+template <int N> void f(const char (*s)[([]{ return N; })()]) { }
+\end{cpp}
+
+    This case is slightly different from the first one, since the template
+    parameter appears in the body of the lambda-expression, which is not
+    considered part of the full-expression in the function parameter list.
+    To make sure these cases do not happen, we propose
+    \hyperref[wording.template]{amending \textbf{[temp.over.link]}}.
 
 
   \item \label{discussion.ODR}
@@ -250,12 +257,9 @@ int bar() { return f(); }
   \item \label{discussion.redeclarations}
     \hyperref[wording.redeclarations]{(wording)}
     A concern with allowing lambda-expressions in \textit{declarations} is
-    that of dealing with entities that can be redeclared. However, we feel like
-    no \textit{normative} change to the wording is required to address that concern.
-    Indeed, it is already the case that no two lambda-expressions share the same
-    closure type within a single translation unit. By further clarifying that the
-    lambda-expressions in alias template specializations are unique to each
-    specialization even if non-dependent, we conclude the following:
+    that of dealing with entities that can be redeclared. It is already the
+    case that no two lambda-expressions share the same closure type within a
+    single translation unit:
 
 \begin{cpp}
 static decltype([] { }) f();
@@ -272,7 +276,13 @@ using A = decltype([] { });
 static void i(A *);
 static void i(A *) { }
 i(nullptr); // okay
+\end{cpp}
 
+   By further clarifying that the lambda-expressions in alias template
+   specializations are unique to each specialization even if non-dependent,
+   we conclude the following:
+
+\begin{cpp}
 template <typename T>
 using B = decltype([] { });
 static void j(B<char16_t> *) { }
@@ -282,6 +292,27 @@ j(nullptr); // ambiguous
 
     To make the above interpretation of the standard more obvious, we propose
     \hyperref[wording.redeclarations]{modifying \textbf{[temp.alias]}}.
+
+    Furthermore, some questions were raised on the Core reflector regarding
+    redeclarations like this:
+\begin{cpp}
+template <int N> static void k(decltype([]{ return 0; }()));
+template <int N> static void k(decltype([]{ return 0; }())); // okay
+template <int N> static void k(int);                         // okay
+\end{cpp}
+
+    These should be valid redeclarations, since the lambda expressions are
+    evaluated, and they neither contain a template parameter in their body
+    nor are part of a full expression that contains one. Hence, the lambda-expression
+    does not need to appear in the signature of the function, and the behavior
+    is equivalent to this, without requiring any special wording:
+
+\begin{cpp}
+struct lambda { auto operator()() const { return 0; } };
+template <int N> static void k(decltype(lambda{}()));
+template <int N> static void k(decltype(lambda{}())); // okay today
+template <int N> static void k(int);                  // okay today
+\end{cpp}
 
 
   \item \label{discussion.sfinae}
@@ -357,7 +388,6 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
 \end{codeblock}
       \textit{-- end example} ]
     \end{quote}
-
   \item \label{wording.template} \hyperref[discussion.template]{(discussion)}
     In \textbf{[temp.over.link] 14.5.6.1/5}:
     \begin{quote}
@@ -370,23 +400,25 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       that they are corresponding counterparts of each other within definitions of
       the same enclosing entity in separate translation units (\textbf{[basic.def.odr]}),
       two lambda-expressions appearing in full expressions involving template
-      parameters are never considered equivalent. [ \textit{Note:} The intent is
-      to avoid lambda-expressions appearing in the signature of a function template
-      with external linkage. \textit{-- end note} ]}
+      parameters are never considered equivalent, and two lambda-expressions
+      involving within their bodies template parameters are never considered
+      equivalent. [ \textit{Note:} The intent is to avoid lambda-expressions
+      appearing in the signature of a function template with external linkage.
+      \textit{-- end note} ]}
     \end{quote}
 
     Also, add the following example after \textbf{[temp.over.link] 14.5.6.1/5}:
 \begin{codeblock}
 @\added{
-// The program is ill-formed, no diagnostic required, because the two\\
-// lambda-expressions are functionally equivalent but not equivalent.\\
-// translation unit 1:\\
-template <unsigned N>\\
-void foo(const char (*s)[([]() \{ return N; \})()]);\\
+// ill-formed, no diagnostic required: the two expressions are\\
+// functionally equivalent but not equivalent\\
+template <int N> void foo(const char (*s)[([]\{\}, N)]); // TU 1\\
+template <int N> void foo(const char (*s)[([]\{\}, N)]); // TU 2\\
 \\
-// translation unit 2:\\
-template <unsigned N>\\
-void foo(const char (*s)[([]() \{ return N; \})()]);
+// ill-formed, no diagnostic required: the two lambda-expressions are\\
+// functionally equivalent but not equivalent\\
+template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 1\\
+template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 2
 }@
 \end{codeblock}
 
