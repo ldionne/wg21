@@ -49,7 +49,10 @@
                       declarations
                 \item clarify the situation for redeclarations of functions with
                       lambda-expressions
+                \item rebase on top of the C++17 DIS
                 \item extract the wording into its own section (editorial)
+                \item TODO: add discussion about implicit captures in unevaluated
+                      contexts
               \end{itemize}
 \end{itemize}
 
@@ -165,20 +168,20 @@ points of contingency to clarify them.
 
     Fortunately, this specific problem can't arise in the case of non-template
     functions, even with the above removal of constraints on lambda-expressions.
-    Indeed, according to \textbf{[basic.link] 3.5/8}, closure types have no linkage,
+    Indeed, according to \textbf{[basic.link] 6.5/8}, closure types have no linkage,
     and therefore they cannot appear in the signature of a function with external
     linkage (a function is a compound type):
     \begin{quote}
       \textit{[...]} A type is said to have linkage if and only if:\\
       \textit{[...]}\\
-      - it is a compound type (3.9.2) other than a class or enumeration,
+      - it is a compound type (6.9.2) other than a class or enumeration,
         compounded exclusively from types that have linkage; or \\
       \textit{[...]}
     \end{quote}
 
     However, to make it clear that closure types are never given a name for
     linkage purposes, we propose \hyperref[wording.non-template]{modifying
-    \textbf{[decl.typedef]}}.
+    \textbf{[dcl.typedef]}}.
 
 
   \item \label{discussion.template}
@@ -187,7 +190,7 @@ points of contingency to clarify them.
     signature of function templates. There are two ways this could happen.
     First, a lambda expression could appear not by itself, but indirectly, by
     being part of an expression which references a template parameter. Indeed,
-    per \textbf{[temp.over.link] 14.5.6.1/4}:
+    per \textbf{[temp.over.link] 17.5.6.1/4}:
     \begin{quote}
       When an expression that references a template parameter is used in the
       function parameter list or the return type in the declaration of a function
@@ -358,28 +361,28 @@ unevaluated context.
 
 
 \section{Proposed Wording}
-The wording is based on the working paper \cite{N4606}:
+The wording is based on the C++17 DIS \cite{N4659}:
 
 \begin{enumerate}
   \item \label{wording.remove}
-    In \textbf{[expr.prim.lambda] 5.1.2/2}:
+    In \textbf{[expr.prim.lambda] 8.1.5/2}:
     \begin{quote}
       The evaluation of a lambda-expression results in a prvalue temporary
       (12.2). This temporary is called the closure object. \removed{A
-      lambda-expression shall not appear in an unevaluated operand (Clause 5),
+      lambda-expression shall not appear in an unevaluated operand (Clause 8),
       in a template-argument, in an alias-declaration, in a typedef declaration,
       or in the declaration of a function or function template outside its function
       body and default arguments. [ Note: The intention is to prevent lambdas from
       appearing in a signature. -- end note ]} [ Note: A closure object behaves like
-      a function object (20.9). -- end note ]
+      a function object (23.14). -- end note ]
     \end{quote}
 
   \item \label{wording.non-template} \hyperref[discussion.non-template]{(discussion)}
-    In \textbf{[decl.typedef] 7.1.3/9}:
+    In \textbf{[dcl.typedef] 10.1.3/9}:
     \begin{quote}
       If the typedef declaration defines an unnamed class (or enum), the first
       typedef-name declared by the declaration to be that class type (or enum type)
-      is used to denote the class type (or enum type) for linkage purposes only (3.5).
+      is used to denote the class type (or enum type) for linkage purposes only (6.5).
       \added{However, a closure type is never given a name for linkage purposes.}
       [ \textit{Example:}
 \begin{codeblock}
@@ -389,11 +392,11 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       \textit{-- end example} ]
     \end{quote}
   \item \label{wording.template} \hyperref[discussion.template]{(discussion)}
-    In \textbf{[temp.over.link] 14.5.6.1/5}:
+    In \textbf{[temp.over.link] 17.5.6.1/5}:
     \begin{quote}
       Two expressions involving template parameters are considered \textit{equivalent}
       if two function definitions containing the expressions would satisfy the
-      one-definition rule (3.2), except that the tokens used to name the template
+      one-definition rule (6.2), except that the tokens used to name the template
       parameters may differ as long as a token used to name a template parameter
       in one expression is replaced by another token that names the same template
       parameter in the other expression. \added{Unless both expressions occur such
@@ -407,7 +410,7 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       \textit{-- end note} ]}
     \end{quote}
 
-    Also, add the following example after \textbf{[temp.over.link] 14.5.6.1/5}:
+    Also, add the following example after \textbf{[temp.over.link] 17.5.6.1/5}:
 \begin{codeblock}
 @\added{
 // ill-formed, no diagnostic required: the two expressions are\\
@@ -423,7 +426,7 @@ template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 2
 \end{codeblock}
 
   \item \label{wording.redeclarations} \hyperref[discussion.redeclarations]{(discussion)}
-    Add the following paragraph at the end of \textbf{[temp.alias] 14.5.7}:
+    Add the following paragraph at the end of \textbf{[temp.alias] 17.5.7}:
     \begin{quote}
       \added{
       The type of a lambda expression appearing in an alias template declaration
@@ -442,7 +445,7 @@ using A = decltype([] \{ \});\\
     \end{quote}
 
   \item \label{wording.sfinae} \hyperref[discussion.sfinae]{(discussion)}
-    Add the following after \textbf{[temp.deduct] 14.8.2/8} (note that the
+    Add the following after \textbf{[temp.deduct] 17.8.2/8} (note that the
     term \textit{immediate context} is not defined formally in the standard,
     which is the subject of \cite{CWG1844}):
     \begin{quote}
@@ -506,10 +509,10 @@ providing extensive guidance for the wording.
     \emph{Boost.Hana, A modern metaprogramming library}\newline
     \url{https://github.com/boostorg/hana}
 
-  \bibitem[N4606]{N4606}
+  \bibitem[N4659]{N4659}
     Richard Smith,
     \emph{Working Draft, Standard for Programming Language C++}\newline
-    \url{https://github.com/cplusplus/draft/blob/master/papers/n4606.pdf}
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf}
 
   \bibitem[DR1607]{DR1607}
     Daniel Kr{\"u}gler,
