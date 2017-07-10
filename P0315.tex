@@ -23,7 +23,7 @@
 
 
 \title{Lambdas in unevaluated contexts}
-\docnumber{P0315R2}
+\docnumber{D0315R3}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 \authortwo{Hubert Tong}{hubert.reinterpretcast@gmail.com}
@@ -51,9 +51,15 @@
                       lambda-expressions
                 \item rebase on top of the C++17 DIS
                 \item extract the wording into its own section (editorial)
-                \item TODO: add discussion about implicit captures in unevaluated
-                      contexts
               \end{itemize}
+  \item R3 -- Applied changes per guidance from CWG in Toronto:
+    \begin{itemize}
+      \item Editorial: hyphenate the term full-expression
+      \item Editorial: italicize the term \textit{lambda-expression}
+      \item Replace wording in \textbf{[temp.over.link]} by equivalent but
+            much simpler wording as suggested by Richard Smith.
+      \item TODO: Add discussion about implicit captures in lambda-expressions in unevaluated contexts.
+    \end{itemize}
 \end{itemize}
 
 
@@ -303,7 +309,7 @@ template <int N> static void k(int);                         // okay
 
     These should be valid redeclarations, since the lambda expressions are
     evaluated, and they neither contain a template parameter in their body
-    nor are part of a full expression that contains one. Hence, the lambda-expression
+    nor are part of a full-expression that contains one. Hence, the lambda-expression
     does not need to appear in the signature of the function, and the behavior
     is equivalent to this, without requiring any special wording:
 
@@ -328,6 +334,7 @@ template <int N> static void k(int);                  // okay today
     inside the declaration of a function template and any part of it is ill-formed,
     then the program is ill-formed. To reflect this, we propose
     \hyperref[wording.sfinae]{adding a note at the end of \textbf{[temp.deduct]}}.
+
 
   \item \label{discussion.nontype}
     One usability question that has been raised with this paper is related
@@ -364,14 +371,15 @@ The wording is based on the C++17 DIS \cite{N4659}:
   \item \label{wording.remove}
     In \textbf{[expr.prim.lambda] 8.1.5/2}:
     \begin{quote}
-      The evaluation of a lambda-expression results in a prvalue temporary
-      (12.2). This temporary is called the closure object. \removed{A
-      lambda-expression shall not appear in an unevaluated operand (Clause 8),
-      in a template-argument, in an alias-declaration, in a typedef declaration,
-      or in the declaration of a function or function template outside its function
-      body and default arguments. [ Note: The intention is to prevent lambdas from
-      appearing in a signature. -- end note ]} [ Note: A closure object behaves like
-      a function object (23.14). -- end note ]
+      The evaluation of a \textit{lambda-expression} results in a prvalue
+      temporary (12.2). This temporary is called the closure object. \removed{A
+      \textit{lambda-expression} shall not appear in an unevaluated operand
+      (Clause 8), in a \textit{template-argument}, in an \textit{alias-declaration},
+      in a typedef declaration, or in the declaration of a function or function
+      template outside its function body and default arguments. [ Note: The
+      intention is to prevent lambdas from appearing in a signature.
+      -- end note ]} [ Note: A closure object behaves like a function object
+      (23.14). -- end note]
     \end{quote}
 
   \item \label{wording.non-template} \hyperref[discussion.non-template]{(discussion)}
@@ -396,15 +404,10 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       one-definition rule (6.2), except that the tokens used to name the template
       parameters may differ as long as a token used to name a template parameter
       in one expression is replaced by another token that names the same template
-      parameter in the other expression. \added{Unless both expressions occur such
-      that they are corresponding counterparts of each other within definitions of
-      the same enclosing entity in separate translation units (\textbf{[basic.def.odr]}),
-      two lambda-expressions appearing in full expressions involving template
-      parameters are never considered equivalent, and two lambda-expressions
-      involving within their bodies template parameters are never considered
-      equivalent. [ \textit{Note:} The intent is to avoid lambda-expressions
-      appearing in the signature of a function template with external linkage.
-      \textit{-- end note} ]}
+      parameter in the other expression. \added{Two \textit{lambda-expressions}
+      are never considered equivalent. [ \textit{Note:} The intent is to avoid
+      \textit{lambda-expressions} appearing in the signature of a function
+      template with external linkage. \textit{-- end note} ]}
     \end{quote}
 
     Also, add the following example after \textbf{[temp.over.link] 17.5.6.1/5}:
