@@ -23,7 +23,7 @@
 
 
 \title{Familiar template syntax for generic lambdas}
-\docnumber{P0428R1}
+\docnumber{D0428R2}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
@@ -45,6 +45,8 @@
                       is a generic lambda
                 \item Shorten discussion
               \end{itemize}
+  \item R2 -- Move the definition of a generic lambda from \textbf{dcl.spec.auto}
+              to \textbf{expr.prim.lambda} per CWG instructions in Toronto.
 \end{itemize}
 
 
@@ -265,24 +267,34 @@ Change in \textbf{[expr.prim.lambda.closure] 8.1.5.1/6}:
   the function call operator template. [\dots]
 \end{quote}
 
-Add in \textbf{[dcl.spec.auto] 10.1.7.4/3}:
-
+Remove \textbf{[dcl.spec.auto] 10.1.7.4/3} (to move it to the end of
+\textbf{[expr.prim.lambda] 8.1.5}):
 \begin{quote}
-  If the \textbf{auto} \textit{type-specifier} appears as one of the \textit{decl-specifiers}
-  in the \textit{decl-specifier-seq} of a \textit{parameter-declaration} of a
-  \textit{lambda-expression}, \added{or if the lambda has a \textit{template-parameter-list},}
-  the lambda is a \textit{generic lambda} (8.1.5.1).
-  \begin{example}\\
-    \tcode{
-      auto glambda\added{1} = [](int i, auto a) \{ return i; \}; // OK: a generic lambda\\
-      \added{auto glambda2 = []<class T>(T t, int i) \{ return i; \}; // OK: a generic lambda}
-    }
-  \end{example}
+  \removed{
+  If the \textbf{auto} \textit{type-specifier} appears as one of the
+  \textit{decl-specifiers} in the \textit{decl-specifier-seq} of a
+  \textit{parameter-declaration} of a \textit{lambda-expression}, the
+  lambda is a \textit{generic lambda} (8.1.5.1).\\
+  [ \textit{Example:}\\
+  \tcode{auto glambda = [](int i, auto a) \{ return i; \}; // OK: a generic lambda}\\
+  -- \textit{end example} ]
+  }
 \end{quote}
 
-Note that it might be cleaner to define what a generic lambda is elsewhere
-instead of in \textbf{[dcl.spec.auto]}, but this is left to another paper
-or a DR.
+Add at the end of \textbf{[expr.prim.lambda] 8.1.5}:
+\begin{quote}
+  \added{
+  If the \textbf{auto} \textit{type-specifier} appears as one of the
+  \textit{decl-specifiers} in the \textit{decl-specifier-seq} of a
+  \textit{parameter-declaration} of a \textit{lambda-expression}, or if
+  the lambda has a \textit{template-parameter-list}, the lambda is a
+  \textit{generic lambda}.\\
+  [ \textit{Example:}\\
+  \tcode{auto glambda1 = [](int i, auto a) \{ return i; \}; // OK: a generic lambda}\\
+  \tcode{auto glambda2 = []<class T>(T t, int i) \{ return i; \}; // OK: a generic lambda}
+  -- \textit{end example} ]
+  }
+\end{quote}
 
 
 \section{Implementation experience}
