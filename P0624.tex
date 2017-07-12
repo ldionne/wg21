@@ -22,22 +22,33 @@
 \newminted[cpp]{c++}{}
 
 
-\title{Default constructible stateless lambdas}
-\docnumber{P0624R0}
+\title{Default constructible and assignable stateless lambdas}
+\docnumber{D0624R1}
 \audience{Evolution Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
 \begin{document}
 \maketitle
 
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 \begin{itemize}
+             \item Rebase wording on top of the current working draft \cite{N4659}
+             \item Make stateless lambdas assignable per EWG direction
+           \end{itemize}
+\end{itemize}
+
+
 \section{Introduction}
 Lambda expressions are a very convenient way of creating inline function objects,
 especially for passing to higher order algorithms. Furthermore, the Standard
 treats stateless lambdas specially, giving them an implicit conversion to a
 corresponding function pointer, which is incredibly useful for storing these
-in data structures. Unfortunately, stateless lambdas are not default constructible,
-which precludes many interesting use cases. This paper proposes making stateless
-lambdas default constructible, so that code like this is valid:
+in data structures. Unfortunately, stateless lambdas are neither default
+constructible nor assignable, which precludes many interesting use cases.
+This paper proposes making stateless lambdas default constructible and
+assignable, so that code like this is valid:
 
 \begin{cpp}
 // in library.hpp
@@ -68,15 +79,23 @@ std::map<std::string, int, decltype(greater)> map;
 \end{cpp}
 
 Instead, the former produces an error message saying something about the use
-of the deleted default constructor of the lambda used inside the map.
+of the deleted default constructor of the lambda used inside the map. Furthermore,
+since lambdas are currently not assignable, the following would also produce an
+error:
 
-Apart from consistency, the second argument is that default-constructing
-stateless lambdas opens a very interesting design space for writing libraries.
-An important tenet of C++ is to give power to experts (while keeping simple
-things simple), and this tiny feature opens up a whole new class of use cases.
-For example, default-constructible lambdas allow the \cite{Dyno} library to
-implement runtime polymorphism with value semantics (like \cc{std::function},
-but for arbitrary interfaces) at the library level:
+\begin{cpp}
+auto greater = [](auto x, auto y) { return x > y; };
+std::map<std::string, int, decltype(greater)> map1{...}, map2{...};
+map1 = map2; // oops!
+\end{cpp}
+
+Apart from consistency, the second argument is that making stateless lambdas
+more like normal function objects opens a very interesting design space for
+writing libraries. An important tenet of C++ is to give power to experts
+(while keeping simple things simple), and this tiny feature opens up a whole
+new class of use cases. For example, default-constructible lambdas allow the
+\cite{Dyno} library to implement runtime polymorphism with value semantics
+(like \cc{std::function}, but for arbitrary interfaces) at the library level:
 
 \begin{cpp}
 // Define the interface of something that can be drawn
@@ -121,20 +140,22 @@ gruesome hack to work (see \href{https://github.com/ldionne/dyno/blob/03eaeded89
 
 
 \section{Proposed Wording}
-The wording is based on the working paper \cite{N4606}. At the beginning of
-\textbf{[expr.prim.lambda] 5.1.2/6}:
+The wording is based on the working paper \cite{N4659}. Replace in
+\textbf{[expr.prim.lambda] 8.1.5.1/11}:
 
 \begin{quote}
-  \added{The closure type for a lambda-expression with no lambda-capture has a
-  public non-virtual defaulted default constructor.} The closure type for a
-  non-generic lambda-expression with no lambda-capture has a public non-virtual
-  non-explicit const conversion function to pointer to function with C++ language
-  linkage [...]
+  \removed{The closure type associated with a \textit{lambda-expression} has
+    no default constructor and a deleted copy assignment operator.}
+  \added{The closure type for a \textit{lambda-expression} has a defaulted
+    default constructor, a defaulted copy assignment operator, and a defaulted
+    move assignment operator, if and only if the \textit{lambda-expression}
+    does not have a \textit{lambda-capture}.}
+  It has a defaulted copy constructor and a defaulted move constructor (15.8).
+  \begin{note}
+  These special member functions are implicitly defined as usual, and might
+  therefore be defined as deleted.
+  \end{note}
 \end{quote}
-
-The wording needs to be rebased on top of the latest changes to
-\textbf{[expr.prim.lambda] 5.1.2/6}, which are expected to appear
-in the post-Kona mailing.
 
 
 \section{References}
@@ -146,10 +167,10 @@ in the post-Kona mailing.
     \emph{Dyno: Runtime polymorphism done right}\newline
     \url{https://github.com/ldionne/dyno}
 
-  \bibitem[N4606]{N4606}
+  \bibitem[N4659]{N4659}
     Richard Smith,
     \emph{Working Draft, Standard for Programming Language C++}\newline
-    \url{https://github.com/cplusplus/draft/blob/master/papers/n4606.pdf}
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf}
 
 \end{thebibliography}
 
