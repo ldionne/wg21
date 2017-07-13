@@ -23,7 +23,7 @@
 
 
 \title{Familiar template syntax for generic lambdas}
-\docnumber{D0428R2}
+\docnumber{P0428R2}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
@@ -284,14 +284,13 @@ Remove \textbf{[dcl.spec.auto] 10.1.7.4/3} (to move it to the end of
 Add at the end of \textbf{[expr.prim.lambda] 8.1.5}:
 \begin{quote}
   \added{
-  If the \textbf{auto} \textit{type-specifier} appears as one of the
-  \textit{decl-specifiers} in the \textit{decl-specifier-seq} of a
-  \textit{parameter-declaration} of a \textit{lambda-expression}, or if
-  the lambda has a \textit{template-parameter-list}, the lambda is a
-  \textit{generic lambda}.\\
+  A lambda is a \textit{generic lambda} if the \textbf{auto} \textit{type-specifier}
+  appears as one of the \textit{decl-specifiers} in the \textit{decl-specifier-seq}
+  of a \textit{parameter-declaration} of the \textit{lambda-expression}, or if
+  the lambda has a \textit{template-parameter-list}.\\
   [ \textit{Example:}\\
-  \tcode{auto glambda1 = [](int i, auto a) \{ return i; \}; // OK: a generic lambda}\\
-  \tcode{auto glambda2 = []<class T>(T t, int i) \{ return i; \}; // OK: a generic lambda}
+  \tcode{int i = [](int i, auto a) \{ return i; \}(3, 4); // OK: a generic lambda}\\
+  \tcode{int j = []<class T>(T t, int i) \{ return i; \}(3, 4); // OK: a generic lambda}
   -- \textit{end example} ]
   }
 \end{quote}
@@ -299,7 +298,8 @@ Add at the end of \textbf{[expr.prim.lambda] 8.1.5}:
 
 \section{Implementation experience}
 This extension to generic lambdas had been implemented in GCC in 2009 as part
-of an experiment \cite{GCC}. Thus, it seems implementable.
+of an experiment \cite{GCC}. This extension was also part of Faisal Vali's
+original implementation of generic lambdas in Clang. Thus, it seems implementable.
 
 
 \section{Discussion} \label{discussion}
