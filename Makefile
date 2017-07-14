@@ -3,4 +3,8 @@ clean:
 
 %.pdf: %.tex
 	latexmk -shell-escape -pdf $*.tex
-	mv $*.pdf generated
+	{ 																																					\
+		docnumber=$$(cat $*.tex | perl -n -e '/docnumber\{(.+)\}/ && print $$1');	\
+		filename=$$(echo $${docnumber} | tr '[:upper:]' '[:lower:]').pdf; 				\
+		mv $*.pdf generated/$${filename}; 																				\
+	}
