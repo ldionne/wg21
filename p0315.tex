@@ -62,93 +62,6 @@
     \end{itemize}
 \end{itemize}
 
-
-\section{Introduction}
-Lambdas are a very powerful language feature, especially when it comes to using
-higher-order algorithms with custom predicates or expressing small, disposable
-pieces of code. Yet, they suffer from one important limitation which cripples
-their usefulness for creative use cases; they can't appear in unevaluated
-contexts. This restriction was originally designed to prevent lambdas from
-appearing in signatures, which would have opened a can of worm for mangling
-because lambdas are required to have unique types. However, the restriction is
-much stronger than it needs to be, and it is indeed possible to achieve the
-same effect without it, as evidenced by this paper.
-
-
-\section{Motivation}
-The original use case that motivated this article is related to making algorithms
-on heterogeneous containers more useful. For a bit of background, it is possible
-to implement \cc{std}-like algorithms that operate on \cc{std::tuple}s instead of
-usual, runtime sequences. For example, it is possible to write an algorithm akin
-to \cc{std::sort}, but which works on a \cc{std::tuple} instead of a runtime
-sequence:
-
-\begin{cpp}
-// Returns a new tuple whose elements are sorted according to the given
-// binary predicate, which must return a boolean `std::integral_constant`.
-template <typename ...T, typename Predicate>
-auto sort(std::tuple<T...> const& tuple, Predicate const& pred);
-\end{cpp}
-
-The algorithm can then be used as follows:
-
-\begin{cpp}
-auto tuple = std::make_tuple(std::array<int, 5>{}, 1, '2', 3.3);
-auto sorted = sort(tuple, [](auto const& a, auto const& b) {
-  return std::integral_constant<bool, sizeof(a) < sizeof(b)>{};
-});
-// sorted is now a std::tuple<char, int, double, std::array<int, 5>>
-\end{cpp}
-
-While this is a simplified example, it is also possible to define other algorithms
-like \cc{for_each}, \cc{transform}, \cc{accumulate}, \cc{find_if} and many more. This
-is exploited extensively in the \cite{Boost.Hana} library, which provides high-level
-algorithms and data structures to make metaprogramming more structured.
-
-Where the current proposal meets with the above use case is when one needs the type
-resulting from an algorithm exposed above. For example, to get the type of the above
-tuple without actually creating the tuple, one would like to simply write
-
-\begin{cpp}
-using sorted = decltype(sort(tuple, [](auto const& a, auto const& b) {
-  return std::integral_constant<bool, sizeof(a) < sizeof(b)>{};
-}));
-\end{cpp}
-
-Unfortunately, with the current restriction on lambdas, this is impossible.
-Instead, one must create a variable holding the lambda, and then pass this
-variable to the algorithm:
-
-\begin{cpp}
-auto predicate = [](auto const& a, auto const& b) {
-  return std::integral_constant<bool, sizeof(a) < sizeof(b)>{};
-};
-using sorted = decltype(sort(tuple, predicate));
-\end{cpp}
-
-Unfortunately, this is both clumsy and not always possible since some contexts
-do not allow defining local variables (for example inside a class declaration).
-Hence, the restriction severly reduces the usefulness of lambdas in these algorithms.
-Also note that the issue presented above does not only arise in the context of
-manipulating heterogeneous containers. Indeed, one could just as well try to
-write the following, only to be puzzled by a compiler error:
-
-\begin{cpp}
-std::vector<int> v{1,2,3,4};
-using Iterator = decltype(std::find_if(begin(v), end(v), [](int i) {
-  return i % 2 == 0;
-}));
-\end{cpp}
-
-While this is a valid use case, it is expected that using \cc{decltype} on
-such a complex expression is less frequent outside the realm of heterogeneous
-computations.
-
-Finally, another motivation for this paper is that the restriction is much stronger
-than it needs to be, and it prevents lambdas from being used in creative ways,
-some of which are certainly unknown to the author of this paper.
-
-
 \section{Discussion}
 The core language changes introduced in this paper are a bit tricky. The reason
 is that we remove many restrictions on lambda expressions, yet we still want to
@@ -358,12 +271,6 @@ foo<[]() {}> x;
 \end{enumerate}
 
 
-\section{Implementation Experience}
-This proposal was naively implemented in Clang. The required change is commenting
-a single line which creates a diagnostic if a lambda-expression is found inside an
-unevaluated context.
-
-
 \section{Proposed Wording}
 The wording is based on the C++17 DIS \cite{N4659}:
 
@@ -492,22 +399,9 @@ j(0); // deduction fails on \#1, calls \#2
 \end{enumerate}
 
 
-\section{Acknowledgements}
-Thanks to Roland Bock and Matt Calabrese for discussing use cases for lambdas
-in unevaluated contexts on the \textit{std-proposal} and \textit{Boost.Devel}
-mailing lists. Thanks to Richard Smith for letting me know that we could do
-without the restriction. Thanks to Hubert Tong and David Vandevoorde for
-providing extensive guidance for the wording.
-
-
 \section{References}
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
-
-  \bibitem[Boost.Hana]{Boost.Hana}
-    Louis Dionne,
-    \emph{Boost.Hana, A modern metaprogramming library}\newline
-    \url{https://github.com/boostorg/hana}
 
   \bibitem[N4659]{N4659}
     Richard Smith,
