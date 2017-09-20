@@ -1,0 +1,9 @@
+_minted*/
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+*.xtr
+*.ext
