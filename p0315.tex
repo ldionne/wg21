@@ -22,7 +22,7 @@
 \newminted[cpp]{c++}{}
 
 
-\title{Lambdas in unevaluated contexts}
+\title{Wording for lambdas in unevaluated contexts}
 \docnumber{D0315R3}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
@@ -30,6 +30,7 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 \section{Revision history}
 \begin{itemize}
@@ -37,8 +38,7 @@
   \item R1 -- Changed the wording to work around the resolution of \cite{DR1607},
               which conflicted with the initial wording. Also address the
               potential additional concerns raised by this wording change.
-  \item R2 -- The following changes were made per feedback from EWG and CWG
-              in Issaquah and CWG in Kona:
+  \item R2 -- Applied feedback from EWG and CWG in Issaquah and CWG in Kona:
               \begin{itemize}
                 \item a lambda expression is not part of the immediate context
                 \item add a discussion about lambdas as non-type template arguments
@@ -50,106 +50,21 @@
                 \item clarify the situation for redeclarations of functions with
                       lambda-expressions
                 \item rebase on top of the C++17 DIS
-                \item extract the wording into its own section (editorial)
+                \item editorial: extract the wording into its own section
               \end{itemize}
   \item R3 -- Applied changes per guidance from CWG in Toronto:
     \begin{itemize}
-      \item Editorial: hyphenate the term full-expression
-      \item Editorial: italicize the term \textit{lambda-expression}
-      \item Replace wording in \textbf{[temp.over.link]} by equivalent but
-            much simpler wording as suggested by Richard Smith.
-      \item TODO: Add discussion about implicit captures in lambda-expressions in unevaluated contexts.
+      \item editorial: hyphenate the term full-expression, italicize the
+            term \textit{lambda-expression}, and remove sections useless
+            for wording purposes
+      \item replace wording in \textbf{[temp.over.link]} by equivalent but
+            much simpler wording as suggested by Richard Smith
+      \item add a discussion about implicit captures in \textit{lambda-expressions}
+            in unevaluated contexts
     \end{itemize}
 \end{itemize}
 
-
-\section{Introduction}
-Lambdas are a very powerful language feature, especially when it comes to using
-higher-order algorithms with custom predicates or expressing small, disposable
-pieces of code. Yet, they suffer from one important limitation which cripples
-their usefulness for creative use cases; they can't appear in unevaluated
-contexts. This restriction was originally designed to prevent lambdas from
-appearing in signatures, which would have opened a can of worm for mangling
-because lambdas are required to have unique types. However, the restriction is
-much stronger than it needs to be, and it is indeed possible to achieve the
-same effect without it, as evidenced by this paper.
-
-
-\section{Motivation}
-The original use case that motivated this article is related to making algorithms
-on heterogeneous containers more useful. For a bit of background, it is possible
-to implement \cc{std}-like algorithms that operate on \cc{std::tuple}s instead of
-usual, runtime sequences. For example, it is possible to write an algorithm akin
-to \cc{std::sort}, but which works on a \cc{std::tuple} instead of a runtime
-sequence:
-
-\begin{cpp}
-// Returns a new tuple whose elements are sorted according to the given
-// binary predicate, which must return a boolean `std::integral_constant`.
-template <typename ...T, typename Predicate>
-auto sort(std::tuple<T...> const& tuple, Predicate const& pred);
-\end{cpp}
-
-The algorithm can then be used as follows:
-
-\begin{cpp}
-auto tuple = std::make_tuple(std::array<int, 5>{}, 1, '2', 3.3);
-auto sorted = sort(tuple, [](auto const& a, auto const& b) {
-  return std::integral_constant<bool, sizeof(a) < sizeof(b)>{};
-});
-// sorted is now a std::tuple<char, int, double, std::array<int, 5>>
-\end{cpp}
-
-While this is a simplified example, it is also possible to define other algorithms
-like \cc{for_each}, \cc{transform}, \cc{accumulate}, \cc{find_if} and many more. This
-is exploited extensively in the \cite{Boost.Hana} library, which provides high-level
-algorithms and data structures to make metaprogramming more structured.
-
-Where the current proposal meets with the above use case is when one needs the type
-resulting from an algorithm exposed above. For example, to get the type of the above
-tuple without actually creating the tuple, one would like to simply write
-
-\begin{cpp}
-using sorted = decltype(sort(tuple, [](auto const& a, auto const& b) {
-  return std::integral_constant<bool, sizeof(a) < sizeof(b)>{};
-}));
-\end{cpp}
-
-Unfortunately, with the current restriction on lambdas, this is impossible.
-Instead, one must create a variable holding the lambda, and then pass this
-variable to the algorithm:
-
-\begin{cpp}
-auto predicate = [](auto const& a, auto const& b) {
-  return std::integral_constant<bool, sizeof(a) < sizeof(b)>{};
-};
-using sorted = decltype(sort(tuple, predicate));
-\end{cpp}
-
-Unfortunately, this is both clumsy and not always possible since some contexts
-do not allow defining local variables (for example inside a class declaration).
-Hence, the restriction severly reduces the usefulness of lambdas in these algorithms.
-Also note that the issue presented above does not only arise in the context of
-manipulating heterogeneous containers. Indeed, one could just as well try to
-write the following, only to be puzzled by a compiler error:
-
-\begin{cpp}
-std::vector<int> v{1,2,3,4};
-using Iterator = decltype(std::find_if(begin(v), end(v), [](int i) {
-  return i % 2 == 0;
-}));
-\end{cpp}
-
-While this is a valid use case, it is expected that using \cc{decltype} on
-such a complex expression is less frequent outside the realm of heterogeneous
-computations.
-
-Finally, another motivation for this paper is that the restriction is much stronger
-than it needs to be, and it prevents lambdas from being used in creative ways,
-some of which are certainly unknown to the author of this paper.
-
-
-\section{Discussion}
+\section{Discussion on wording}
 The core language changes introduced in this paper are a bit tricky. The reason
 is that we remove many restrictions on lambda expressions, yet we still want to
 keep closure types out of the signature of external functions, which would be
@@ -355,13 +270,72 @@ foo<[]() {}> x;
     With the current wording that would be an ODR violation. Is this something
     we want to do something about?
 
+
+  \item \label{discussion.capture}
+    Whether a \textit{lambda-expression} implicitly captures an entity
+    currently depends on whether the \textit{lambda-expression}
+    (\textbf{[expr.prim.lambda.capture] 8.1.5.2/7}):
+    \begin{enumerate}
+      \item odr-uses the entity (in the case of a variable),
+      \item odr-uses \cc{this} (in the case of the object designated by \cc{*this}), or
+      \item names the entity in a potentially-evaluated expression where the
+            enclosing full-expression depends on a generic lambda parameter
+            declared within the reaching scope of the \textit{lambda-expression}.
+    \end{enumerate}
+
+    Since an unevaluated context does not satisfy the above criteria, there
+    was a question regarding whether variables could be implicitly captured
+    by a \textit{lambda-expression} appearing in an unevaluated context:
+\begin{cpp}
+void f(int i) {
+  auto lambda = [=]{ return i; }; // captures i
+  static_assert(sizeof(L) == sizeof([=]{ return i; })); // Error, i was not captured?
+}
+\end{cpp}
+
+    The desire is that entities be implicitly captured by \textit{lambda-expressions}
+    even when the lambda appears in an unevaluated context. However, according
+    to the great oracle of C++, Richard Smith, this already works as desired:
+
+    \begin{quote}
+      Lambdas in unevaluated operands have a lot more value if we also permit
+      default initialization of non-capturing lambdas (that gives us the ability
+      to use \cc{std::set<T, decltype([](T a, T b) { return ... })>}, for
+      instance). If we *do* permit that, then we should treat the body of at
+      least a non-capturing lambda as *not* being an unevaluated operand even
+      when the \textit{lambda-expression} is lexically within one. That's
+      actually already the result that our current definition of "subexpression"
+      gives. And that in turn means that lambdas would need to capture
+      enclosing variables that they use, even in unevaluated operands.
+    \end{quote}
+
+    Hence, no wording change is required.
+
+  \item \label{discussion.blockscope}
+    Consider the following example:
+
+\begin{cpp}
+auto f(int i) -> decltype([=](auto g) { return g(i); }) { }
+\end{cpp}
+
+    As Richard Smith says:
+    \begin{quote}
+      It's not completely clear whether this would be valid: the
+      \textit{lambda-expression} is not lexically within a block scope,
+      but names from the function's block scope are visible at the point of
+      the \textit{lambda-expression}, so is this a local \textit{lambda-expression}
+      or not? If \cc{f} were a non-defining function declaration, I think
+      \textbf{[basic.scope.proto]} makes it clear that the lambda would not
+      be a local \textit{lambda-expression} and \textbf{[expr.prim.lambda.capture] 8.1.5.2/3}
+      would disallow it having any captures. It'd be good to clear up exactly
+      what it means for the smallest enclosing scope of a \textit{lambda-expression}
+      to be a block scope; I don't think this mattered up until now.
+    \end{quote}
+
+    For the time being, and for the purpose of making this paper progress, we
+    do not tackle this limitation and leave it ill-formed to perform such
+    captures.
 \end{enumerate}
-
-
-\section{Implementation Experience}
-This proposal was naively implemented in Clang. The required change is commenting
-a single line which creates a diagnostic if a lambda-expression is found inside an
-unevaluated context.
 
 
 \section{Proposed Wording}
@@ -421,7 +395,15 @@ template <int N> void foo(const char (*s)[([]\{\}, N)]); // TU 2\\
 // ill-formed, no diagnostic required: the two lambda-expressions are\\
 // functionally equivalent but not equivalent\\
 template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 1\\
-template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 2
+template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 2\\
+\\
+// two different declarations because the non-dependent portions differ\\
+template <class T> void baz(T, char (*s)[sizeof(decltype([]\{ return 0; \}))]);\\
+template <class T> void baz(T, char (*s)[sizeof(decltype([]\{ return 0; \}))]);\\
+\\
+// two different declarations because the non-dependent portions differ\\
+template <class T> void spam(decltype([]\{\}) (*s)[sizeof(T)]);\\
+template <class T> void spam(decltype([]\{\}) (*s)[sizeof(T)]);\\
 }@
 \end{codeblock}
 
@@ -489,25 +471,45 @@ j(0); // deduction fails on \#1, calls \#2
       \textit{-- end note} ]
       }
     \end{quote}
+
+  %
+  % NOTE: THIS CAN BE REMOVED ONCE I'M SURE NO WORDING IS REQUIRED FOR THIS
+  %
+  % \item \label{wording.capture} \hyperref[discussion.capture]{(discussion)}
+  %   Add in \textbf{[expr.prim.lambda.capture] 8.1.5.2/7}:
+  %   \begin{quote}
+  %     A \textit{lambda-expression} with an associated \textit{capture-default}
+  %     that does not explicitly capture \cc{*this} or a variable with automatic
+  %     storage duration (this excludes any \textit{id-expression} that has been
+  %     found to refer to an \textit{init-capture}'s associated non-static data
+  %     member), is said to implicitly capture the entity (i.e., \cc{*this} or a
+  %     variable) if the \textit{compound-statement}:
+  %     \begin{itemize}
+  %       \item odr-uses (6.2) the entity (in the case of a variable),
+  %       \item odr-uses (6.2) \cc{this} (in the case of the object designated
+  %             by \cc{*this}), or
+  %       \item names the entity in a potentially evaluated expression where the
+  %             enclosing full-expression depends on a generic lambda parameter
+  %             declared within the reaching scope of the \textit{lambda-expression}.
+  %     \end{itemize}
+  %     [ \textit{Example:}
+  %     \\ \dots \\
+  %     \textit{-- end example} ] All such implicitly captured entities shall be
+  %     declared within the reaching scope of the lambda expression. \added{For
+  %     the purpose of determining implicit captures, the \textit{compound-statement}
+  %     of a \textit{lambda-expression} is an evaluated context.}
+  %     \begin{note}The implicit capture of an entity by a nested
+  %     \textit{lambda-expression} can cause its implicit capture
+  %     by the containing \textit{lambda-expression} (see below).
+  %     Implicit odr-uses of \cc{this} can result in implicit capture.
+  %     \end{note}
+  %   \end{quote}
 \end{enumerate}
-
-
-\section{Acknowledgements}
-Thanks to Roland Bock and Matt Calabrese for discussing use cases for lambdas
-in unevaluated contexts on the \textit{std-proposal} and \textit{Boost.Devel}
-mailing lists. Thanks to Richard Smith for letting me know that we could do
-without the restriction. Thanks to Hubert Tong and David Vandevoorde for
-providing extensive guidance for the wording.
 
 
 \section{References}
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
-
-  \bibitem[Boost.Hana]{Boost.Hana}
-    Louis Dionne,
-    \emph{Boost.Hana, A modern metaprogramming library}\newline
-    \url{https://github.com/boostorg/hana}
 
   \bibitem[N4659]{N4659}
     Richard Smith,
