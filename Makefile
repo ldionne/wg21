@@ -1,5 +1,5 @@
 clean:
-	rm -rf _minted-* *.xtr *.out *.log *.fls *.aux *.ext *.fdb_latexmk
+	rm -rf _minted-* *.xtr *.out *.log *.fls *.aux *.ext *.fdb_latexmk *.toc
 
 %:
 	latexmk -shell-escape -pdf $*.tex
