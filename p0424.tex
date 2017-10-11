@@ -1,16 +1,14 @@
-\documentclass[11pt]{article}
+\documentclass{wg21}
 
 \usepackage{xcolor}
 \usepackage{soul}
 \usepackage{ulem}
 \usepackage{fullpage}
-\usepackage[colorlinks, allcolors=blue]{hyperref}
 \usepackage{parskip}
 \usepackage{csquotes}
 \usepackage{listings}
 \usepackage{minted}
-\usepackage{textcomp}
-\usepackage{upquote}
+\usepackage{enumitem}
 
 \lstdefinestyle{base}{
   language=c++,
@@ -22,33 +20,25 @@
 
 \newcommand{\cc}[1]{\mintinline{c++}{#1}}
 \newminted[cpp]{c++}{}
-\newcommand{\deleted}[1]{\st{#1}}
-\newcommand{\added}[1]{\sethlcolor{green}{\hl{#1}}}
 
-\date{}
+
 \title{Reconsidering literal operator templates for strings}
-\author{}
-
+\docnumber{D0424R1}
+\audience{Evolution Working Group}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+\authortwo{Hanicka Dus\'{i}kov\'{a}}{hanicka@hanicka.net}
 
 \begin{document}
-
-\maketitle\vspace{-2cm}
-
-\begin{flushright}
-  \begin{tabular}{ll}
-  Document \#:&P0424R1\\
-  Date:       &\date{2016-11-07}\\
-  Project:    &Programming Language C++\\
-  Audience:   &Evolution Working Group\\
-  Reply-to:   &\author{Louis Dionne} \textless\href{mailto:ldionne.2@gmail.com}{ldionne.2@gmail.com}\textgreater
-  \end{tabular}
-\end{flushright}
+\maketitle
 
 
 \section{Revision history}
 \begin{itemize}
   \item R0 -- Initial draft
-  \item R1 -- Updated the wording to account for cv-qualified string literals.
+  \item R1 -- \begin{enumerate}
+    \item TODO: Update motivation with compile-time regexp
+    \item Updated the wording to account for cv-qualified string literals.
+  \end{enumerate}
 \end{itemize}
 
 
@@ -258,7 +248,7 @@ Change in \textbf{[lex.ext] (2.14.8)/5}:
   \textit{ud-suffix}\added{,} and let \textit{len} be the number of code units
   in \textit{str} (i.e., its length excluding the terminating null character).
   \added{If \textit{S} contains a literal operator with parameter types
-  \texttt{const C*} and \texttt{std::size\_t}, the} \deleted{The} literal
+  \texttt{const C*} and \texttt{std::size\_t}, the} \removed{The} literal
   \textit{L} is treated as a call of the form \texttt{operator"" X(str, len)}.
   \added{Otherwise, \textit{S} shall contain a string literal operator template
   (13.5.8), and \textit{L} is treated as a call of the form
@@ -271,7 +261,7 @@ Change in \textbf{[lex.ext] (2.14.8)/5}:
 Change in \textbf{[over.literal] (13.5.8)/5}:
 
 \begin{quote}
-  \deleted{The declaration of a literal operator template shall have an empty
+  \removed{The declaration of a literal operator template shall have an empty
   \textit{parameter-declaration-clause} and its \textit{template-parameter-list}
   shall have} \added{ A \textit{numeric literal operator template} is a literal
   operator template whose \textit{template-parameter-list} has} a single
