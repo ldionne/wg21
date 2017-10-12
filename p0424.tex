@@ -7,7 +7,7 @@
 \usepackage{parskip}
 \usepackage{csquotes}
 \usepackage{listings}
-\usepackage{minted}
+\usepackage[cache=false]{minted}
 \usepackage{enumitem}
 
 \lstdefinestyle{base}{
@@ -26,7 +26,7 @@
 \docnumber{D0424R1}
 \audience{Evolution Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
-\authortwo{Hanicka Dus\'{i}kov\'{a}}{hanicka@hanicka.net}
+\authortwo{Hana Dus\'{i}kov\'{a}}{hanicka@hanicka.net}
 
 \begin{document}
 \maketitle
@@ -96,8 +96,9 @@ int main(int argc, char** argv) {
 }
 \end{cpp}
 
-Under the hood, constexpr functions are used to parse the string literal and
-generate a type like the following from the string literal:
+Under the hood of \cite{CTRE} library, constexpr functions and template 
+metaprogramming are used to parse the string literal and generate a type
+like the following from the string literal:
 
 \begin{cpp}
 RegExp<
@@ -189,6 +190,11 @@ Wording will be provided if the proposal makes it through EWG.
     Eric Niebler,
     \emph{Boost.Xpressive}\newline
     \url{http://www.boost.org/doc/libs/release/doc/html/xpressive.html}
+		
+  \bibitem[CTRE]{CTRE}
+    Hana Dus\'{i}kov\'{a}
+    \emph{Compile Time Regular Expression library}\newline
+    \url{https://github.com/hanickadot/compile-time-regular-expressions}
 
 \end{thebibliography}
 
