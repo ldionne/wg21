@@ -75,9 +75,12 @@ auto x = "abcd"_udl; // calls the above function
 
 
 \section{Motivation}
-Many use cases have recently come up, the most notable ones being compile-time
+There are many use cases for such an operator, some of which were covered in
+the previous version of this paper (\cite{P0424R0}). However, some interesting
+use cases have recently come up, the most notable ones being compile-time
 JSON parsing and compile-time regular expression parsing. For example, a
-regular expression engine can be generated at compile-time as follows:
+regular expression engine can be generated at compile-time as follows
+(example taken from the \cite{CTRE} library):
 
 \begin{cpp}
 #include "pregexp.hpp"
@@ -96,9 +99,8 @@ int main(int argc, char** argv) {
 }
 \end{cpp}
 
-Under the hood of \cite{CTRE} library, constexpr functions and template 
-metaprogramming are used to parse the string literal and generate a type
-like the following from the string literal:
+Under the hood, constexpr functions and metaprogramming are used to parse the
+string literal and generate a type like the following from the string literal:
 
 \begin{cpp}
 RegExp<
@@ -111,7 +113,7 @@ RegExp<
 
 Since the regular expression parser is generated at compile-time, it can be
 better optimized and the resulting code is much faster than \cc{std::regex}
-(3000x faster has been witnessed).
+(speedups of 3000x have been witnessed).
 
 Similar functionality has traditionally been achieved by using expression
 templates and template metaprogramming to build the representation of the
@@ -126,7 +128,16 @@ auto regexp = bos >> ((set='a','b','c')|(as_xpr('x') >> 'y' >> 'z')) >> +_ >> eo
 It is worth noting that the specific use case of parsing regular expressions
 at compile-time came up at CppCon during a lightning talk, and the room showed
 a very strong interest in getting a standardized solution to this problem.
-Today, we must rely on a non-standard extension provided by Clang and GCC.
+Today, we must rely on a non-standard extension provided by Clang and GCC,
+which allows user-defined literal operators of the following form to be
+considered for string literals:
+
+\begin{cpp}
+template <typename CharT, CharT ...s>
+constexpr auto operator"" _udl();
+
+"foo"_udl // calls operator""_udl<char, 'f', 'o', 'o'>()
+\end{cpp}
 
 
 \section{How would that work?}
@@ -152,19 +163,38 @@ Calling a function template with such a template-parameter-list works in
 
 
 \section{Implementation experience}
-A very similar literal operator is already provided by both Clang and GCC:
-
-\begin{cpp}
-  template <typename CharT, CharT ...s>
-  constexpr auto operator"" _udl(); // works
-\end{cpp}
-
-It is expected that implementing support for the proposed user-defined literal
-operator should be easy.
+As mentionned above, both Clang and GCC already provide a very similar
+user-defined literal operator. The authors think that it should be fairly
+straightforward to implement the operator proposed in this paper.
 
 
 \section{Wording}
 Wording will be provided if the proposal makes it through EWG.
+
+\section{Discussion}
+\begin{itemize}
+  \item A reasonable person could argue that what we need is in fact a solution for
+        compile-time strings instead of this operator. While we do need a solution
+        for compile-time strings (and in fact one of the authors is involved in the
+        compile-time programming proposals currently trying to solve that problem),
+        the operator proposed in this paper solves a slightly different problem.
+        Indeed, the problem we're solving here is the ability to access the contents
+        of the string as constant expressions from within the body of the operator,
+        which requires passing the contents of the string as a template parameter
+        (since C++ does not have \cc{constexpr} parameters). We use a \cc{char const*}
+        to pass it since that type is one we can already use for non-type template
+        parameters. Another choice would have been to pass a \cc{std::string_view},
+        but that would require expanding the set of types we can use as non-type
+        template parameters, which is beyond the scope of what we want to do.
+
+  \item A reasonable person could also request that more machinery for manipulating
+        strings at compile-time be provided with this paper. Our answer is that such
+        machinery is being worked on independently of this paper, and this proposal
+        is useful on its own (even without such machinery). For information, the plan
+        is to expand what parts of the standard library we can use at compile-time in
+        such a way that we can use the same string processing machinery at compile-time
+        and at runtime.
+\end{itemize}
 
 
 \section{References}
@@ -190,7 +220,7 @@ Wording will be provided if the proposal makes it through EWG.
     Eric Niebler,
     \emph{Boost.Xpressive}\newline
     \url{http://www.boost.org/doc/libs/release/doc/html/xpressive.html}
-		
+
   \bibitem[CTRE]{CTRE}
     Hana Dus\'{i}kov\'{a}
     \emph{Compile Time Regular Expression library}\newline
