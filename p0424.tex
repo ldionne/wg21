@@ -153,13 +153,13 @@ auto operator"" _udl();
 
 // should be roughly equivalent to
 
-constexpr char __unnamed[] = "foobar";
+inline constexpr char __unnamed[] = "foobar";
 operator""_udl<char, __unnamed, sizeof(__unnamed)-1>();
 \end{cpp}
 
 Calling a function template with such a template-parameter-list works in
-\href{https://wandbox.org/permlink/RBV6abYfNee94wlW}{Clang} and
-\href{https://wandbox.org/permlink/rZEY8vDB5mHMPmmd}{GCC} today.
+\href{https://wandbox.org/permlink/RB0EaL3jGr9auaO3}{Clang} and
+\href{https://wandbox.org/permlink/6AJEsQdiUmngE14i}{GCC} today.
 
 
 \section{Implementation experience}
