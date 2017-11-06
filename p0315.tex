@@ -23,7 +23,7 @@
 
 
 \title{Wording for lambdas in unevaluated contexts}
-\docnumber{P0315R3}
+\docnumber{D0315R4}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 \authortwo{Hubert Tong}{hubert.reinterpretcast@gmail.com}
@@ -40,27 +40,69 @@
               potential additional concerns raised by this wording change.
   \item R2 -- Applied feedback from EWG and CWG in Issaquah and CWG in Kona:
               \begin{itemize}
-                \item a lambda expression is not part of the immediate context
-                \item add a discussion about lambdas as non-type template arguments
-                \item clarify the difference between the types of lambda expressions
-                      in alias templates
-                \item clarify ODR-equivalence of lambda expressions declared in
+                \item A lambda expression is not part of the immediate context.
+                \item Add a discussion about lambdas as non-type template arguments.
+                \item Clarify the difference between the types of lambda expressions
+                      in alias templates.
+                \item Clarify ODR-equivalence of lambda expressions declared in
                       different TUs, and the meaning for function template
-                      declarations
-                \item clarify the situation for redeclarations of functions with
-                      lambda-expressions
-                \item rebase on top of the C++17 DIS
-                \item editorial: extract the wording into its own section
+                      declarations.
+                \item Clarify the situation for redeclarations of functions with
+                      lambda-expressions.
+                \item Rebase on top of the C++17 DIS.
+                \item Editorial: extract the wording into its own section.
               \end{itemize}
   \item R3 -- Applied changes per guidance from CWG in Toronto:
     \begin{itemize}
-      \item editorial: hyphenate the term full-expression, italicize the
+      \item Editorial: hyphenate the term full-expression, italicize the
             term \textit{lambda-expression}, and remove sections useless
-            for wording purposes
-      \item replace wording in \textbf{[temp.over.link]} by equivalent but
-            much simpler wording as suggested by Richard Smith
-      \item add a discussion about implicit captures in \textit{lambda-expressions}
-            in unevaluated contexts
+            for wording purposes.
+      \item Replace wording in \textbf{[temp.over.link]} by equivalent but
+            much simpler wording as suggested by Richard Smith.
+      \item Add a discussion about implicit captures in \textit{lambda-expressions}
+            in unevaluated contexts.
+    \end{itemize}
+  \item R4 -- Applied changes per guidance from CWG in Albuquerque:
+    \begin{itemize}
+      \item Editorial: do not italicize the ``s'' in \textit{lambda-expressions}.
+      \item Use ``not considered equivalent'' instead of ``differ'' in example
+            added to \textbf{[temp.over.link]}.
+      \item Clarify why closure types are not given a name for linkage purposes
+            in \textbf{[dcl.typedef]}.
+      \item Add discussion about \textit{requires-clause}s involving
+            \textit{lambda-expression}s.
+      \item TODO: Add wording similar to \textbf{[temp.over.link]}, for variable
+            definitions (\textbf{[temp.over.link]} only considers function templates)
+      \item TODO: In discussion, section 6, we need to use the following examples instead:
+\begin{cpp}
+// foo.h
+template <auto> struct foo { };
+extern foo<+[]() {}> x;
+
+// translation unit 1:
+#include "foo.h"
+
+// translation unit 2:
+#include "foo.h"
+\end{cpp}
+
+and
+
+\begin{cpp}
+// foo.h
+template <auto> struct foo { };
+inline foo<+[]() {}> x;
+
+// translation unit 1:
+#include "foo.h"
+
+// translation unit 2:
+#include "foo.h"
+\end{cpp}
+
+          There's two variants to this example:
+          + extern: it's a violation of the linkage rule, and we don't want to do something about it
+          + inline: ???
     \end{itemize}
 \end{itemize}
 
@@ -293,7 +335,7 @@ void f(int i) {
 }
 \end{cpp}
 
-    The desire is that entities be implicitly captured by \textit{lambda-expressions}
+    The desire is that entities be implicitly captured by \textit{lambda-expression}s
     even when the lambda appears in an unevaluated context. However, according
     to the great oracle of C++, Richard Smith, this already works as desired:
 
@@ -335,6 +377,32 @@ auto f(int i) -> decltype([=](auto g) { return g(i); }) { }
     For the time being, and for the purpose of making this paper progress, we
     do not tackle this limitation and leave it ill-formed to perform such
     captures.
+
+  \item This paper was proposed before \textit{requires-clause}s were added to
+        the working draft. With \textit{requires-clause}s, the question of
+        whether the following two constructs are valid arises:
+
+        \begin{cpp}
+          template<typename T>
+          void f(T t) requires requires {
+            []() { typename T::invalid foo; };
+          };
+        \end{cpp}
+
+        and
+
+        \begin{cpp}
+          template<typename T>
+          void f(T t) requires requires {
+            [](auto a) { typename decltype(a)::invalid foo; }(t);
+          };
+        \end{cpp}
+
+        The intent is for both of the above examples to be invalid, just like
+        they would be invalid if that was \textit{SFINAE} during template
+        argument deduction. This is because the body of a lambda is not part
+        of the immediate context for the purpose of template argument deduction.
+        We believe the proposed wording already makes this clear.
 \end{enumerate}
 
 
@@ -362,7 +430,9 @@ The wording is based on the C++17 DIS \cite{N4659}:
       If the typedef declaration defines an unnamed class (or enum), the first
       typedef-name declared by the declaration to be that class type (or enum type)
       is used to denote the class type (or enum type) for linkage purposes only (6.5).
-      \added{However, a closure type is never given a name for linkage purposes.}
+      \added{[ \textit{Note:} A typedef declaration involving a \textit{lambda-expression}
+      does not define the associated closure type, and so the closure type is
+      not given a name for linkage purposes.\textit{-- end note} ]}
       [ \textit{Example:}
 \begin{codeblock}
 typedef struct { } *ps, S; // S is the class name for linkage purposes
@@ -378,9 +448,9 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       one-definition rule (6.2), except that the tokens used to name the template
       parameters may differ as long as a token used to name a template parameter
       in one expression is replaced by another token that names the same template
-      parameter in the other expression. \added{Two \textit{lambda-expressions}
+      parameter in the other expression. \added{Two \textit{lambda-expression}s
       are never considered equivalent. [ \textit{Note:} The intent is to avoid
-      \textit{lambda-expressions} appearing in the signature of a function
+      \textit{lambda-expression}s appearing in the signature of a function
       template with external linkage. \textit{-- end note} ]}
     \end{quote}
 
@@ -397,11 +467,13 @@ template <int N> void foo(const char (*s)[([]\{\}, N)]); // TU 2\\
 template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 1\\
 template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 2\\
 \\
-// two different declarations because the non-dependent portions differ\\
+// two different declarations because the non-dependent portions are not\\
+// considered equivalent\\
 template <class T> void baz(T, char (*s)[sizeof(decltype([]\{ return 0; \}))]);\\
 template <class T> void baz(T, char (*s)[sizeof(decltype([]\{ return 0; \}))]);\\
 \\
-// two different declarations because the non-dependent portions differ\\
+// two different declarations because the non-dependent portions are not\\
+// considered equivalent\\
 template <class T> void spam(decltype([]\{\}) (*s)[sizeof(T)]);\\
 template <class T> void spam(decltype([]\{\}) (*s)[sizeof(T)]);\\
 }@
