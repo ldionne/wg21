@@ -7,7 +7,7 @@
 \usepackage{parskip}
 \usepackage{csquotes}
 \usepackage{listings}
-\usepackage[cache=false]{minted}
+\usepackage{minted}
 \usepackage{enumitem}
 
 \lstdefinestyle{base}{
@@ -22,8 +22,8 @@
 \newminted[cpp]{c++}{}
 
 
-\title{Reconsidering literal operator templates for strings}
-\docnumber{P0424R1}
+\title{String literals as non-type template parameters}
+\docnumber{D0424R2}
 \audience{Evolution Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 \authortwo{Hana Dus\'{i}kov\'{a}}{hanicka@hanicka.net}
@@ -35,52 +35,52 @@
 \section{Revision history}
 \begin{itemize}
   \item R0 -- Initial draft
-  \item R1 -- Rewrite with different UDL form per EWG direction, and update motivation
+  \item R1 -- Rewrite with different UDL form per EWG direction, and update motivation.
+  \item R2 -- Incorporate feedback from EWG in Albuquerque:
+              \begin{itemize}
+                \item Use array syntax instead of pointer and length.
+                \item Allow string literals as non-type template arguments.
+                \item TODO: Propose some wording.
+              \end{itemize}
 \end{itemize}
 
 
-\section{Introduction}
-C++11 added the ability for users to define their own literal suffixes.
-Several forms of literal operators are available, but none of them allows
-getting a string literal as a compile-time entity from within the user-defined
-literal operator. This prevents the user-defined literal to create an object
-whose type depends on the \emph{contents} of the string literal. This paper
-proposes solving that problem by allowing user-defined literal operators of
-the following form to be considered for string literals:
+\section{Abstract}
+We propose allowing string literals as non-type template arguments. A string
+literal would be passed as a reference to an array of characters:
 
 \begin{cpp}
-template <typename CharT, CharT const* str, std::size_t length>
+template <auto& str>
+void foo();
+
+foo<"hello">(); // calls foo with array {'h', 'e', 'l', 'l', 'o', '\0'}
+\end{cpp}
+
+To match this new functionality, we also propose adding a new form of the
+user-defined literal operator for strings:
+
+\begin{cpp}
+template <auto& str>
 auto operator"" _udl();
 
-auto x = "abcd"_udl; // calls the above function
+"hello"_udl; // equivalent to operator""_udl<"hello">()
 \end{cpp}
 
 
-\section{History}
-\begin{enumerate}
-  \item \cite{N3599} (in 2013) proposed adding the missing literal operator
-        using a \cc{char...} parameter pack, but the paper was rejected at
-        that time with the following conclusion (\cite{CWG66}):
-        \begin{quote}
-          Revise with additional machinery for compile time string processing
-        \end{quote}
-  \item \cite{P0424R0} (the initial revision of this paper) was presented in
-        Issaquah in 2016 and argued for adding the missing literal operator
-        using a \cc{char...} parameter pack, but the paper was rejected
-        because implementers were concerned with the compile-time cost of
-        instantiating a function template with such a parameter pack.
-  \item This paper addresses implementer's concerns by using a \cc{char const*}
-        template parameter instead of a \cc{char...} parameter pack.
-\end{enumerate}
-
-
 \section{Motivation}
-There are many use cases for such an operator, some of which were covered in
-the previous version of this paper (\cite{P0424R0}). However, some interesting
-use cases have recently come up, the most notable ones being compile-time
-JSON parsing and compile-time regular expression parsing. For example, a
-regular expression engine can be generated at compile-time as follows
-(example taken from the \cite{CTRE} library):
+Compile-time strings are a sorely missed piece of functionality in C++.
+Indeed, while we can pass a string as a function argument, there is no way
+of getting a string as a compile-time entity from within a function. This
+prevents a function from creating an object whose type depends on the
+\emph{contents} of the string being passed. This paper proposes solving
+this problem by allowing string literals as non-type template parameters.
+
+There are many concrete use cases for this functionality, some of which were
+covered in a previous version of this paper (\cite{P0424R0}). However, some
+interesting use cases have recently come up, the most notable ones being
+compile-time JSON parsing and compile-time regular expression parsing. For
+example, a regular expression engine can be generated at compile-time as
+follows (example taken from the \cite{CTRE} library):
 
 \begin{cpp}
 #include "pregexp.hpp"
@@ -139,82 +139,70 @@ constexpr auto operator"" _udl();
 "foo"_udl // calls operator""_udl<char, 'f', 'o', 'o'>()
 \end{cpp}
 
-
-\section{How would that work?}
-The idea behind how this operator would work is that the compiler would
-generate a constexpr string and pass that to the user-defined literal.
-For example:
+With this proposal, we could instead write the following:
 
 \begin{cpp}
-template <typename CharT, CharT const* str, std::size_t length>
-auto operator"" _udl();
+auto regexp = sre::parse<"^(?:[abc]|xyz).+$">();
+\end{cpp}
 
-"foobar"_udl;
+or, for those that prefer user-defined literals:
+
+\begin{cpp}
+using namespace sre;
+auto regexp = "^(?:[abc]|xyz).+$"_pre;
+\end{cpp}
+
+
+\section{How would that work?}
+The idea behind how this would work is that the compiler would generate a
+constexpr array and pass a reference to that as a template argument:
+
+\begin{cpp}
+template <auto& str>
+void f() {
+  // str is a `char const (&)[7]`
+}
+
+f<"foobar">();
 
 // should be roughly equivalent to
 
 inline constexpr char __unnamed[] = "foobar";
-operator""_udl<char, __unnamed, sizeof(__unnamed)-1>();
+f<__unnamed>();
 \end{cpp}
 
 Calling a function template with such a template-parameter-list works in
-\href{https://wandbox.org/permlink/RB0EaL3jGr9auaO3}{Clang} and
-\href{https://wandbox.org/permlink/6AJEsQdiUmngE14i}{GCC} today.
+both \href{https://wandbox.org/permlink/zOOIb472ak9nBNMt}{Clang} and
+\href{https://wandbox.org/permlink/8zpg3CLqzi9VTiuE}{GCC} today.
 
 
-\section{Implementation experience}
-As mentionned above, both Clang and GCC already provide a very similar
-user-defined literal operator. The authors think that it should be fairly
-straightforward to implement the operator proposed in this paper.
+\section{Proposed wording}
+TODO
 
 
-\section{Wording}
-Wording will be provided if the proposal makes it through EWG.
+\section{Potential generalization}
+We could potentially make this applicable to arrays of arbitrary types,
+with something like the following syntax:
 
-\section{Discussion}
-\begin{itemize}
-  \item A reasonable person could argue that what we need is in fact a solution for
-        compile-time strings instead of this operator. While we do need a solution
-        for compile-time strings (and in fact one of the authors is involved in the
-        compile-time programming proposals currently trying to solve that problem),
-        the operator proposed in this paper solves a slightly different problem.
-        Indeed, the problem we're solving here is the ability to access the contents
-        of the string as constant expressions from within the body of the operator,
-        which requires passing the contents of the string as a template parameter
-        (since C++ does not have \cc{constexpr} parameters). We use a \cc{char const*}
-        to pass it since that type is one we can already use for non-type template
-        parameters. Another choice would have been to pass a \cc{std::string_view},
-        but that would require expanding the set of types we can use as non-type
-        template parameters, which is beyond the scope of what we want to do.
+\begin{cpp}
+template <auto& array> void f();
 
-  \item A reasonable person could also request that more machinery for manipulating
-        strings at compile-time be provided with this paper. Our answer is that such
-        machinery is being worked on independently of this paper, and this proposal
-        is useful on its own (even without such machinery). For information, the plan
-        is to expand what parts of the standard library we can use at compile-time in
-        such a way that we can use the same string processing machinery at compile-time
-        and at runtime.
-\end{itemize}
+f<{1, 2, 3}>(); // calls f with an array of type `int (&)[3]`
+\end{cpp}
+
+This is an interesting generalization, but the author prefers tackling
+that as part of a separate proposal, since this proposal only targets
+string literals and is very useful on its own.
 
 
 \section{References}
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
 
-  \bibitem[N3599]{N3599}
-    Richard Smith,
-    \emph{Literal operator templates for strings}\newline
-    \url{http://open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html}
-
   \bibitem[P0424R0]{P0424R0}
     Louis Dionne,
     \emph{Reconsidering literal operator templates for strings}\newline
     \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0424r0.pdf}
-
-  \bibitem[CWG66]{CWG66}
-    Richard Smith,
-    \emph{EWG Issue \#66}\newline
-    \url{http://cplusplus.github.io/EWG/ewg-active.html#66}
 
   \bibitem[Boost.Xpressive]{Boost.Xpressive}
     Eric Niebler,
