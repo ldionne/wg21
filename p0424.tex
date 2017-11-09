@@ -40,7 +40,7 @@
               \begin{itemize}
                 \item Use array syntax instead of pointer and length.
                 \item Allow string literals as non-type template arguments.
-                \item TODO: Propose some wording.
+                \item Initial wording attempt.
               \end{itemize}
 \end{itemize}
 
@@ -53,7 +53,7 @@ literal would be passed as a reference to an array of characters:
 template <auto& str>
 void foo();
 
-foo<"hello">(); // calls foo with array {'h', 'e', 'l', 'l', 'o', '\0'}
+foo<"hello">(); // creates a `constexpr char[6]` and passes a reference to it
 \end{cpp}
 
 To match this new functionality, we also propose adding a new form of the
@@ -177,7 +177,102 @@ both \href{https://wandbox.org/permlink/zOOIb472ak9nBNMt}{Clang} and
 
 
 \section{Proposed wording}
-TODO
+Please note that this wording is very much a strawman aiming to convey the
+intent of the author. It was put together in a very short amount of time
+and changes will be made to make it more Core-ready.
+
+This wording is based on the working draft \cite{N4700}.
+In \textbf{[temp.arg.nontype] 17.3.2/2}:
+
+\begin{quote}
+  A \grammarterm{template-argument} for a non-type \grammarterm{template-parameter}
+  shall be a converted constant expression of the type of the
+  \grammarterm{template-parameter}. For a non-type \grammarterm{template-parameter}
+  of reference or pointer type, the value of the constant expression shall not
+  refer to (or for a pointer type, shall not be the address of):
+
+  \begin{itemize}
+  \item a subobject,
+  \item a temporary object,
+  \item \removed{a string literal,}
+  \item the result of a \tcode{typeid} expression, or
+  \item a predefined \tcode{__func__} variable.
+  \end{itemize}
+\end{quote}
+
+Remove \textbf{[temp.arg.nontype] 17.3.2/4} (TODO: make red):
+
+\begin{quote}
+  \begin{note}
+  A string literal
+  is not an acceptable
+  \grammarterm{template-argument}.
+  \begin{example}
+
+  \begin{codeblock}
+  template<class T, const char* p> class X {
+    // ...
+  };
+
+  X<int, "Studebaker"> x1;        // error: string literal as template-argument
+
+  const char p[] = "Vivisectionist";
+  X<int,p> x2;                    // OK
+  \end{codeblock}
+  \end{example}
+  \end{note}
+\end{quote}
+
+Add after \textbf{[temp.arg.nontype] 17.3.2/2} (TODO: make green):
+
+\begin{quote}
+  When passed as a \textit{template-argument}, a string literal is a constant
+  expression with external linkage.
+  \begin{note}
+    The intent is that \cc{f<"foobar">()} be roughly equivalent to
+    \begin{cpp}
+      inline constexpr char __some_mangled_name_including_foobar[] = "foobar";
+      f<__some_mangled_name_including_foobar>();
+    \end{cpp}
+  \end{note}
+\end{quote}
+
+
+\section{Discussion on ODR}
+We have two choices; either we don't mandate that equivalent string literals
+share the same storage, or we do. If we do \textit{not} mandate that equivalent
+string literals share the same storage, then template specializations with
+equivalent string literals would potentially be different template
+instantiations. This could lead to ODR issues:
+
+\begin{cpp}
+// in foo.hpp
+template <auto& str>
+struct foo { };
+
+inline foo<"hello"> x;
+
+// in a.cpp
+#include "foo.hpp"
+
+// in b.cpp
+#include "foo.hpp"
+\end{cpp}
+
+In the above, there are two possibilities:
+\begin{enumerate}
+  \item \cc{x} is defined with a different type in \cc{a.cpp} and \cc{b.cpp}
+        (ODR violation), or
+  \item \cc{x} has the same type in both translation units (no ODR violation,
+        only one copy of \cc{x} in the resulting program)
+\end{enumerate}
+
+We think this should \textit{not} be an ODR violation, and this is therefore
+what the current wording achieves by giving external linkage to the string
+literals used as \textit{template-argument}s. Under the covers, an
+implementation would likely use the contents of the string literal to
+produce the mangled name of the variable. Based on preliminary discussion
+with implementers, this does not seem to be a problem.
 
 
 \section{Potential generalization}
@@ -213,6 +308,11 @@ string literals and is very useful on its own.
     Hana Dus\'{i}kov\'{a}
     \emph{Compile Time Regular Expression library}\newline
     \url{https://github.com/hanickadot/compile-time-regular-expressions}
+
+  \bibitem[N4700]{N4700}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4700.pdf}
 
 \end{thebibliography}
 
