@@ -71,38 +71,9 @@
             in \textbf{[dcl.typedef]}.
       \item Add discussion about \textit{requires-clause}s involving
             \textit{lambda-expression}s.
-      \item TODO: Add wording similar to \textbf{[temp.over.link]}, for variable
-            definitions (\textbf{[temp.over.link]} only considers function templates)
-      \item TODO: In discussion, section 6, we need to use the following examples instead:
-\begin{cpp}
-// foo.h
-template <auto> struct foo { };
-extern foo<+[]() {}> x;
-
-// translation unit 1:
-#include "foo.h"
-
-// translation unit 2:
-#include "foo.h"
-\end{cpp}
-
-and
-
-\begin{cpp}
-// foo.h
-template <auto> struct foo { };
-inline foo<+[]() {}> x;
-
-// translation unit 1:
-#include "foo.h"
-
-// translation unit 2:
-#include "foo.h"
-\end{cpp}
-
-          There's two variants to this example:
-          + extern: it's a violation of the linkage rule, and we don't want to do something about it
-          + inline: ???
+      \item Add note to \textbf{[basic.def.odr]} to clarify the situation for
+            non-function templates.
+      \item Fix example of ODR violation in the discussion (section 6).
     \end{itemize}
 \end{itemize}
 
@@ -294,13 +265,17 @@ template <int N> static void k(int);                  // okay today
 
 
   \item \label{discussion.nontype}
-    One usability question that has been raised with this paper is related
-    to the usage of lambda expressions as non-type template arguments.
+    \hyperref[wording.nontype]{(wording)}
+    One usability question that has been raised with this paper is related to
+    the usage of \textit{lambda-expression}s as non-type template arguments.
+    This question is not handled by our changes to \textbf{[temp.over.link]},
+    since those only impact function templates. Should the following two
+    programs be valid?
 
 \begin{cpp}
 // foo.h
 template <auto> struct foo { };
-foo<[]() {}> x;
+extern foo<+[]() {}> x;
 
 // translation unit 1:
 #include "foo.h"
@@ -309,8 +284,23 @@ foo<[]() {}> x;
 #include "foo.h"
 \end{cpp}
 
-    With the current wording that would be an ODR violation. Is this something
-    we want to do something about?
+    and
+
+\begin{cpp}
+// foo.h
+template <auto> struct foo { };
+inline foo<+[]() {}> x;
+
+// translation unit 1:
+#include "foo.h"
+
+// translation unit 2:
+#include "foo.h"
+\end{cpp}
+
+    In both cases, this should be an ODR violation. This is already the effect
+    of the proposed wording, but we propose \hyperref[wording.nontype]{adding
+    a note to \textbf{[basic.def.odr]}} to make this clear.
 
 
   \item \label{discussion.capture}
@@ -542,6 +532,19 @@ j(0); // deduction fails on \#1, calls \#2
       \textit{-- end example} ]
       \textit{-- end note} ]
       }
+    \end{quote}
+
+  \item \label{wording.nontype} \hyperref[discussion.nontype]{(discussion)}
+    Change in \textbf{[basic.def.odr] 6.2/6}:
+    \begin{quote}
+      If the definitions of \cc{D} satisfy all these requirements, then the
+      behavior is as if there were a single definition of \cc{D}. \added{
+      [\textit{Note:} The entity is still declared in multiple translation
+      units, and \textbf{[basic.link]} still applies to these declarations.
+      In particular, \textit{lambda-expression}s (\textbf{[expr.prim.lambda]})
+      appearing in the type of \cc{D} may result in the different declarations
+      having distinct types. \textit{ -- end note}]} If the definitions of
+      \cc{D} do not satisfy these requirements, then the behavior is undefined.
     \end{quote}
 
   %
