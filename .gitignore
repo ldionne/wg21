@@ -1,9 +1,10 @@
-_minted*/
 *.aux
+*.ext
 *.fdb_latexmk
 *.fls
 *.log
 *.out
+*.pyg
 *.toc
 *.xtr
-*.ext
+_minted*/
