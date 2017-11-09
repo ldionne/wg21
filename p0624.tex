@@ -23,7 +23,7 @@
 
 
 \title{Default constructible and assignable stateless lambdas}
-\docnumber{P0624R1}
+\docnumber{D0624R2}
 \audience{Evolution Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
@@ -34,8 +34,13 @@
 \begin{itemize}
   \item R0 -- Initial draft
   \item R1 \begin{itemize}
-             \item Rebase wording on top of the current working draft \cite{N4659}
-             \item Make stateless lambdas assignable per EWG direction
+             \item Rebase wording on top of the current working draft N4659.
+             \item Make stateless lambdas assignable per EWG direction in Toronto.
+           \end{itemize}
+  \item R2 \begin{itemize}
+             \item Rebase wording on top of current working draft \cite{N4700} (no-op).
+             \item Fix wording to keep the assignment operator deleted for stateful lambdas.
+             \item Record the intent that construction and assignment operations be trivial.
            \end{itemize}
 \end{itemize}
 
@@ -140,22 +145,28 @@ gruesome hack to work (see \href{https://github.com/ldionne/dyno/blob/03eaeded89
 
 
 \section{Proposed Wording}
-The wording is based on the working paper \cite{N4659}. Replace in
+The wording is based on the working paper \cite{N4700}. Replace in
 \textbf{[expr.prim.lambda] 8.1.5.1/11}:
 
 \begin{quote}
   \removed{The closure type associated with a \textit{lambda-expression} has
-    no default constructor and a deleted copy assignment operator.}
-  \added{The closure type for a \textit{lambda-expression} has a defaulted
-    default constructor, a defaulted copy assignment operator, and a defaulted
-    move assignment operator, if and only if the \textit{lambda-expression}
-    does not have a \textit{lambda-capture}.}
+  no default constructor and a deleted copy assignment operator.}
+  \added{The closure type associated with a \textit{lambda-expression} has a
+  deleted default constructor if the \textit{lambda-expression} has a
+  \textit{lambda-capture}, and a defaulted default constructor otherwise.
+  It has a deleted copy assignment operator if the \textit{lambda-expression}
+  has a \textit{lambda-capture}, and a defaulted copy assignment operator otherwise.}
   It has a defaulted copy constructor and a defaulted move constructor (15.8).
   \begin{note}
   These special member functions are implicitly defined as usual, and might
   therefore be defined as deleted.
   \end{note}
 \end{quote}
+
+When discussed in EWG, interest in having stateless lambdas be \textit{trivially}
+default constructible was expressed, if CWG thought it to be a good idea. The
+current wording does not achieve that, so minor tweaking should be expected if
+trivial default constructibility is desirable.
 
 
 \section{References}
@@ -167,10 +178,10 @@ The wording is based on the working paper \cite{N4659}. Replace in
     \emph{Dyno: Runtime polymorphism done right}\newline
     \url{https://github.com/ldionne/dyno}
 
-  \bibitem[N4659]{N4659}
+  \bibitem[N4700]{N4700}
     Richard Smith,
     \emph{Working Draft, Standard for Programming Language C++}\newline
-    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf}
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4700.pdf}
 
 \end{thebibliography}
 
