@@ -23,7 +23,7 @@
 
 
 \title{Wording for lambdas in unevaluated contexts}
-\docnumber{D0315R4}
+\docnumber{P0315R4}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 \authortwo{Hubert Tong}{hubert.reinterpretcast@gmail.com}
@@ -64,6 +64,7 @@
     \end{itemize}
   \item R4 -- Applied changes per guidance from CWG in Albuquerque:
     \begin{itemize}
+      \item Rebase on top of current working draft (\cite{N4700}).
       \item Editorial: do not italicize the ``s'' in \textit{lambda-expressions}.
       \item Use ``not considered equivalent'' instead of ``differ'' in example
             added to \textbf{[temp.over.link]}.
@@ -73,7 +74,8 @@
             \textit{lambda-expression}s.
       \item Add note to \textbf{[basic.def.odr]} to clarify the situation for
             non-function templates.
-      \item Fix example of ODR violation in the discussion (section 6).
+      \item Fix example of ODR violation in \hyperref[discussion.nontype]{
+            discussion on ODR issues}.
     \end{itemize}
 \end{itemize}
 
@@ -397,21 +399,20 @@ auto f(int i) -> decltype([=](auto g) { return g(i); }) { }
 
 
 \section{Proposed Wording}
-The wording is based on the C++17 DIS \cite{N4659}:
+The wording is based on the current working draft \cite{N4700}:
 
 \begin{enumerate}
   \item \label{wording.remove}
     In \textbf{[expr.prim.lambda] 8.1.5/2}:
     \begin{quote}
-      The evaluation of a \textit{lambda-expression} results in a prvalue
-      temporary (12.2). This temporary is called the closure object. \removed{A
-      \textit{lambda-expression} shall not appear in an unevaluated operand
-      (Clause 8), in a \textit{template-argument}, in an \textit{alias-declaration},
-      in a typedef declaration, or in the declaration of a function or function
-      template outside its function body and default arguments. [ Note: The
-      intention is to prevent lambdas from appearing in a signature.
-      -- end note ]} [ Note: A closure object behaves like a function object
-      (23.14). -- end note]
+      A \textit{lambda-expression} is a prvalue whose result object is called
+      the closure object. \removed{A \textit{lambda-expression} shall not
+      appear in an unevaluated operand (Clause 8), in a \textit{template-argument},
+      in an \textit{alias-declaration}, in a typedef declaration, or in the
+      declaration of a function or function template outside its function body
+      and default arguments. [ Note: The intention is to prevent lambdas from
+      appearing in a signature. -- end note ]} [ Note: A closure object behaves
+      like a function object (23.14). -- end note]
     \end{quote}
 
   \item \label{wording.non-template} \hyperref[discussion.non-template]{(discussion)}
@@ -421,7 +422,7 @@ The wording is based on the C++17 DIS \cite{N4659}:
       typedef-name declared by the declaration to be that class type (or enum type)
       is used to denote the class type (or enum type) for linkage purposes only (6.5).
       \added{[ \textit{Note:} A typedef declaration involving a \textit{lambda-expression}
-      does not define the associated closure type, and so the closure type is
+      does not itself define the associated closure type, and so the closure type is
       not given a name for linkage purposes.\textit{-- end note} ]}
       [ \textit{Example:}
 \begin{codeblock}
@@ -431,7 +432,7 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       \textit{-- end example} ]
     \end{quote}
   \item \label{wording.template} \hyperref[discussion.template]{(discussion)}
-    In \textbf{[temp.over.link] 17.5.6.1/5}:
+    In \textbf{[temp.over.link] 17.6.6.1/5}:
     \begin{quote}
       Two expressions involving template parameters are considered \textit{equivalent}
       if two function definitions containing the expressions would satisfy the
@@ -444,23 +445,13 @@ typedef struct { } *ps, S; // S is the class name for linkage purposes
       template with external linkage. \textit{-- end note} ]}
     \end{quote}
 
-    Also, add the following example after \textbf{[temp.over.link] 17.5.6.1/5}:
+    Also, add the following example after \textbf{[temp.over.link] 17.6.6.1/5}:
 \begin{codeblock}
 @\added{
 // ill-formed, no diagnostic required: the two expressions are\\
 // functionally equivalent but not equivalent\\
-template <int N> void foo(const char (*s)[([]\{\}, N)]); // TU 1\\
-template <int N> void foo(const char (*s)[([]\{\}, N)]); // TU 2\\
-\\
-// ill-formed, no diagnostic required: the two lambda-expressions are\\
-// functionally equivalent but not equivalent\\
-template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 1\\
-template <int N> void bar(const char (*s)[([]() \{ return N; \})()]); // TU 2\\
-\\
-// two different declarations because the non-dependent portions are not\\
-// considered equivalent\\
-template <class T> void baz(T, char (*s)[sizeof(decltype([]\{ return 0; \}))]);\\
-template <class T> void baz(T, char (*s)[sizeof(decltype([]\{ return 0; \}))]);\\
+template <int N> void foo(const char (*s)[([]\{\}, N)]);\\
+template <int N> void foo(const char (*s)[([]\{\}, N)]);\\
 \\
 // two different declarations because the non-dependent portions are not\\
 // considered equivalent\\
@@ -470,7 +461,7 @@ template <class T> void spam(decltype([]\{\}) (*s)[sizeof(T)]);\\
 \end{codeblock}
 
   \item \label{wording.redeclarations} \hyperref[discussion.redeclarations]{(discussion)}
-    Add the following paragraph at the end of \textbf{[temp.alias] 17.5.7}:
+    Add the following paragraph at the end of \textbf{[temp.alias] 17.6.7}:
     \begin{quote}
       \added{
       The type of a lambda expression appearing in an alias template declaration
@@ -489,14 +480,14 @@ using A = decltype([] \{ \});\\
     \end{quote}
 
   \item \label{wording.sfinae} \hyperref[discussion.sfinae]{(discussion)}
-    Add the following after \textbf{[temp.deduct] 17.8.2/8} (note that the
+    Add the following after \textbf{[temp.deduct] 17.9.2/8} (note that the
     term \textit{immediate context} is not defined formally in the standard,
     which is the subject of \cite{CWG1844}):
     \begin{quote}
       \added{
-      A lambda expression appearing in a function type or a template parameter
-      is not considered part of the immediate context for the purposes of
-      template argument deduction. [ \textit{Note:}  The intent is to avoid
+      A \textit{lambda-expression} appearing in a function type or a template
+      parameter is not considered part of the immediate context for the purposes
+      of template argument deduction. [ \textit{Note:}  The intent is to avoid
       requiring implementations to deal with substitution failure involving
       arbitrary statements. [ \textit{Example:}
       }
@@ -586,11 +577,6 @@ j(0); // deduction fails on \#1, calls \#2
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
 
-  \bibitem[N4659]{N4659}
-    Richard Smith,
-    \emph{Working Draft, Standard for Programming Language C++}\newline
-    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4659.pdf}
-
   \bibitem[DR1607]{DR1607}
     Daniel Kr{\"u}gler,
     \emph{Lambdas in template parameters}\newline
@@ -600,6 +586,11 @@ j(0); // deduction fails on \#1, calls \#2
     Richard Smith,
     \emph{Defining "immediate context"}\newline
     \url{http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_active.html#1844}
+
+  \bibitem[N4700]{N4700}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4700.pdf}
 
 \end{thebibliography}
 
