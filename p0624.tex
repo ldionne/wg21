@@ -23,7 +23,7 @@
 
 
 \title{Default constructible and assignable stateless lambdas}
-\docnumber{D0624R2}
+\docnumber{P0624R2}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
@@ -146,16 +146,15 @@ gruesome hack to work (see \href{https://github.com/ldionne/dyno/blob/03eaeded89
 
 \section{Proposed Wording}
 The wording is based on the working paper \cite{N4700}. Replace in
-\textbf{[expr.prim.lambda] 8.1.5.1/11}:
+\textbf{[expr.prim.lambda.closure] 8.1.5.1/11}:
 
 \begin{quote}
-  \removed{The closure type associated with a \textit{lambda-expression} has
-  no default constructor and a deleted copy assignment operator.}
-  \added{The closure type associated with a \textit{lambda-expression} has a
-  deleted default constructor if the \textit{lambda-expression} has a
-  \textit{lambda-capture}, and a defaulted default constructor otherwise.
-  It has a deleted copy assignment operator if the \textit{lambda-expression}
-  has a \textit{lambda-capture}, and a defaulted copy assignment operator otherwise.}
+  The closure type associated with a \textit{lambda-expression} has no default
+  constructor \removed{and a deleted copy assignment operator.} \added{if the
+  \textit{lambda-expression} has a \textit{lambda-capture} and a defaulted
+  default constructor otherwise. It has a deleted copy assignment operator if
+  the \textit{lambda-expression} has a \textit{lambda-capture} and defaulted
+  copy and move assignment operators otherwise.}
   It has a defaulted copy constructor and a defaulted move constructor (15.8).
   \begin{note}
   These special member functions are implicitly defined as usual, and might
