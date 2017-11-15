@@ -23,7 +23,7 @@
 
 
 \title{String literals as non-type template parameters}
-\docnumber{D0424R2}
+\docnumber{P0424R2}
 \audience{Core Working Group}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 \authortwo{Hana Dus\'{i}kov\'{a}}{hanicka@hanicka.net}
@@ -177,12 +177,20 @@ both \href{https://wandbox.org/permlink/zOOIb472ak9nBNMt}{Clang} and
 
 
 \section{Proposed wording}
-Please note that this wording is very much a strawman aiming to convey the
-intent of the author. It was put together in a very short amount of time
-and changes will be made to make it more Core-ready.
+Please note that this wording is a strawman aiming to convey the intent of
+the authors. It was put together in a very short amount of time and changes
+will be made to prepare it for review by CWG. The authors wanted to publish
+a revision of this paper with the new design agreed upon by EWG.
 
-This wording is based on the working draft \cite{N4700}.
-In \textbf{[temp.arg.nontype] 17.3.2/2}:
+This wording is based on the working draft \cite{N4700}. First, we allow
+string literals as non-type template arguments. Secondly, we add the new
+user-defined literal. We do this by splitting the term of art \textit{literal
+operator template} into two terms, \textit{numeric literal operator template}
+and \textit{string literal operator template}. The term \textit{literal
+operator template} is retained and refers to either form. This is the approach
+that was originally taken by Richard Smith in \cite{N3599}.
+
+Remove in \textbf{[temp.arg.nontype] 17.3.2/2}:
 
 \begin{quote}
   A \grammarterm{template-argument} for a non-type \grammarterm{template-parameter}
@@ -229,12 +237,53 @@ Add after \textbf{[temp.arg.nontype] 17.3.2/2} (TODO: make green):
   When passed as a \textit{template-argument}, a string literal is a constant
   expression with external linkage.
   \begin{note}
-    The intent is that \cc{f<"foobar">()} be roughly equivalent to
+    The intent is that \cc{f<"foobar">()} be equivalent to
     \begin{cpp}
       inline constexpr char __some_mangled_name_including_foobar[] = "foobar";
       f<__some_mangled_name_including_foobar>();
     \end{cpp}
   \end{note}
+\end{quote}
+
+
+Replace ``literal operator template'' with ``numeric literal operator template''
+in \textbf{[lex.ext] (5.13.8)/3} and \textbf{[lex.ext] (5.13.8)/4}:
+
+\begin{quote}
+  [...] Otherwise, \cc{S} shall contain a raw literal operator or a
+  \added{numeric} literal operator template (16.5.8), but not both. [...]
+  Otherwise (\cc{S} contains a \added{numeric} literal operator template),
+  \cc{L} is treated as a call of the form [...]
+\end{quote}
+
+Change in \textbf{[lex.ext] (5.13.8)/5}:
+
+\begin{quote}
+  If \textit{L} is a \textit{user-defined-string-literal}, let \textit{str} be
+  the literal without its \textit{ud-suffix} and let \textit{len} be the number
+  of code units in \textit{str} (i.e., its length excluding the terminating
+  null character).
+  \added{If \textit{S} contains a literal operator template with a non-type
+  template parameter that can bind to \textit{str}, the literal \textit{L} is
+  treated as a call of the form \texttt{operator "" X<str>()}. Otherwise, the}
+  \removed{The} literal \textit{L} is treated as a call of the form
+  \texttt{operator"" X(str, len)}.
+\end{quote}
+
+Change in \textbf{[over.literal] (16.5.8)/5}:
+
+\begin{quote}
+  \removed{The declaration of a literal operator template shall have an empty
+  \textit{parameter-declaration-clause} and its \textit{template-parameter-list}
+  shall have} \added{ A \textit{numeric literal operator template} is a literal
+  operator template whose \textit{template-parameter-list} has} a single
+  \textit{template-parameter} that is a non-type template parameter pack (17.6.3)
+  with element type \texttt{char}. \added{A \textit{string literal operator template}
+  is a literal operator template whose \textit{template-parameter-list} comprises
+  a non-type \textit{template-parameter} \textit{str} that can bind to a string
+  literal. The declaration of a literal operator template shall have an empty
+  \textit{parameter-declaration-clause} and shall declare either a numeric
+  literal operator template or a string literal operator template.}
 \end{quote}
 
 
@@ -313,6 +362,11 @@ string literals and is very useful on its own.
     Richard Smith,
     \emph{Working Draft, Standard for Programming Language C++}\newline
     \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/n4700.pdf}
+
+  \bibitem[N3599]{N3599}
+    Richard Smith,
+    \emph{Literal operator templates for strings}\newline
+    \url{http://open-std.org/JTC1/SC22/WG21/docs/papers/2013/n3599.html}
 
 \end{thebibliography}
 
