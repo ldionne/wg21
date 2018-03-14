@@ -5,10 +5,12 @@ the `generated/` directory contains the generated proposals (html or pdf).
 The source for proposals that are not being worked on anymore are in the
 `done/` subdirectory so I can keep my sanity between meetings.
 
-To generate the PDF for a proposal with source in `pXXXX.tex`, type
-`make pXXXX`. This will generate the appropriate PDF file `pXXXXrN.pdf`
-or `dXXXXrN.pdf` in the `generated/` folder. This requires a LaTeX
-distribution, such as [MacTeX][].
+To generate the PDF or HTML for a proposal with source in `pXXXX.{tex,bs}`,
+type `make pXXXX.{tex,bs}`. This will generate the appropriate PDF or HTML
+file `pXXXXrN.<ext>` or `dXXXXrN.<ext>` in the `generated/` folder. This
+requires a LaTeX distribution, such as [MacTeX][] or an internet connection,
+depending on whether the source uses LaTeX or [Bikeshed][].
 
 
+[Bikeshed]: https://tabatkins.github.io/bikeshed
 [MacTeX]: https://www.tug.org/mactex
