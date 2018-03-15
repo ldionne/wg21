@@ -117,6 +117,10 @@
 \newcommand{\removed}[1]{\textcolor{remclr}{\sout{#1}}}
 \newcommand{\changed}[2]{\removed{#1} \added{#2}}
 
+\newenvironment{addedm}{\color{addclr}}{ }
+\newenvironment{changedm}{\color{noteclr}}{ }
+\newenvironment{removedm}{\color{remclr}}{ }
+
 \newcommand{\nbc}[1]{[#1]\ }
 \newcommand{\addednb}[2]{\added{\nbc{#1}#2}}
 \newcommand{\removednb}[2]{\removed{\nbc{#1}#2}}
