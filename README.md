@@ -11,6 +11,13 @@ file `pXXXXrN.<ext>` or `dXXXXrN.<ext>` in the `generated/` folder. This
 requires a LaTeX distribution, such as [MacTeX][] or an internet connection,
 depending on whether the source uses LaTeX or [Bikeshed][].
 
+#### TODO list
+For Rapperswil:
+- Paper to make std::map constexpr (check `__tree` in libc++)
+- Paper for unified product type access
+- Paper for making variant constexpr?
+- Paper for making string constexpr
+- Paper to add parameter pack support for anything that has begin() and end(), and is constexpr? Or maybe instead a variation of `for ...`?
 
 [Bikeshed]: https://tabatkins.github.io/bikeshed
 [MacTeX]: https://www.tug.org/mactex
