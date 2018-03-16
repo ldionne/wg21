@@ -1,0 +1,82 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Constexpr in \cc{std::pointer_traits}}
+\docnumber{D1006R0}
+\audience{LEWG}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+\section{Abstract}
+As part of the \cc{constexpr} reflection effort, and in particular making
+\cc{std::vector} \cc{constexpr}, we need to make \cc{std::pointer_traits}
+\cc{constexpr} (it is used in the implementation).
+
+
+\section{Proposed wording}
+This wording is based on the working draft \cite{N4727}.
+Change in \textbf{[pointer.traits] 23.10.3/1}:
+
+\begin{quote}
+\begin{codeblock}
+namespace std {
+  template<class Ptr> struct pointer_traits {
+    using pointer         = Ptr;
+    using element_type    = @\textit{see below}@;
+    using difference_type = @\textit{see below}@;
+
+    template<class U> using rebind = @\textit{see below}@;
+
+    static @\added{constexpr}@ pointer pointer_to(@\textit{see below}@ r);
+  };
+
+  template<class T> struct pointer_traits<T*> {
+    using pointer         = T*;
+    using element_type    = T;
+    using difference_type = ptrdiff_t;
+
+    template<class U> using rebind = U*;
+
+    static @\added{constexpr}@ pointer pointer_to(@\textit{see below}@ r) noexcept;
+  };
+}
+\end{codeblock}
+\end{quote}
+
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+\bibitem[N4727]{N4727}
+  Richard Smith,
+  \emph{Working Draft, Standard for Programming Language C++}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+
+\end{thebibliography}
+
+\end{document}
