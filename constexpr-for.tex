@@ -1,0 +1,60 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{\cc{for...}}
+\docnumber{D0XXXR0}
+\audience{EWG}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+\section{Abstract}
+TODO
+
+
+\section{Motivation}
+TODO
+
+
+\section{Proposed wording}
+TODO
+
+
+\section{Other considered options}
+TODO
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+\bibitem[N4727]{N4727}
+  Richard Smith,
+  \emph{Working Draft, Standard for Programming Language C++}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+
+\end{thebibliography}
+
+\end{document}

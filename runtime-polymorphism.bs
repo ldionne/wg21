@@ -1,0 +1,88 @@
+<pre class='metadata'>
+Title: Runtime polymorphism without inheritance
+Shortname: P0XXX
+Revision: 0
+Audience: EWG
+Status: P
+Group: WG21
+URL: http://wg21.link/TODO
+Editor: Louis Dionne, ldionne.2@gmail.com
+Abstract: TODO
+Date: 2018-03-14
+Markup Shorthands: markdown yes
+Toggle Diffs: no
+</pre>
+
+Abstract {#abstract}
+========
+
+Runtime polymorphism in C++ is mainly achieved by means of inheritance.
+Unfortunately, inheritance ... TODO
+
+TABLE
+
+BEFORE:
+
+```c++
+class Drawable {
+public:
+  virtual void draw(std::ostream& out) const = 0;
+};
+
+class Square : public Drawable {
+public:
+  virtual void draw(std::ostream& out) const override { ... }
+};
+
+class Circle : public Drawable {
+public:
+  virtual void draw(std::ostream& out) const override { ... }
+};
+
+void render(std::vector<Drawable*> const& widgets) {
+  for (auto* widget : widgets) {
+    widget->draw(screen);
+  }
+}
+```
+
+AFTER:
+
+```c++
+template <typename T>
+concept Drawable = requires {
+  void T::draw(std::ostream&) const;
+};
+
+class Square {
+public:
+  void draw(std::ostream& out) const { ... }
+};
+
+class Circle {
+public:
+  void draw(std::ostream& out) const { ... }
+};
+
+void render(std::vector<Drawable> const& widgets) {
+  for (auto& widget : widgets) {
+    widget.draw(screen);
+  }
+}
+```
+
+
+
+Motivation {#motivation}
+==========
+
+TODO:
+- value semantics lost with inheritance
+- lack of flexibility in the way polymorphism is implemented
+- inheritance encourages dynamic lifetime through the use of pointers
+
+Details {#details}
+=======
+
+TODO:
+- would allow traits
