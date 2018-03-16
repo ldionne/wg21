@@ -1,0 +1,466 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Making \cc{std::vector} constexpr}
+\docnumber{D1004R0}
+\audience{LEWG}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+\section{Abstract}
+\cc{std::vector} is not currently \cc{constexpr} friendly. With the loosening
+of requirements on \cc{constexpr} in \cite{P0784R1} and related papers, we
+can now make \cc{std::vector} \cc{constexpr}, and we should in order to support
+the \cc{constexpr} reflection effort (and other evident use cases).
+
+
+\section{Encountered issues}
+We surveyed the implementation of \cc{std::vector} in libc++ and noted the
+following issues:
+\begin{itemize}
+  \item ASAN and debug annotations (like iterator invalidation checks) can't
+        work in \cc{constexpr}.
+  \item Assertions won't work in \cc{constexpr}.
+  \item \cc{pointer_traits<T*>::pointer_to} is used but is not currently
+        \cc{constexpr}.
+  \item Try-catch blocks are used in some places (e.g. \cc{std::vector::insert}),
+        but those can't appear in \cc{constexpr}.
+  \item Note that making \cc{std::swap} \cc{constexpr} is not a problem since
+        the resolution of \cite{P0859R0}, according to Richard Smith.
+\end{itemize}
+
+Assertion and ASAN annotations can be handled by having a mechanism to detect
+when a function is evaluated as part of a constant expression, as proposed in
+\cite{P0595R0}.
+
+\cc{std::pointer_traits} can be made \cc{constexpr}; this is handled by
+P1006, which should be published in the same mailing as this paper.
+
+Try-catch blocks could be allowed inside \cc{constexpr}; this is handled by
+P1002, which should be published in the same mailing as this paper.
+
+
+\section{Proposed wording}
+This wording is based on the working draft \cite{N4727}. We basically mark
+all the member and non-member functions of \cc{std::vector} \cc{constexpr}.
+
+Change in \textbf{[vector.syn] 26.3.6}:
+\begin{quote}
+\begin{codeblock}
+#include <initializer_list>
+
+namespace std {
+  // 26.3.11, class template \tcode{vector}
+  template<class T, class Allocator = allocator<T>> class vector;
+
+  template<class T, class Allocator>
+    @\added{constexpr}@ bool operator==(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+  template<class T, class Allocator>
+    @\added{constexpr}@ bool operator< (const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+  template<class T, class Allocator>
+    @\added{constexpr}@ bool operator!=(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+  template<class T, class Allocator>
+    @\added{constexpr}@ bool operator> (const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+  template<class T, class Allocator>
+    @\added{constexpr}@ bool operator>=(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+  template<class T, class Allocator>
+    @\added{constexpr}@ bool operator<=(const vector<T, Allocator>& x, const vector<T, Allocator>& y);
+
+  template<class T, class Allocator>
+    @\added{constexpr}@ void swap(vector<T, Allocator>& x, vector<T, Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
+
+  [...]
+}
+\end{codeblock}
+\end{quote}
+
+Change in \textbf{[vector.overview] 26.3.11.1}:
+\begin{quote}
+\begin{codeblock}
+namespace std {
+  template<class T, class Allocator = allocator<T>>
+  class vector {
+  public:
+    // types
+    using value_type             = T;
+    using allocator_type         = Allocator;
+    using pointer                = typename allocator_traits<Allocator>::pointer;
+    using const_pointer          = typename allocator_traits<Allocator>::const_pointer;
+    using reference              = value_type&;
+    using const_reference        = const value_type&;
+    using size_type              = @\impdef@; // see 26.2
+    using difference_type        = @\impdef@; // see 26.2
+    using iterator               = @\impdef@; // see 26.2
+    using const_iterator         = @\impdef@; // see 26.2
+    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+    // 26.3.11.2, construct/copy/destroy
+    @\added{constexpr}@ vector() noexcept(noexcept(Allocator())) : vector(Allocator()) { }
+    @\added{constexpr}@ explicit vector(const Allocator&) noexcept;
+    @\added{constexpr}@ explicit vector(size_type n, const Allocator& = Allocator());
+    @\added{constexpr}@ vector(size_type n, const T& value, const Allocator& = Allocator());
+    template<class InputIterator>
+      @\added{constexpr}@ vector(InputIterator first, InputIterator last, const Allocator& = Allocator());
+    @\added{constexpr}@ vector(const vector& x);
+    @\added{constexpr}@ vector(vector&&) noexcept;
+    @\added{constexpr}@ vector(const vector&, const Allocator&);
+    @\added{constexpr}@ vector(vector&&, const Allocator&);
+    @\added{constexpr}@ vector(initializer_list<T>, const Allocator& = Allocator());
+    @\added{constexpr}@ ~vector();
+    @\added{constexpr}@ vector& operator=(const vector& x);
+    @\added{constexpr}@ vector& operator=(vector&& x)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
+    @\added{constexpr}@ vector& operator=(initializer_list<T>);
+    template<class InputIterator>
+      @\added{constexpr}@ void assign(InputIterator first, InputIterator last);
+    @\added{constexpr}@ void assign(size_type n, const T& u);
+    @\added{constexpr}@ void assign(initializer_list<T>);
+    @\added{constexpr}@ allocator_type get_allocator() const noexcept;
+
+    // iterators
+    @\added{constexpr}@ iterator               begin() noexcept;
+    @\added{constexpr}@ const_iterator         begin() const noexcept;
+    @\added{constexpr}@ iterator               end() noexcept;
+    @\added{constexpr}@ const_iterator         end() const noexcept;
+    @\added{constexpr}@ reverse_iterator       rbegin() noexcept;
+    @\added{constexpr}@ const_reverse_iterator rbegin() const noexcept;
+    @\added{constexpr}@ reverse_iterator       rend() noexcept;
+    @\added{constexpr}@ const_reverse_iterator rend() const noexcept;
+
+    @\added{constexpr}@ const_iterator         cbegin() const noexcept;
+    @\added{constexpr}@ const_iterator         cend() const noexcept;
+    @\added{constexpr}@ const_reverse_iterator crbegin() const noexcept;
+    @\added{constexpr}@ const_reverse_iterator crend() const noexcept;
+
+    // 26.3.11.3, capacity
+    @\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+    @\added{constexpr}@ size_type size() const noexcept;
+    @\added{constexpr}@ size_type max_size() const noexcept;
+    @\added{constexpr}@ size_type capacity() const noexcept;
+    @\added{constexpr}@ void      resize(size_type sz);
+    @\added{constexpr}@ void      resize(size_type sz, const T& c);
+    @\added{constexpr}@ void      reserve(size_type n);
+    @\added{constexpr}@ void      shrink_to_fit();
+
+    // element access
+    @\added{constexpr}@ reference       operator[](size_type n);
+    @\added{constexpr}@ const_reference operator[](size_type n) const;
+    @\added{constexpr}@ const_reference at(size_type n) const;
+    @\added{constexpr}@ reference       at(size_type n);
+    @\added{constexpr}@ reference       front();
+    @\added{constexpr}@ const_reference front() const;
+    @\added{constexpr}@ reference       back();
+    @\added{constexpr}@ const_reference back() const;
+
+    // 26.3.11.4, data access
+    @\added{constexpr}@ T*       data() noexcept;
+    @\added{constexpr}@ const T* data() const noexcept;
+
+    // 26.3.11.5, modifiers
+    template<class... Args> @\added{constexpr}@ reference emplace_back(Args&&... args);
+    @\added{constexpr}@ void push_back(const T& x);
+    @\added{constexpr}@ void push_back(T&& x);
+    @\added{constexpr}@ void pop_back();
+
+    template<class... Args> @\added{constexpr}@ iterator emplace(const_iterator position, Args&&... args);
+    @\added{constexpr}@ iterator insert(const_iterator position, const T& x);
+    @\added{constexpr}@ iterator insert(const_iterator position, T&& x);
+    @\added{constexpr}@ iterator insert(const_iterator position, size_type n, const T& x);
+    template<class InputIterator>
+      @\added{constexpr}@ iterator insert(const_iterator position, InputIterator first, InputIterator last);
+    @\added{constexpr}@ iterator insert(const_iterator position, initializer_list<T> il);
+    @\added{constexpr}@ iterator erase(const_iterator position);
+    @\added{constexpr}@ iterator erase(const_iterator first, const_iterator last);
+    @\added{constexpr}@ void     swap(vector&)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
+    @\added{constexpr}@ void     clear() noexcept;
+  };
+
+  template<class InputIterator,
+           class Allocator = allocator<typename iterator_traits<InputIterator>::value_type>>
+    @\added{constexpr}@ vector(InputIterator, InputIterator, Allocator = Allocator())
+      -> vector<typename iterator_traits<InputIterator>::value_type, Allocator>;
+
+  // 26.3.11.6, specialized algorithms
+  template<class T, class Allocator>
+    @\added{constexpr}@ void swap(vector<T, Allocator>& x, vector<T, Allocator>& y)
+      noexcept(noexcept(x.swap(y)));
+}
+\end{codeblock}%
+\end{quote}
+
+Change in \textbf{[vector.cons] 26.3.11.2}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ explicit vector(const Allocator&);
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ explicit vector(size_type n, const Allocator& = Allocator());
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ vector(size_type n, const T& value,
+                           const Allocator& = Allocator());
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+template<class InputIterator>
+  @\added{constexpr}@ vector(InputIterator first, InputIterator last,
+                             const Allocator& = Allocator());
+\end{itemdecl}
+[...]
+\end{quote}
+
+Change in \textbf{[vector.capacity] 26.3.11.3}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ size_type capacity() const noexcept;
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ void reserve(size_type n);
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ void shrink_to_fit();
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ void swap(vector& x)
+  noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
+           allocator_traits<Allocator>::is_always_equal::value);
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ void resize(size_type sz);
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ void resize(size_type sz, const T& c);
+\end{itemdecl}
+[...]
+\end{quote}
+
+Change in \textbf{[vector.data] 26.3.11.4}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ T*         data() noexcept;
+@\added{constexpr}@ const T*   data() const noexcept;
+\end{itemdecl}
+\end{quote}
+
+Change in \textbf{[vector.modifiers] 26.3.11.5}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ iterator insert(const_iterator position, const T& x);
+@\added{constexpr}@ iterator insert(const_iterator position, T&& x);
+@\added{constexpr}@ iterator insert(const_iterator position, size_type n, const T& x);
+template<class InputIterator>
+  @\added{constexpr}@ iterator insert(const_iterator position, InputIterator first, InputIterator last);
+@\added{constexpr}@ iterator insert(const_iterator position, initializer_list<T>);
+
+template<class... Args> @\added{constexpr}@ reference emplace_back(Args&&... args);
+template<class... Args> @\added{constexpr}@ iterator emplace(const_iterator position, Args&&... args);
+@\added{constexpr}@ void push_back(const T& x);
+@\added{constexpr}@ void push_back(T&& x);
+\end{itemdecl}
+[...]
+\begin{itemdecl}
+@\added{constexpr}@ iterator erase(const_iterator position);
+@\added{constexpr}@ iterator erase(const_iterator first, const_iterator last);
+@\added{constexpr}@ void pop_back();
+\end{itemdecl}
+\end{quote}
+
+Change in \textbf{[vector.special] 26.3.11.6}:
+\begin{quote}
+\begin{itemdecl}
+template<class T, class Allocator>
+  @\added{constexpr}@ void swap(vector<T, Allocator>& x, vector<T, Allocator>& y)
+    noexcept(noexcept(x.swap(y)));
+\end{itemdecl}
+\end{quote}
+
+Change in \textbf{[vector.bool] 26.3.12/1}:
+\begin{quote}
+To optimize space allocation, a specialization of vector for \tcode{bool}
+elements is provided \added{(we are sorry)}:
+
+\begin{codeblock}
+namespace std {
+  template<class Allocator>
+  class vector<bool, Allocator> {
+  public:
+    // types
+    using value_type             = bool;
+    using allocator_type         = Allocator;
+    using pointer                = @\impdef@;
+    using const_pointer          = @\impdef@;
+    using const_reference        = bool;
+    using size_type              = @\impdef@; // see 26.2
+    using difference_type        = @\impdef@; // see 26.2
+    using iterator               = @\impdef@; // see 26.2
+    using const_iterator         = @\impdef@; // see 26.2
+    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+    // bit reference
+    class reference {
+      friend class vector;
+      @\added{constexpr}@ reference() noexcept;
+    public:
+      @\added{constexpr}@ ~reference();
+      @\added{constexpr}@ operator bool() const noexcept;
+      @\added{constexpr}@ reference& operator=(const bool x) noexcept;
+      @\added{constexpr}@ reference& operator=(const reference& x) noexcept;
+      @\added{constexpr}@ void flip() noexcept;     // flips the bit
+    };
+
+    // construct/copy/destroy
+    @\added{constexpr}@ vector() : vector(Allocator()) { }
+    @\added{constexpr}@ explicit vector(const Allocator&);
+    @\added{constexpr}@ explicit vector(size_type n, const Allocator& = Allocator());
+    @\added{constexpr}@ vector(size_type n, const bool& value, const Allocator& = Allocator());
+    template<class InputIterator>
+      @\added{constexpr}@ vector(InputIterator first, InputIterator last, const Allocator& = Allocator());
+    @\added{constexpr}@ vector(const vector& x);
+    @\added{constexpr}@ vector(vector&& x);
+    @\added{constexpr}@ vector(const vector&, const Allocator&);
+    @\added{constexpr}@ vector(vector&&, const Allocator&);
+    @\added{constexpr}@ vector(initializer_list<bool>, const Allocator& = Allocator()));
+    @\added{constexpr}@ ~vector();
+    @\added{constexpr}@ vector& operator=(const vector& x);
+    @\added{constexpr}@ vector& operator=(vector&& x);
+    @\added{constexpr}@ vector& operator=(initializer_list<bool>);
+    template<class InputIterator>
+      @\added{constexpr}@ void assign(InputIterator first, InputIterator last);
+    @\added{constexpr}@ void assign(size_type n, const bool& t);
+    @\added{constexpr}@ void assign(initializer_list<bool>);
+    @\added{constexpr}@ allocator_type get_allocator() const noexcept;
+
+    // iterators
+    @\added{constexpr}@ iterator               begin() noexcept;
+    @\added{constexpr}@ const_iterator         begin() const noexcept;
+    @\added{constexpr}@ iterator               end() noexcept;
+    @\added{constexpr}@ const_iterator         end() const noexcept;
+    @\added{constexpr}@ reverse_iterator       rbegin() noexcept;
+    @\added{constexpr}@ const_reverse_iterator rbegin() const noexcept;
+    @\added{constexpr}@ reverse_iterator       rend() noexcept;
+    @\added{constexpr}@ const_reverse_iterator rend() const noexcept;
+
+    @\added{constexpr}@ const_iterator         cbegin() const noexcept;
+    @\added{constexpr}@ const_iterator         cend() const noexcept;
+    @\added{constexpr}@ const_reverse_iterator crbegin() const noexcept;
+    @\added{constexpr}@ const_reverse_iterator crend() const noexcept;
+
+    // capacity
+    @\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+    @\added{constexpr}@ size_type size() const noexcept;
+    @\added{constexpr}@ size_type max_size() const noexcept;
+    @\added{constexpr}@ size_type capacity() const noexcept;
+    @\added{constexpr}@ void      resize(size_type sz, bool c = false);
+    @\added{constexpr}@ void      reserve(size_type n);
+    @\added{constexpr}@ void      shrink_to_fit();
+
+    // element access
+    @\added{constexpr}@ reference       operator[](size_type n);
+    @\added{constexpr}@ const_reference operator[](size_type n) const;
+    @\added{constexpr}@ const_reference at(size_type n) const;
+    @\added{constexpr}@ reference       at(size_type n);
+    @\added{constexpr}@ reference       front();
+    @\added{constexpr}@ const_reference front() const;
+    @\added{constexpr}@ reference       back();
+    @\added{constexpr}@ const_reference back() const;
+
+    // modifiers
+    template<class... Args> @\added{constexpr}@ reference emplace_back(Args&&... args);
+    @\added{constexpr}@ void push_back(const bool& x);
+    @\added{constexpr}@ void pop_back();
+    template<class... Args> @\added{constexpr}@ iterator emplace(const_iterator position, Args&&... args);
+    @\added{constexpr}@ iterator insert(const_iterator position, const bool& x);
+    @\added{constexpr}@ iterator insert(const_iterator position, size_type n, const bool& x);
+    template<class InputIterator>
+      @\added{constexpr}@ iterator insert(const_iterator position, InputIterator first, InputIterator last);
+    @\added{constexpr}@ iterator insert(const_iterator position, initializer_list<bool> il);
+
+    @\added{constexpr}@ iterator erase(const_iterator position);
+    @\added{constexpr}@ iterator erase(const_iterator first, const_iterator last);
+    @\added{constexpr}@ void swap(vector&);
+    @\added{constexpr}@ static void swap(reference x, reference y) noexcept;
+    @\added{constexpr}@ void flip() noexcept;       // flips all bits
+    @\added{constexpr}@ void clear() noexcept;
+  };
+}
+\end{codeblock}%
+\end{quote}
+
+Change in \textbf{[vector.bool] 26.3.12/4}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ void flip() noexcept;
+\end{itemdecl}
+\end{quote}
+
+Change in \textbf{[vector.bool] 26.3.12/5}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ static void swap(reference x, reference y) noexcept;
+\end{itemdecl}
+\end{quote}
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+\bibitem[N4727]{N4727}
+  Richard Smith,
+  \emph{Working Draft, Standard for Programming Language C++}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+
+\bibitem[P0784R1]{P0784R1}
+  Multiple authors,
+  \emph{Standard containers and constexpr}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0784r1.html}
+
+\bibitem[P0859R0]{P0859R0}
+  Richard Smith,
+  \emph{Core Issue 1581: When are constexpr member functions defined?}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0859r0.html}
+
+\bibitem[P0595R0]{P0595R0}
+  David Vandevoorde,
+  \emph{The constexpr Operator}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0595r0.html}
+
+\end{thebibliography}
+
+\end{document}
