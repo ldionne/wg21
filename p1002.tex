@@ -1,0 +1,119 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Try-catch blocks in constexpr functions}
+\docnumber{D1002R0}
+\audience{Evolution Working Group}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+
+\section{Proposal}
+Try-catch blocks can't currently appear in \cc{constexpr} functions:
+
+\begin{cpp}
+  constexpr int f(int x) {
+    try { return x + 1; } // ERROR: can't appear in constexpr function
+    catch (...) { return 0; }
+  }
+\end{cpp}
+
+This paper proposes allowing this usage, but without changing the fact that
+a \cc{throw} statement can't appear in a constant expression. This way,
+compilation errors are still triggered by throwing in a \cc{constexpr}
+function, and hence a \cc{catch} block is simply never entered. In other
+words, try blocks are allowed in \cc{constexpr} functions, but they behave
+like no-ops when the function is evaluated as a constant expression.
+
+This proposal does not close the door to implementing error-handling in
+\cc{constexpr} functions in the future if we so desire.
+
+This proposal does not break any code, since \cc{constexpr} functions that
+contain try-catch blocks are currently ill-formed.
+
+
+\section{Motivation}
+The underlying motivation is reflection and metaprogramming, just like
+\cite{P0784R1}. Concretely, this limitation was encountered whilst surveying
+\cc{std::vector} in libc++ with the purpose of making it \cc{constexpr}-enabled.
+Indeed, \cc{vector::insert} uses a try-catch block to provide the strong
+exception guarantee.
+
+
+\section{Proposed wording}
+This wording is based on the working draft \cite{N4727}. Change in
+\textbf{[dcl.constexpr] 10.1.5/3}:
+
+\begin{quote}
+  The definition of a constexpr function shall satisfy the following requirements:
+  \begin{itemize}
+    \item[--] it shall not be virtual (13.3);
+    \item[--] its return type shall be a literal type;
+    \item[--] each of its parameter types shall be a literal type;
+    \item[--] its \grammarterm{function-body} shall be \texttt{= delete},
+              \texttt{= default}, or a \grammarterm{compound-statement} that
+              does not contain
+      \begin{itemize}
+        \item[--] an \grammarterm{asm-definition},
+        \item[--] a \texttt{goto} statement,
+        \item[--] an identifier label (9.1),\added{ or}
+        \item[--] \removed{a \grammarterm{try-block}, or}
+        \item[--] a definition of a variable of non-literal type or of static
+                  or thread storage duration or for which no initialization is
+                  performed.
+      \end{itemize}
+  \end{itemize}
+\end{quote}
+
+Change in \textbf{[dcl.constexpr] 10.1.5/4}:
+
+\begin{quote}
+  The definition of a constexpr constructor shall satisfy the following requirements:
+  \begin{itemize}
+    \item[--] the class shall not have any virtual base classes;
+    \item[--] each of the parameter types shall be a literal type\removed{;}\added{.}
+    \item[--] \removed{its \grammarterm{function-body} shall not be a \grammarterm{function-try-block}.}
+  \end{itemize}
+\end{quote}
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+  \bibitem[N4727]{N4727}
+    Richard Smith,
+    \emph{Working Draft, Standard for Programming Language C++}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+
+  \bibitem[P0784R1]{P0784R1}
+    Multiple authors,
+    \emph{Standard containers and constexpr}\newline
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0784r1.html}
+
+\end{thebibliography}
+
+\end{document}
