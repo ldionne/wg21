@@ -1,0 +1,73 @@
+\documentclass{wg21}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{fullpage}
+\usepackage{parskip}
+\usepackage{csquotes}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{enumitem}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Making \cc{std::string} constexpr}
+\docnumber{D1004R0}
+\audience{LEWG}
+\author{Louis Dionne}{ldionne.2@gmail.com}
+
+\begin{document}
+\maketitle
+
+\section{Abstract}
+\cc{std::string} is not currently \cc{constexpr} friendly. With the loosening
+of requirements on \cc{constexpr} in \cite{P0784R1} and related papers, we
+can now make it so, and we should in order to support the \cc{constexpr}
+reflection effort (and other evident use cases).
+
+
+\section{Encountered issues}
+We surveyed the implementation of \cc{std::string} in libc++ and noted the
+following issues:
+\begin{itemize}
+  \item TODO
+\end{itemize}
+
+
+\section{Proposed wording}
+This wording is based on the working draft \cite{N4727}:
+
+Change in \textbf{[TODO.TODO] x.y.z}:
+\begin{quote}
+TODO
+\end{quote}
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+\bibitem[N4727]{N4727}
+  Richard Smith,
+  \emph{Working Draft, Standard for Programming Language C++}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+
+\bibitem[P0784R1]{P0784R1}
+  Multiple authors,
+  \emph{Standard containers and constexpr}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0784r1.html}
+
+\end{thebibliography}
+
+\end{document}
