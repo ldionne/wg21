@@ -56,8 +56,9 @@ Assertion and ASAN annotations can be handled by having a mechanism to detect
 when a function is evaluated as part of a constant expression, as proposed in
 \cite{P0595R0}.
 
-\cc{std::pointer_traits} can be made \cc{constexpr}; this is handled by
-P1006, which should be published in the same mailing as this paper.
+\cc{std::pointer_traits} can be made \cc{constexpr} in the cases we care about;
+this is handled by P1006, which should be published in the same mailing as this
+paper.
 
 Try-catch blocks could be allowed inside \cc{constexpr}; this is handled by
 P1002, which should be published in the same mailing as this paper.
