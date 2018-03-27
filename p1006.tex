@@ -1,5 +1,8 @@
 \documentclass{wg21}
 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
 \usepackage{xcolor}
 \usepackage{soul}
 \usepackage{ulem}
@@ -36,6 +39,45 @@ As part of the \cc{constexpr} reflection effort, and in particular making
 \cc{constexpr} (it is used in the implementation).
 
 
+\section{Difficulties}
+The standard currently defines a base template \cc{std::pointer_traits} and a
+specialization of it for raw pointers (\cc{std::pointer_traits<T*>}). Marking
+the base template as \cc{constexpr} would imply that all specializations of it
+need to be marked \cc{constexpr} too, since specializations of templates in
+namespace \cc{std} for user-defined types need to retain the same interface
+as the base template. Indeed, per \textbf{[namespace.std] 20.5.4.2.1/1} in
+\cite{N4727}:
+
+\begin{quote}
+  The behavior of a C++ program is undefined if it adds declarations or
+  definitions to namespace \texttt{std} or to a namespace within namespace
+  \texttt{std} unless otherwise specified. A program may add a template
+  specialization for any standard library template to namespace \texttt{std}
+  only if the declaration depends on a user-defined type and the specialization
+  meets the standard library requirements for the original template and is not
+  explicitly prohibited.
+\end{quote}
+
+However, forcing all specializations of \cc{std::pointer_traits} to be marked
+\cc{constexpr} will preclude useful fancy pointer implementations from using
+it, such as \cc{offset_ptr}. \cc{offset_ptr} is a pointer represented as an
+offset from \cc{this}, which is used in memory mapped files and similar
+contexts. The problem with \cc{offset_ptr} is that it uses a \cc{reinterpret_cast}
+internally, which isn't allowed in constant expressions (and the barrier to
+allowing that is very high).
+
+So marking the base template \cc{constexpr} is not an option without changing
+\textbf{[namespace.std]}. The only other option is to mark the specialization
+of \cc{std::pointer_traits} for raw pointers (\cc{std::pointer_traits<T*>}) as
+\cc{constexpr}, which does not seem to validate \textbf{[namespace.std]} because
+it is not a user-provided specialization.
+
+Also note that in practice, we don't expect (and have no use for) \cc{std::vector}
+being \cc{constexpr}-friendly for allocators other than the default allocator,
+which means that we don't really care about making more than \cc{std::pointer_traits<T*>}
+\cc{constexpr}. This is the direction this paper takes.
+
+
 \section{Proposed wording}
 This wording is based on the working draft \cite{N4727}.
 Change in \textbf{[pointer.traits] 23.10.3/1}:
@@ -50,7 +92,7 @@ namespace std {
 
     template<class U> using rebind = @\textit{see below}@;
 
-    static @\added{constexpr}@ pointer pointer_to(@\textit{see below}@ r);
+    static pointer pointer_to(@\textit{see below}@ r);
   };
 
   template<class T> struct pointer_traits<T*> {
@@ -66,6 +108,11 @@ namespace std {
 \end{codeblock}
 \end{quote}
 
+
+
+\section{Acknowledgements}
+Thanks to Ion Gaztañaga for discussing the troubles of \cc{offset_ptr} and
+\cc{constexpr} with me.
 
 
 \section{References}
