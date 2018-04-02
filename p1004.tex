@@ -206,7 +206,7 @@ namespace std {
 
   template<class InputIterator,
            class Allocator = allocator<typename iterator_traits<InputIterator>::value_type>>
-    @\added{constexpr}@ vector(InputIterator, InputIterator, Allocator = Allocator())
+    vector(InputIterator, InputIterator, Allocator = Allocator())
       -> vector<typename iterator_traits<InputIterator>::value_type, Allocator>;
 
   // 26.3.11.6, specialized algorithms
