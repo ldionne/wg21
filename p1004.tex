@@ -23,12 +23,20 @@
 
 
 \title{Making \cc{std::vector} constexpr}
-\docnumber{P1004R0}
+\docnumber{D1004R1}
 \audience{LEWG}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
 \begin{document}
 \maketitle
+
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 -- Specify that \cc{std::vector}'s iterators are constexpr iterators,
+              as defined in \cite{P0858R0}.
+\end{itemize}
+
 
 \section{Abstract}
 \cc{std::vector} is not currently \cc{constexpr} friendly. With the loosening
@@ -68,9 +76,6 @@ P1002, which should be published in the same mailing as this paper.
 This wording is based on the working draft \cite{N4727}. We basically mark
 all the member and non-member functions of \cc{std::vector} \cc{constexpr}.
 
-TODO: Mention that \cc{std::vector}'s iterators must be constexpr iterators,
-as defined in JAX.
-
 Change in \textbf{[vector.syn] 26.3.6}:
 \begin{quote}
 \begin{codeblock}
@@ -100,6 +105,12 @@ namespace std {
   [...]
 }
 \end{codeblock}
+\end{quote}
+
+Add after \textbf{[vector.overview] 26.3.11.1/2}:
+\begin{quote}
+\added{The types \texttt{iterator} and \texttt{const_iterator} satisfy the
+constexpr iterator requirements ([iterator.requirements.general]).}
 \end{quote}
 
 Change in \textbf{[vector.overview] 26.3.11.1}:
@@ -464,6 +475,11 @@ Change in \textbf{[vector.bool] 26.3.12/5}:
   David Vandevoorde,
   \emph{The constexpr Operator}\newline
   \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0595r0.html}
+
+\bibitem[P0858R0]{P0858R0}
+  Antony Polukhin,
+  \emph{Constexpr iterator requirements}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/p0858r0.html}
 
 \end{thebibliography}
 
