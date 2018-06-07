@@ -33,8 +33,12 @@
 \section{Revision history}
 \begin{itemize}
   \item R0 -- Initial draft
-  \item R1 -- Specify that \cc{std::vector}'s iterators are constexpr iterators,
-              as defined in \cite{P0858R0}.
+  \item R1 -- \begin{itemize}
+              \item Per LEWG guidance in RAP, specify that \cc{std::vector}'s
+                    iterators are constexpr iterators, as defined in \cite{P0858R0}.
+              \item Remove an easter egg from the wording -- I don't mess
+                    with LWG.
+              \end{itemize}
 \end{itemize}
 
 
@@ -327,7 +331,7 @@ template<class T, class Allocator>
 Change in \textbf{[vector.bool] 26.3.12/1}:
 \begin{quote}
 To optimize space allocation, a specialization of vector for \tcode{bool}
-elements is provided \added{(we are sorry)}:
+elements is provided:
 
 \begin{codeblock}
 namespace std {
