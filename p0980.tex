@@ -23,9 +23,9 @@
 
 
 \title{Making \cc{std::string} constexpr}
-\docnumber{D1004R0}
+\docnumber{D0980R0}
 \audience{LEWG}
-\author{Louis Dionne}{ldionne.2@gmail.com}
+\author{Louis Dionne}{ldionne@apple.com}
 
 \begin{document}
 \maketitle
@@ -48,11 +48,1412 @@ following issues:
 \section{Proposed wording}
 This wording is based on the working draft \cite{N4727}:
 
-Change in \textbf{[TODO.TODO] x.y.z}:
+Change in \textbf{[string.syn] 20.3.1}:
 \begin{quote}
-TODO
+\begin{codeblock}
+#include <initializer_list>
+
+namespace std {
+  // 20.2, character traits
+  template<class charT> struct char_traits;
+  template<> struct char_traits<char>;
+  template<> struct char_traits<char16_t>;
+  template<> struct char_traits<char32_t>;
+  template<> struct char_traits<wchar_t>;
+
+  // 20.3.2, \tcode{basic_string}
+  template<class charT, class traits = char_traits<charT>, class Allocator = allocator<charT>>
+    class basic_string;
+
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(const basic_string<charT, traits, Allocator>& lhs,
+                const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(basic_string<charT, traits, Allocator>&& lhs,
+                const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(const basic_string<charT, traits, Allocator>& lhs,
+                basic_string<charT, traits, Allocator>&& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(basic_string<charT, traits, Allocator>&& lhs,
+                basic_string<charT, traits, Allocator>&& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(const charT* lhs,
+                const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(const charT* lhs,
+                basic_string<charT, traits, Allocator>&& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(charT lhs,
+                const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(charT lhs,
+                basic_string<charT, traits, Allocator>&& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(const basic_string<charT, traits, Allocator>& lhs,
+                const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(basic_string<charT, traits, Allocator>&& lhs,
+                const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(const basic_string<charT, traits, Allocator>& lhs,
+                charT rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@ basic_string<charT, traits, Allocator>
+      operator+(basic_string<charT, traits, Allocator>&& lhs,
+                charT rhs);
+
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator==(const basic_string<charT, traits, Allocator>& lhs,
+                    const basic_string<charT, traits, Allocator>& rhs) noexcept;
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator==(const charT* lhs,
+                    const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator==(const basic_string<charT, traits, Allocator>& lhs,
+                    const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator!=(const basic_string<charT, traits, Allocator>& lhs,
+                    const basic_string<charT, traits, Allocator>& rhs) noexcept;
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator!=(const charT* lhs,
+                    const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator!=(const basic_string<charT, traits, Allocator>& lhs,
+                    const charT* rhs);
+
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator< (const basic_string<charT, traits, Allocator>& lhs,
+                    const basic_string<charT, traits, Allocator>& rhs) noexcept;
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator< (const basic_string<charT, traits, Allocator>& lhs,
+                    const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator< (const charT* lhs,
+                    const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator> (const basic_string<charT, traits, Allocator>& lhs,
+                    const basic_string<charT, traits, Allocator>& rhs) noexcept;
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator> (const basic_string<charT, traits, Allocator>& lhs,
+                    const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator> (const charT* lhs,
+                    const basic_string<charT, traits, Allocator>& rhs);
+
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator<=(const basic_string<charT, traits, Allocator>& lhs,
+                    const basic_string<charT, traits, Allocator>& rhs) noexcept;
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator<=(const basic_string<charT, traits, Allocator>& lhs,
+                    const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator<=(const charT* lhs,
+                    const basic_string<charT, traits, Allocator>& rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator>=(const basic_string<charT, traits, Allocator>& lhs,
+                    const basic_string<charT, traits, Allocator>& rhs) noexcept;
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator>=(const basic_string<charT, traits, Allocator>& lhs,
+                    const charT* rhs);
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    bool operator>=(const charT* lhs,
+                    const basic_string<charT, traits, Allocator>& rhs);
+
+  // 20.3.3.8, swap
+  template<class charT, class traits, class Allocator>
+    @\added{constexpr}@
+    void swap(basic_string<charT, traits, Allocator>& lhs,
+              basic_string<charT, traits, Allocator>& rhs)
+      noexcept(noexcept(lhs.swap(rhs)));
+
+  // 20.3.3.9, inserters and extractors
+  template<class charT, class traits, class Allocator>
+    basic_istream<charT, traits>&
+      operator>>(basic_istream<charT, traits>& is,
+                 basic_string<charT, traits, Allocator>& str);
+  template<class charT, class traits, class Allocator>
+    basic_ostream<charT, traits>&
+      operator<<(basic_ostream<charT, traits>& os,
+                 const basic_string<charT, traits, Allocator>& str);
+  template<class charT, class traits, class Allocator>
+    basic_istream<charT, traits>&
+      getline(basic_istream<charT, traits>& is,
+              basic_string<charT, traits, Allocator>& str,
+              charT delim);
+  template<class charT, class traits, class Allocator>
+    basic_istream<charT, traits>&
+      getline(basic_istream<charT, traits>&& is,
+              basic_string<charT, traits, Allocator>& str,
+              charT delim);
+  template<class charT, class traits, class Allocator>
+    basic_istream<charT, traits>&
+      getline(basic_istream<charT, traits>& is,
+              basic_string<charT, traits, Allocator>& str);
+  template<class charT, class traits, class Allocator>
+    basic_istream<charT, traits>&
+      getline(basic_istream<charT, traits>&& is,
+              basic_string<charT, traits, Allocator>& str);
+
+  // \tcode{basic_string} typedef names
+  using string    = basic_string<char>;
+  using u16string = basic_string<char16_t>;
+  using u32string = basic_string<char32_t>;
+  using wstring   = basic_string<wchar_t>;
+
+  // 20.3.4, numeric conversions
+  int stoi(const string& str, size_t* idx = nullptr, int base = 10);
+  long stol(const string& str, size_t* idx = nullptr, int base = 10);
+  unsigned long stoul(const string& str, size_t* idx = nullptr, int base = 10);
+  long long stoll(const string& str, size_t* idx = nullptr, int base = 10);
+  unsigned long long stoull(const string& str, size_t* idx = nullptr, int base = 10);
+  float stof(const string& str, size_t* idx = nullptr);
+  double stod(const string& str, size_t* idx = nullptr);
+  long double stold(const string& str, size_t* idx = nullptr);
+  string to_string(int val);
+  string to_string(unsigned val);
+  string to_string(long val);
+  string to_string(unsigned long val);
+  string to_string(long long val);
+  string to_string(unsigned long long val);
+  string to_string(float val);
+  string to_string(double val);
+  string to_string(long double val);
+
+  int stoi(const wstring& str, size_t* idx = nullptr, int base = 10);
+  long stol(const wstring& str, size_t* idx = nullptr, int base = 10);
+  unsigned long stoul(const wstring& str, size_t* idx = nullptr, int base = 10);
+  long long stoll(const wstring& str, size_t* idx = nullptr, int base = 10);
+  unsigned long long stoull(const wstring& str, size_t* idx = nullptr, int base = 10);
+  float stof(const wstring& str, size_t* idx = nullptr);
+  double stod(const wstring& str, size_t* idx = nullptr);
+  long double stold(const wstring& str, size_t* idx = nullptr);
+  wstring to_wstring(int val);
+  wstring to_wstring(unsigned val);
+  wstring to_wstring(long val);
+  wstring to_wstring(unsigned long val);
+  wstring to_wstring(long long val);
+  wstring to_wstring(unsigned long long val);
+  wstring to_wstring(float val);
+  wstring to_wstring(double val);
+  wstring to_wstring(long double val);
+
+  namespace pmr {
+    template<class charT, class traits = char_traits<charT>>
+      using basic_string = std::basic_string<charT, traits, polymorphic_allocator<charT>>;
+
+    using string    = basic_string<char>;
+    using u16string = basic_string<char16_t>;
+    using u32string = basic_string<char32_t>;
+    using wstring   = basic_string<wchar_t>;
+  }
+
+  // 20.3.5, hash support
+  template<class T> struct hash;
+  template<> struct hash<string>;
+  template<> struct hash<u16string>;
+  template<> struct hash<u32string>;
+  template<> struct hash<wstring>;
+  template<> struct hash<pmr::string>;
+  template<> struct hash<pmr::u16string>;
+  template<> struct hash<pmr::u32string>;
+  template<> struct hash<pmr::wstring>;
+
+  inline namespace literals {
+  inline namespace string_literals {
+    // 20.3.6, suffix for \tcode{basic_string} literals
+    @\added{constexpr}@ string    operator""s(const char* str, size_t len);
+    @\added{constexpr}@ u16string operator""s(const char16_t* str, size_t len);
+    @\added{constexpr}@ u32string operator""s(const char32_t* str, size_t len);
+    @\added{constexpr}@ wstring   operator""s(const wchar_t* str, size_t len);
+  }
+  }
+}
+\end{codeblock}
 \end{quote}
 
+In \textbf{[basic.string]/20.3.2}:
+\begin{codeblock}
+namespace std {
+  template<class charT, class traits = char_traits<charT>,
+           class Allocator = allocator<charT>>
+  class basic_string {
+  public:
+    // types
+    using traits_type            = traits;
+    using value_type             = charT;
+    using allocator_type         = Allocator;
+    using size_type              = typename allocator_traits<Allocator>::size_type;
+    using difference_type        = typename allocator_traits<Allocator>::difference_type;
+    using pointer                = typename allocator_traits<Allocator>::pointer;
+    using const_pointer          = typename allocator_traits<Allocator>::const_pointer;
+    using reference              = value_type&;
+    using const_reference        = const value_type&;
+
+    using iterator               = @\impdefx{type of \tcode{basic_string::iterator}}@; // see \ref{container.requirements}
+    using const_iterator         = @\impdefx{type of \tcode{basic_string::const_iterator}}@; // see \ref{container.requirements}
+    using reverse_iterator       = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    static const size_type npos  = -1;
+
+    // 20.3.2.2, construct/copy/destroy
+    @\added{constexpr}@ basic_string() noexcept(noexcept(Allocator())) : basic_string(Allocator()) { }
+    @\added{constexpr}@ explicit basic_string(const Allocator& a) noexcept;
+    @\added{constexpr}@ basic_string(const basic_string& str);
+    @\added{constexpr}@ basic_string(basic_string&& str) noexcept;
+    @\added{constexpr}@ basic_string(const basic_string& str, size_type pos, const Allocator& a = Allocator());
+    @\added{constexpr}@ basic_string(const basic_string& str, size_type pos, size_type n,
+                                     const Allocator& a = Allocator());
+    template<class T>
+      @\added{constexpr}@ basic_string(const T& t, size_type pos, size_type n, const Allocator& a = Allocator());
+    template<class T>
+      @\added{constexpr}@ explicit basic_string(const T& t, const Allocator& a = Allocator());
+    @\added{constexpr}@ basic_string(const charT* s, size_type n, const Allocator& a = Allocator());
+    @\added{constexpr}@ basic_string(const charT* s, const Allocator& a = Allocator());
+    @\added{constexpr}@ basic_string(size_type n, charT c, const Allocator& a = Allocator());
+    template<class InputIterator>
+      @\added{constexpr}@ basic_string(InputIterator begin, InputIterator end, const Allocator& a = Allocator());
+    @\added{constexpr}@ basic_string(initializer_list<charT>, const Allocator& = Allocator());
+    @\added{constexpr}@ basic_string(const basic_string&, const Allocator&);
+    @\added{constexpr}@ basic_string(basic_string&&, const Allocator&);
+
+    @\added{constexpr}@ ~basic_string();
+    @\added{constexpr}@ basic_string& operator=(const basic_string& str);
+    @\added{constexpr}@ basic_string& operator=(basic_string&& str)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
+    template<class T>
+      @\added{constexpr}@ basic_string& operator=(const T& t);
+    @\added{constexpr}@ basic_string& operator=(const charT* s);
+    @\added{constexpr}@ basic_string& operator=(charT c);
+    @\added{constexpr}@ basic_string& operator=(initializer_list<charT>);
+
+    // 20.3.2.3, iterators
+    @\added{constexpr}@ iterator       begin() noexcept;
+    @\added{constexpr}@ const_iterator begin() const noexcept;
+    @\added{constexpr}@ iterator       end() noexcept;
+    @\added{constexpr}@ const_iterator end() const noexcept;
+
+    @\added{constexpr}@ reverse_iterator       rbegin() noexcept;
+    @\added{constexpr}@ const_reverse_iterator rbegin() const noexcept;
+    @\added{constexpr}@ reverse_iterator       rend() noexcept;
+    @\added{constexpr}@ const_reverse_iterator rend() const noexcept;
+
+    @\added{constexpr}@ const_iterator         cbegin() const noexcept;
+    @\added{constexpr}@ const_iterator         cend() const noexcept;
+    @\added{constexpr}@ const_reverse_iterator crbegin() const noexcept;
+    @\added{constexpr}@ const_reverse_iterator crend() const noexcept;
+
+    // 20.3.2.4, capacity
+    @\added{constexpr}@ size_type size() const noexcept;
+    @\added{constexpr}@ size_type length() const noexcept;
+    @\added{constexpr}@ size_type max_size() const noexcept;
+    @\added{constexpr}@ void resize(size_type n, charT c);
+    @\added{constexpr}@ void resize(size_type n);
+    @\added{constexpr}@ size_type capacity() const noexcept;
+    @\added{constexpr}@ void reserve(size_type res_arg);
+    @\added{constexpr}@ void shrink_to_fit();
+    @\added{constexpr}@ void clear() noexcept;
+    @\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+
+    // 20.3.2.5, element access
+    @\added{constexpr}@ const_reference operator[](size_type pos) const;
+    @\added{constexpr}@ reference       operator[](size_type pos);
+    @\added{constexpr}@ const_reference at(size_type n) const;
+    @\added{constexpr}@ reference       at(size_type n);
+
+    @\added{constexpr}@ const charT& front() const;
+    @\added{constexpr}@ charT&       front();
+    @\added{constexpr}@ const charT& back() const;
+    @\added{constexpr}@ charT&       back();
+
+    // 20.3.2.6, modifiers
+    @\added{constexpr}@ basic_string& operator+=(const basic_string& str);
+    template<class T>
+      @\added{constexpr}@ basic_string& operator+=(const T& t);
+    @\added{constexpr}@ basic_string& operator+=(const charT* s);
+    @\added{constexpr}@ basic_string& operator+=(charT c);
+    @\added{constexpr}@ basic_string& operator+=(initializer_list<charT>);
+    @\added{constexpr}@ basic_string& append(const basic_string& str);
+    @\added{constexpr}@ basic_string& append(const basic_string& str, size_type pos, size_type n = npos);
+    template<class T>
+      @\added{constexpr}@ basic_string& append(const T& t);
+    template<class T>
+      @\added{constexpr}@ basic_string& append(const T& t, size_type pos, size_type n = npos);
+    @\added{constexpr}@ basic_string& append(const charT* s, size_type n);
+    @\added{constexpr}@ basic_string& append(const charT* s);
+    @\added{constexpr}@ basic_string& append(size_type n, charT c);
+    template<class InputIterator>
+      @\added{constexpr}@ basic_string& append(InputIterator first, InputIterator last);
+    @\added{constexpr}@ basic_string& append(initializer_list<charT>);
+
+    @\added{constexpr}@ void push_back(charT c);
+
+    @\added{constexpr}@ basic_string& assign(const basic_string& str);
+    @\added{constexpr}@ basic_string& assign(basic_string&& str)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
+    @\added{constexpr}@ basic_string& assign(const basic_string& str, size_type pos, size_type n = npos);
+    template<class T>
+      @\added{constexpr}@ basic_string& assign(const T& t);
+    template<class T>
+      @\added{constexpr}@ basic_string& assign(const T& t, size_type pos, size_type n = npos);
+    @\added{constexpr}@ basic_string& assign(const charT* s, size_type n);
+    @\added{constexpr}@ basic_string& assign(const charT* s);
+    @\added{constexpr}@ basic_string& assign(size_type n, charT c);
+    template<class InputIterator>
+      @\added{constexpr}@ basic_string& assign(InputIterator first, InputIterator last);
+    @\added{constexpr}@ basic_string& assign(initializer_list<charT>);
+
+    @\added{constexpr}@ basic_string& insert(size_type pos, const basic_string& str);
+    @\added{constexpr}@ basic_string& insert(size_type pos1, const basic_string& str,
+                                             size_type pos2, size_type n = npos);
+    template<class T>
+      @\added{constexpr}@ basic_string& insert(size_type pos, const T& t);
+    template<class T>
+      @\added{constexpr}@ basic_string& insert(size_type pos1, const T& t, size_type pos2, size_type n = npos);
+    @\added{constexpr}@ basic_string& insert(size_type pos, const charT* s, size_type n);
+    @\added{constexpr}@ basic_string& insert(size_type pos, const charT* s);
+    @\added{constexpr}@ basic_string& insert(size_type pos, size_type n, charT c);
+    @\added{constexpr}@ iterator insert(const_iterator p, charT c);
+    @\added{constexpr}@ iterator insert(const_iterator p, size_type n, charT c);
+    template<class InputIterator>
+      @\added{constexpr}@ iterator insert(const_iterator p, InputIterator first, InputIterator last);
+    @\added{constexpr}@ iterator insert(const_iterator p, initializer_list<charT>);
+
+    @\added{constexpr}@ basic_string& erase(size_type pos = 0, size_type n = npos);
+    @\added{constexpr}@ iterator erase(const_iterator p);
+    @\added{constexpr}@ iterator erase(const_iterator first, const_iterator last);
+
+    @\added{constexpr}@ void pop_back();
+
+    @\added{constexpr}@ basic_string& replace(size_type pos1, size_type n1, const basic_string& str);
+    @\added{constexpr}@ basic_string& replace(size_type pos1, size_type n1, const basic_string& str,
+                                              size_type pos2, size_type n2 = npos);
+    template<class T>
+      @\added{constexpr}@ basic_string& replace(size_type pos1, size_type n1, const T& t);
+    template<class T>
+      @\added{constexpr}@ basic_string& replace(size_type pos1, size_type n1, const T& t,
+                                                size_type pos2, size_type n2 = npos);
+    @\added{constexpr}@ basic_string& replace(size_type pos, size_type n1, const charT* s, size_type n2);
+    @\added{constexpr}@ basic_string& replace(size_type pos, size_type n1, const charT* s);
+    @\added{constexpr}@ basic_string& replace(size_type pos, size_type n1, size_type n2, charT c);
+
+    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const basic_string& str);
+    template<class T>
+      @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const T& t);
+    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
+    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const charT* s);
+    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, size_type n, charT c);
+    template<class InputIterator>
+      @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2,
+                                                InputIterator j1, InputIterator j2);
+    @\added{constexpr}@ basic_string& replace(const_iterator, const_iterator, initializer_list<charT>);
+
+    @\added{constexpr}@ size_type copy(charT* s, size_type n, size_type pos = 0) const;
+
+    @\added{constexpr}@ void swap(basic_string& str)
+      noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
+               allocator_traits<Allocator>::is_always_equal::value);
+
+    // 20.3.2.7, string operations
+    @\added{constexpr}@ const charT* c_str() const noexcept;
+    @\added{constexpr}@ const charT* data() const noexcept;
+    @\added{constexpr}@ charT* data() noexcept;
+    @\added{constexpr}@ operator basic_string_view<charT, traits>() const noexcept;
+    @\added{constexpr}@ allocator_type get_allocator() const noexcept;
+
+    template<class T>
+      @\added{constexpr}@ size_type find (const T& t, size_type pos = 0) const;
+    @\added{constexpr}@ size_type find (const basic_string& str, size_type pos = 0) const noexcept;
+    @\added{constexpr}@ size_type find (const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type find (const charT* s, size_type pos = 0) const;
+    @\added{constexpr}@ size_type find (charT c, size_type pos = 0) const;
+    template<class T>
+      @\added{constexpr}@ size_type rfind(const T& t, size_type pos = npos) const;
+    @\added{constexpr}@ size_type rfind(const basic_string& str, size_type pos = npos) const noexcept;
+    @\added{constexpr}@ size_type rfind(const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type rfind(const charT* s, size_type pos = npos) const;
+    @\added{constexpr}@ size_type rfind(charT c, size_type pos = npos) const;
+
+    template<class T>
+      @\added{constexpr}@ size_type find_first_of(const T& t, size_type pos = 0) const;
+    @\added{constexpr}@ size_type find_first_of(const basic_string& str, size_type pos = 0) const noexcept;
+    @\added{constexpr}@ size_type find_first_of(const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type find_first_of(const charT* s, size_type pos = 0) const;
+    @\added{constexpr}@ size_type find_first_of(charT c, size_type pos = 0) const;
+    template<class T>
+      @\added{constexpr}@ size_type find_last_of (const T& t, size_type pos = npos) const;
+    @\added{constexpr}@ size_type find_last_of (const basic_string& str, size_type pos = npos) const noexcept;
+    @\added{constexpr}@ size_type find_last_of (const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type find_last_of (const charT* s, size_type pos = npos) const;
+    @\added{constexpr}@ size_type find_last_of (charT c, size_type pos = npos) const;
+
+    template<class T>
+      @\added{constexpr}@ size_type find_first_not_of(const T& t, size_type pos = 0) const;
+    @\added{constexpr}@ size_type find_first_not_of(const basic_string& str, size_type pos = 0) const noexcept;
+    @\added{constexpr}@ size_type find_first_not_of(const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type find_first_not_of(const charT* s, size_type pos = 0) const;
+    @\added{constexpr}@ size_type find_first_not_of(charT c, size_type pos = 0) const;
+    template<class T>
+      @\added{constexpr}@ size_type find_last_not_of (const T& t, size_type pos = npos) const;
+    @\added{constexpr}@ size_type find_last_not_of (const basic_string& str, size_type pos = npos) const noexcept;
+    @\added{constexpr}@ size_type find_last_not_of (const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type find_last_not_of (const charT* s, size_type pos = npos) const;
+    @\added{constexpr}@ size_type find_last_not_of (charT c, size_type pos = npos) const;
+
+    @\added{constexpr}@ basic_string substr(size_type pos = 0, size_type n = npos) const;
+    template<class T>
+      @\added{constexpr}@ int compare(const T& t) const;
+    template<class T>
+      @\added{constexpr}@ int compare(size_type pos1, size_type n1, const T& t) const;
+    template<class T>
+      @\added{constexpr}@ int compare(size_type pos1, size_type n1, const T& t,
+                                      size_type pos2, size_type n2 = npos) const;
+    @\added{constexpr}@ int compare(const basic_string& str) const noexcept;
+    @\added{constexpr}@ int compare(size_type pos1, size_type n1, const basic_string& str) const;
+    @\added{constexpr}@ int compare(size_type pos1, size_type n1, const basic_string& str,
+                                    size_type pos2, size_type n2 = npos) const;
+    @\added{constexpr}@ int compare(const charT* s) const;
+    @\added{constexpr}@ int compare(size_type pos1, size_type n1, const charT* s) const;
+    @\added{constexpr}@ int compare(size_type pos1, size_type n1, const charT* s, size_type n2) const;
+
+    @\added{constexpr}@ bool starts_with(basic_string_view<charT, traits> x) const noexcept;
+    @\added{constexpr}@ bool starts_with(charT x) const noexcept;
+    @\added{constexpr}@ bool starts_with(const charT* x) const;
+    @\added{constexpr}@ bool ends_with(basic_string_view<charT, traits> x) const noexcept;
+    @\added{constexpr}@ bool ends_with(charT x) const noexcept;
+    @\added{constexpr}@ bool ends_with(const charT* x) const;
+  };
+
+  template<class InputIterator,
+           class Allocator = allocator<typename iterator_traits<InputIterator>::value_type>>
+    basic_string(InputIterator, InputIterator, Allocator = Allocator())
+      -> basic_string<typename iterator_traits<InputIterator>::value_type,
+                      char_traits<typename iterator_traits<InputIterator>::value_type>,
+                      Allocator>;
+
+  template<class charT,
+           class traits,
+           class Allocator = allocator<charT>>
+    explicit basic_string(basic_string_view<charT, traits>, const Allocator& = Allocator())
+      -> basic_string<charT, traits, Allocator>;
+
+  template<class charT,
+           class traits,
+           class Allocator = allocator<charT>>
+    basic_string(basic_string_view<charT, traits>,
+                 typename @\seebelow@::size_type, typename @\seebelow@::size_type,
+                 const Allocator& = Allocator())
+      -> basic_string<charT, traits, Allocator>;
+}
+\end{codeblock}
+
+In \textbf{[string.cons]/20.3.2.2}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ explicit basic_string(const Allocator& a) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(const basic_string& str);
+@\added{constexpr}@ basic_string(basic_string&& str) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(const basic_string& str, size_type pos,
+                                 const Allocator& a = Allocator());
+@\added{constexpr}@ basic_string(const basic_string& str, size_type pos, size_type n,
+                                 const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  @\added{constexpr}@ basic_string(const T& t, size_type pos, size_type n, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{codeblock}
+@\added{constexpr}@ basic_string(sv.substr(pos, n), a);
+\end{codeblock}
+
+\begin{itemdecl}
+template<class T>
+  @\added{constexpr}@ explicit basic_string(const T& t, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(const charT* s, size_type n, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(const charT* s, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(size_type n, charT c, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class InputIterator>
+  @\added{constexpr}@ basic_string(InputIterator begin, InputIterator end, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(initializer_list<charT> il, const Allocator& a = Allocator());
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string(const basic_string& str, const Allocator& alloc);
+@\added{constexpr}@ basic_string(basic_string&& str, const Allocator& alloc);
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string& operator=(const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@basic_string& operator=(basic_string&& str)
+  noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+           allocator_traits<Allocator>::is_always_equal::value);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  @\added{constexpr}@basic_string& operator=(const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string& operator=(const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string& operator=(charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+@\added{constexpr}@ basic_string& operator=(initializer_list<charT> il);
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.iterators]/20.3.2.3}:
+\begin{quote}
+\begin{itemdecl}
+@\added{constexpr}@ iterator       begin() noexcept;
+@\added{constexpr}@ const_iterator begin() const noexcept;
+@\added{constexpr}@ const_iterator cbegin() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+iterator       end() noexcept;
+const_iterator end() const noexcept;
+const_iterator cend() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+reverse_iterator       rbegin() noexcept;
+const_reverse_iterator rbegin() const noexcept;
+const_reverse_iterator crbegin() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+reverse_iterator       rend() noexcept;
+const_reverse_iterator rend() const noexcept;
+const_reverse_iterator crend() const noexcept;
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.capacity]/20.3.2.4}:
+\begin{quote}
+\begin{itemdecl}
+size_type size() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type length() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type max_size() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+void resize(size_type n, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+void resize(size_type n);
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type capacity() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+void reserve(size_type res_arg);
+\end{itemdecl}
+
+\begin{itemdecl}
+void shrink_to_fit();
+\end{itemdecl}
+
+\begin{itemdecl}
+void clear() noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+[[nodiscard]] bool empty() const noexcept;
+\end{itemdecl}
+\end{quote}
+
+
+\rSec3[string.access]{Element access}
+
+In \textbf{[string.access]/20.3.2.5}:
+\begin{quote}
+\begin{itemdecl}
+const_reference operator[](size_type pos) const;
+reference       operator[](size_type pos);
+\end{itemdecl}
+
+\begin{itemdecl}
+const_reference at(size_type pos) const;
+reference       at(size_type pos);
+\end{itemdecl}
+
+\begin{itemdecl}
+const charT& front() const;
+charT& front();
+\end{itemdecl}
+
+\begin{itemdecl}
+const charT& back() const;
+charT& back();
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.modifiers]/20.3.2.6}:
+\begin{quote}
+\begin{itemdecl}
+basic_string& operator+=(const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& operator+=(const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& operator+=(const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& operator+=(charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& operator+=(initializer_list<charT> il);
+\end{itemdecl}
+\end{quote}
+
+
+
+
+In \textbf{[string.append]/20.3.2.6.2}:
+\begin{quote}
+\begin{itemdecl}
+basic_string& append(const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& append(const basic_string& str, size_type pos, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& append(const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& append(const T& t, size_type pos, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& append(const charT* s, size_type n);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& append(const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& append(size_type n, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class InputIterator>
+  basic_string& append(InputIterator first, InputIterator last);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& append(initializer_list<charT> il);
+\end{itemdecl}
+
+\begin{itemdecl}
+void push_back(charT c);
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.assign]/20.3.2.6.3}:
+
+\begin{quote}
+\begin{itemdecl}
+basic_string& assign(const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& assign(basic_string&& str)
+  noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+           allocator_traits<Allocator>::is_always_equal::value);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& assign(const basic_string& str, size_type pos, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& assign(const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& assign(const T& t, size_type pos, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& assign(const charT* s, size_type n);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& assign(const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& assign(initializer_list<charT> il);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& assign(size_type n, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class InputIterator>
+  basic_string& assign(InputIterator first, InputIterator last);
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.insert]/20.3.2.6.4}:
+\begin{quote}
+\begin{itemdecl}
+basic_string& insert(size_type pos, const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& insert(size_type pos1, const basic_string& str, size_type pos2, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& insert(size_type pos, const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& insert(size_type pos1, const T& t, size_type pos2, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& insert(size_type pos, const charT* s, size_type n);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& insert(size_type pos, const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& insert(size_type pos, size_type n, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+iterator insert(const_iterator p, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+iterator insert(const_iterator p, size_type n, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class InputIterator>
+  iterator insert(const_iterator p, InputIterator first, InputIterator last);
+\end{itemdecl}
+
+\begin{itemdecl}
+iterator insert(const_iterator p, initializer_list<charT> il);
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.erase]/20.3.2.6.5}:
+\begin{quote}
+\begin{itemdecl}
+basic_string& erase(size_type pos = 0, size_type n = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+iterator erase(const_iterator p);
+\end{itemdecl}
+
+\begin{itemdecl}
+iterator erase(const_iterator first, const_iterator last);
+\end{itemdecl}
+
+\begin{itemdecl}
+void pop_back();
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.replace]/20.3.2.6.6}:
+\begin{quote}
+\begin{itemdecl}
+basic_string& replace(size_type pos1, size_type n1, const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(size_type pos1, size_type n1, const basic_string& str,
+                      size_type pos2, size_type n2 = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& replace(size_type pos1, size_type n1, const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& replace(size_type pos1, size_type n1, const T& t,
+                        size_type pos2, size_type n2 = npos);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(size_type pos1, size_type n1, const charT* s, size_type n2);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(size_type pos, size_type n, const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(size_type pos1, size_type n1, size_type n2, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(const_iterator i1, const_iterator i2, const basic_string& str);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  basic_string& replace(const_iterator i1, const_iterator i2, const T& t);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(const_iterator i1, const_iterator i2, const charT* s);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(const_iterator i1, const_iterator i2, size_type n, charT c);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class InputIterator>
+  basic_string& replace(const_iterator i1, const_iterator i2, InputIterator j1, InputIterator j2);
+\end{itemdecl}
+
+\begin{itemdecl}
+basic_string& replace(const_iterator i1, const_iterator i2, initializer_list<charT> il);
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.copy]/20.3.2.6.7}:
+\begin{quote}
+\begin{itemdecl}
+size_type copy(charT* s, size_type n, size_type pos = 0) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.swap]/20.3.2.6.8}:
+\begin{quote}
+\begin{itemdecl}
+void swap(basic_string& s)
+  noexcept(allocator_traits<Allocator>::propagate_on_container_swap::value ||
+           allocator_traits<Allocator>::is_always_equal::value);
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.accessors]/20.3.2.7.1}:
+\begin{quote}
+\begin{itemdecl}
+const charT* c_str() const noexcept;
+const charT* data() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+charT* data() noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+operator basic_string_view<charT, traits>() const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+allocator_type get_allocator() const noexcept;
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.find]/20.3.2.7.2}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  size_type find(const T& t, size_type pos = 0) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find(const basic_string& str, size_type pos = 0) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find(const charT* s, size_type pos, size_type n) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find(const charT* s, size_type pos = 0) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find(charT c, size_type pos = 0) const;
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.rfind] 20.3.2.7.3}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  size_type rfind(const T& t, size_type pos = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type rfind(const basic_string& str, size_type pos = npos) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type rfind(const charT* s, size_type pos, size_type n) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type rfind(const charT* s, size_type pos = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type rfind(charT c, size_type pos = npos) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.find.first.of]/20.3.2.7.4}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  size_type find_first_of(const T& t, size_type pos = 0) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_of(const basic_string& str, size_type pos = 0) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_of(const charT* s, size_type pos, size_type n) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_of(const charT* s, size_type pos = 0) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_of(charT c, size_type pos = 0) const;
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.find.last.of]/20.3.2.7.5}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  size_type find_last_of(const T& t, size_type pos = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_of(const basic_string& str, size_type pos = npos) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_of(const charT* s, size_type pos, size_type n) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_of(const charT* s, size_type pos = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_of(charT c, size_type pos = npos) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.find.first.not.of]/20.3.2.7.6}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  size_type find_first_not_of(const T& t, size_type pos = 0) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_not_of(const basic_string& str, size_type pos = 0) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_not_of(const charT* s, size_type pos, size_type n) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_not_of(const charT* s, size_type pos = 0) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_first_not_of(charT c, size_type pos = 0) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.find.last.not.of]/20.3.2.7.7}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  size_type find_last_not_of(const T& t, size_type pos = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_not_of(const basic_string& str, size_type pos = npos) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_not_of(const charT* s, size_type pos, size_type n) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_not_of(const charT* s, size_type pos = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+size_type find_last_not_of(charT c, size_type pos = npos) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.substr]/20.3.2.7.8}:
+\begin{quote}
+\begin{itemdecl}
+basic_string substr(size_type pos = 0, size_type n = npos) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.compare]/20.3.2.7.9}:
+\begin{quote}
+\begin{itemdecl}
+template<class T>
+  int compare(const T& t) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  int compare(size_type pos1, size_type n1, const T& t) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class T>
+  int compare(size_type pos1, size_type n1, const T& t, size_type pos2, size_type n2 = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+int compare(const basic_string& str) const noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+int compare(size_type pos1, size_type n1, const basic_string& str) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+int compare(size_type pos1, size_type n1, const basic_string& str,
+            size_type pos2, size_type n2 = npos) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+int compare(const charT* s) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+int compare(size_type pos, size_type n1, const charT* s) const;
+\end{itemdecl}
+
+\begin{itemdecl}
+int compare(size_type pos, size_type n1, const charT* s, size_type n2) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.starts.with]/20.3.2.7.10}:
+\begin{quote}
+\begin{itemdecl}
+bool starts_with(basic_string_view<charT, traits> x) const noexcept;
+bool starts_with(charT x) const noexcept;
+bool starts_with(const charT* x) const;
+\end{itemdecl}
+\end{quote}
+
+
+In \textbf{[string.ends.with]/20.3.2.7.11}:
+\begin{quote}
+\begin{itemdecl}
+bool ends_with(basic_string_view<charT, traits> x) const noexcept;
+bool ends_with(charT x) const noexcept;
+bool ends_with(const charT* x) const;
+\end{itemdecl}
+\end{quote}
+
+In \textbf{[string.nonmembers]/20.3.3}:
+\begin{quote}
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(const basic_string<charT, traits, Allocator>& lhs,
+              const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(basic_string<charT, traits, Allocator>&& lhs,
+              const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(const basic_string<charT, traits, Allocator>& lhs,
+              basic_string<charT, traits, Allocator>&& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(basic_string<charT, traits, Allocator>&& lhs,
+              basic_string<charT, traits, Allocator>&& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(const charT* lhs, basic_string<charT, traits, Allocator>&& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(charT lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(charT lhs, basic_string<charT, traits, Allocator>&& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(basic_string<charT, traits, Allocator>&& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(const basic_string<charT, traits, Allocator>& lhs, charT rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  basic_string<charT, traits, Allocator>
+    operator+(basic_string<charT, traits, Allocator>&& lhs, charT rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator==(const basic_string<charT, traits, Allocator>& lhs,
+                  const basic_string<charT, traits, Allocator>& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator==(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator==(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator!=(const basic_string<charT, traits, Allocator>& lhs,
+                  const basic_string<charT, traits, Allocator>& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator!=(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator!=(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator<(const basic_string<charT, traits, Allocator>& lhs,
+                 const basic_string<charT, traits, Allocator>& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator<(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator<(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator>(const basic_string<charT, traits, Allocator>& lhs,
+                 const basic_string<charT, traits, Allocator>& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator>(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator>(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator<=(const basic_string<charT, traits, Allocator>& lhs,
+                  const basic_string<charT, traits, Allocator>& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator<=(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator<=(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator>=(const basic_string<charT, traits, Allocator>& lhs,
+                  const basic_string<charT, traits, Allocator>& rhs) noexcept;
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator>=(const charT* lhs, const basic_string<charT, traits, Allocator>& rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  bool operator>=(const basic_string<charT, traits, Allocator>& lhs, const charT* rhs);
+\end{itemdecl}
+
+\begin{itemdecl}
+template<class charT, class traits, class Allocator>
+  void swap(basic_string<charT, traits, Allocator>& lhs,
+            basic_string<charT, traits, Allocator>& rhs)
+    noexcept(noexcept(lhs.swap(rhs)));
+\end{itemdecl}
+\end{quote}
 
 \section{References}
 \renewcommand{\section}[2]{}%
