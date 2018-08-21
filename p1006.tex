@@ -26,12 +26,24 @@
 
 
 \title{Constexpr in \cc{std::pointer_traits}}
-\docnumber{P1006R0}
-\audience{LEWG}
+\docnumber{D1006R1}
+\audience{LWG}
 \author{Louis Dionne}{ldionne.2@gmail.com}
 
 \begin{document}
 \maketitle
+
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 \begin{itemize}
+              \item Add wording in the specification of \cc{std::pointer_traits},
+                    not only the synopsis.
+              \item Add caveat that user-provided specializations of
+                    \cc{std::pointer_traits<T*>} now need to provide
+                    a \cc{constexpr} \cc{pointer_to} method.
+              \end{itemize}
+\end{itemize}
 
 \section{Abstract}
 As part of the \cc{constexpr} reflection effort, and in particular making
@@ -45,17 +57,15 @@ specialization of it for raw pointers (\cc{std::pointer_traits<T*>}). Marking
 the base template as \cc{constexpr} would imply that all specializations of it
 need to be marked \cc{constexpr} too, since specializations of templates in
 namespace \cc{std} for user-defined types need to retain the same interface
-as the base template. Indeed, per \textbf{[namespace.std] 20.5.4.2.1/1} in
-\cite{N4727}:
+as the base template. Indeed, per \textbf{[namespace.std] 15.5.4.2.1/2} in
+\cite{N4762}:
 
 \begin{quote}
-  The behavior of a C++ program is undefined if it adds declarations or
-  definitions to namespace \texttt{std} or to a namespace within namespace
-  \texttt{std} unless otherwise specified. A program may add a template
-  specialization for any standard library template to namespace \texttt{std}
-  only if the declaration depends on a user-defined type and the specialization
-  meets the standard library requirements for the original template and is not
-  explicitly prohibited.
+  Unless explicitly prohibited, a program may add a template specialization for
+  any standard library class template to namespace \texttt{std} provided that
+  (a) the added declaration depends on at least one program-defined type and
+  (b) the specialization meets the standard library requirements for the
+  original template.
 \end{quote}
 
 However, forcing all specializations of \cc{std::pointer_traits} to be marked
@@ -69,7 +79,7 @@ allowing that is very high).
 So marking the base template \cc{constexpr} is not an option without changing
 \textbf{[namespace.std]}. The only other option is to mark the specialization
 of \cc{std::pointer_traits} for raw pointers (\cc{std::pointer_traits<T*>}) as
-\cc{constexpr}, which does not seem to validate \textbf{[namespace.std]} because
+\cc{constexpr}, which does not seem to violate \textbf{[namespace.std]} because
 it is not a user-provided specialization.
 
 Also note that in practice, we don't expect (and have no use for) \cc{std::vector}
@@ -77,11 +87,14 @@ being \cc{constexpr}-friendly for allocators other than the default allocator,
 which means that we don't really care about making more than \cc{std::pointer_traits<T*>}
 \cc{constexpr}. This is the direction this paper takes.
 
+However, it does mean that user-provided specializations of \cc{std::pointer_traits<T*>},
+where \cc{T} is a user-defined type, need to abide by the added \cc{constexpr}
+requirement.
+
 
 \section{Proposed wording}
-This wording is based on the working draft \cite{N4727}.
-Change in \textbf{[pointer.traits] 23.10.3/1}:
-
+This wording is based on the working draft \cite{N4762}.
+Change in \textbf{[pointer.traits] 19.10.3/1}:
 \begin{quote}
 \begin{codeblock}
 namespace std {
@@ -108,6 +121,24 @@ namespace std {
 \end{codeblock}
 \end{quote}
 
+Change in \textbf{[pointer.traits.functions] 19.10.3.2}:
+\begin{quote}
+\textbf{19.10.3.2 Pointer traits member functions [pointer.traits.functions]}
+
+\begin{codeblock}
+static pointer pointer_traits::pointer_to(see below r);
+static @\added{constexpr}@ pointer pointer_traits<T*>::pointer_to(see below r) noexcept;
+\end{codeblock}
+
+\textit{Remarks:} If \texttt{element_type} is \textit{cv} \texttt{void}, the
+type of \texttt{r} is unspecified; otherwise, it is \texttt{element_type\&}.
+
+\textit{Returns:} The first member function returns a pointer to \texttt{r}
+obtained by calling \texttt{Ptr::pointer_to(r)} through which indirection is
+valid; an instantiation of this function is ill-formed if \texttt{Ptr} does
+not have a matching \texttt{pointer_to} static member function. The second
+member function returns \texttt{addressof(r)}.
+\end{quote}
 
 
 \section{Acknowledgements}
@@ -119,10 +150,10 @@ Thanks to Ion Gaztañaga for discussing the troubles of \cc{offset_ptr} and
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
 
-\bibitem[N4727]{N4727}
+\bibitem[N4762]{N4762}
   Richard Smith,
   \emph{Working Draft, Standard for Programming Language C++}\newline
-  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4762.pdf}
 
 \end{thebibliography}
 
