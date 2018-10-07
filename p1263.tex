@@ -26,7 +26,7 @@
 
 
 \title{Controlling the instantiation of vtables and RTTI}
-\docnumber{DXXXXR0}
+\docnumber{P1263R0}
 \audience{EWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -191,8 +191,7 @@ section, we outline a couple of motivations related to ABI control.
   and given \cc{linkonce_odr} linkage.
 
   This technique is unfortunate as it relies on detailed knowledge of how common
-  toolchains work (TODO: or is that specified in the Itanium ABI?), and it may
-  also require creating a dummy virtual function.
+  toolchains work, and it may also require creating a dummy virtual function.
 \end{enumerate}
 
 \section{Open questions}
@@ -200,7 +199,7 @@ Does it make sense to declare the RTTI in a separate TU than the vtable?
 I think the Itanium ABI requires those to be in the same TU.
 
 \section{Proposed wording}
-TODO
+Will be provided on request.
 
 \section{Acknowledgments}
 Thanks to John McCall for the initial idea.
