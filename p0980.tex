@@ -23,7 +23,7 @@
 
 
 \title{Making \cc{std::string} constexpr}
-\docnumber{D0980R0}
+\docnumber{P0980R0}
 \audience{LEWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -41,7 +41,15 @@ reflection effort (and other evident use cases).
 We surveyed the implementation of \cc{std::string} in libc++ and noted the
 following issues:
 \begin{itemize}
-  \item TODO
+  \item We need to make \cc{char_traits} \cc{constexpr} for at least its
+        \cc{char} specialization.
+  \item At least one implementation (libc++) currently explicitly instantiates
+        the \cc{basic_string<char>} in a shared library. We need to investigate
+        whether \cc{constexpr} has any bad interactions with this. We don't
+        suspect this should be the case, as long as the member functions of
+        \cc{basic_string<char>} are defined in the headers.
+  \item We expected the SSO to be a problem, but it is implemented with unions
+        and no \cc{reinterpret_cast}s are required.
 \end{itemize}
 
 
@@ -326,22 +334,30 @@ namespace std {
     static const size_type npos  = -1;
 
     // 20.3.2.2, construct/copy/destroy
-    @\added{constexpr}@ basic_string() noexcept(noexcept(Allocator())) : basic_string(Allocator()) { }
-    @\added{constexpr}@ explicit basic_string(const Allocator& a) noexcept;
-    @\added{constexpr}@ basic_string(const basic_string& str);
-    @\added{constexpr}@ basic_string(basic_string&& str) noexcept;
-    @\added{constexpr}@ basic_string(const basic_string& str, size_type pos, const Allocator& a = Allocator());
-    @\added{constexpr}@ basic_string(const basic_string& str, size_type pos, size_type n,
-                                     const Allocator& a = Allocator());
+    @\added{constexpr}@
+    basic_string() noexcept(noexcept(Allocator())) : basic_string(Allocator()) { }
+    @\added{constexpr}@
+    explicit basic_string(const Allocator& a) noexcept;
+    @\added{constexpr}@
+    basic_string(const basic_string& str);
+    @\added{constexpr}@
+    basic_string(basic_string&& str) noexcept;
+    @\added{constexpr}@
+    basic_string(const basic_string& str, size_type pos, const Allocator& a = Allocator());
+    @\added{constexpr}@
+    basic_string(const basic_string& str, size_type pos, size_type n,
+                 const Allocator& a = Allocator());
     template<class T>
-      @\added{constexpr}@ basic_string(const T& t, size_type pos, size_type n, const Allocator& a = Allocator());
+      @\added{constexpr}@
+      basic_string(const T& t, size_type pos, size_type n, const Allocator& a = Allocator());
     template<class T>
       @\added{constexpr}@ explicit basic_string(const T& t, const Allocator& a = Allocator());
     @\added{constexpr}@ basic_string(const charT* s, size_type n, const Allocator& a = Allocator());
     @\added{constexpr}@ basic_string(const charT* s, const Allocator& a = Allocator());
     @\added{constexpr}@ basic_string(size_type n, charT c, const Allocator& a = Allocator());
     template<class InputIterator>
-      @\added{constexpr}@ basic_string(InputIterator begin, InputIterator end, const Allocator& a = Allocator());
+      @\added{constexpr}@ \
+      basic_string(InputIterator begin, InputIterator end, const Allocator& a = Allocator());
     @\added{constexpr}@ basic_string(initializer_list<charT>, const Allocator& = Allocator());
     @\added{constexpr}@ basic_string(const basic_string&, const Allocator&);
     @\added{constexpr}@ basic_string(basic_string&&, const Allocator&);
@@ -468,12 +484,17 @@ namespace std {
     @\added{constexpr}@ basic_string& replace(size_type pos, size_type n1, const charT* s);
     @\added{constexpr}@ basic_string& replace(size_type pos, size_type n1, size_type n2, charT c);
 
-    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const basic_string& str);
+    @\added{constexpr}@
+    basic_string& replace(const_iterator i1, const_iterator i2, const basic_string& str);
     template<class T>
-      @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const T& t);
-    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
-    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const charT* s);
-    @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, size_type n, charT c);
+      @\added{constexpr}@
+      basic_string& replace(const_iterator i1, const_iterator i2, const T& t);
+    @\added{constexpr}@
+    basic_string& replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
+    @\added{constexpr}@
+    basic_string& replace(const_iterator i1, const_iterator i2, const charT* s);
+    @\added{constexpr}@
+    basic_string& replace(const_iterator i1, const_iterator i2, size_type n, charT c);
     template<class InputIterator>
       @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2,
                                                 InputIterator j1, InputIterator j2);
@@ -519,17 +540,27 @@ namespace std {
     @\added{constexpr}@ size_type find_last_of (charT c, size_type pos = npos) const;
 
     template<class T>
-      @\added{constexpr}@ size_type find_first_not_of(const T& t, size_type pos = 0) const;
-    @\added{constexpr}@ size_type find_first_not_of(const basic_string& str, size_type pos = 0) const noexcept;
-    @\added{constexpr}@ size_type find_first_not_of(const charT* s, size_type pos, size_type n) const;
-    @\added{constexpr}@ size_type find_first_not_of(const charT* s, size_type pos = 0) const;
-    @\added{constexpr}@ size_type find_first_not_of(charT c, size_type pos = 0) const;
+      @\added{constexpr}@
+      size_type find_first_not_of(const T& t, size_type pos = 0) const;
+    @\added{constexpr}@ size_type
+    find_first_not_of(const basic_string& str, size_type pos = 0) const noexcept;
+    @\added{constexpr}@ size_type
+    find_first_not_of(const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@ size_type
+    find_first_not_of(const charT* s, size_type pos = 0) const;
+    @\added{constexpr}@ size_type
+    find_first_not_of(charT c, size_type pos = 0) const;
     template<class T>
-      @\added{constexpr}@ size_type find_last_not_of (const T& t, size_type pos = npos) const;
-    @\added{constexpr}@ size_type find_last_not_of (const basic_string& str, size_type pos = npos) const noexcept;
-    @\added{constexpr}@ size_type find_last_not_of (const charT* s, size_type pos, size_type n) const;
-    @\added{constexpr}@ size_type find_last_not_of (const charT* s, size_type pos = npos) const;
-    @\added{constexpr}@ size_type find_last_not_of (charT c, size_type pos = npos) const;
+      @\added{constexpr}@
+      size_type find_last_not_of (const T& t, size_type pos = npos) const;
+    @\added{constexpr}@
+    size_type find_last_not_of (const basic_string& str, size_type pos = npos) const noexcept;
+    @\added{constexpr}@
+    size_type find_last_not_of (const charT* s, size_type pos, size_type n) const;
+    @\added{constexpr}@
+    size_type find_last_not_of (const charT* s, size_type pos = npos) const;
+    @\added{constexpr}@
+    size_type find_last_not_of (charT c, size_type pos = npos) const;
 
     @\added{constexpr}@ basic_string substr(size_type pos = 0, size_type n = npos) const;
     template<class T>
@@ -598,7 +629,8 @@ In \textbf{[string.cons]/20.3.2.2}:
 
 \begin{itemdecl}
 template<class T>
-  @\added{constexpr}@ basic_string(const T& t, size_type pos, size_type n, const Allocator& a = Allocator());
+  @\added{constexpr}@
+  basic_string(const T& t, size_type pos, size_type n, const Allocator& a = Allocator());
 \end{itemdecl}
 
 \begin{codeblock}
@@ -989,24 +1021,29 @@ template<class T>
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const basic_string& str);
+@\added{constexpr}@
+basic_string& replace(const_iterator i1, const_iterator i2, const basic_string& str);
 \end{itemdecl}
 
 \begin{itemdecl}
 template<class T>
-  @\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const T& t);
+  @\added{constexpr}@
+  basic_string& replace(const_iterator i1, const_iterator i2, const T& t);
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
+@\added{constexpr}@
+basic_string& replace(const_iterator i1, const_iterator i2, const charT* s, size_type n);
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, const charT* s);
+@\added{constexpr}@
+basic_string& replace(const_iterator i1, const_iterator i2, const charT* s);
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, size_type n, charT c);
+@\added{constexpr}@
+basic_string& replace(const_iterator i1, const_iterator i2, size_type n, charT c);
 \end{itemdecl}
 
 \begin{itemdecl}
@@ -1016,7 +1053,8 @@ template<class InputIterator>
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ basic_string& replace(const_iterator i1, const_iterator i2, initializer_list<charT> il);
+@\added{constexpr}@
+basic_string& replace(const_iterator i1, const_iterator i2, initializer_list<charT> il);
 \end{itemdecl}
 \end{quote}
 
@@ -1190,19 +1228,23 @@ template<class T>
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ size_type find_last_not_of(const basic_string& str, size_type pos = npos) const noexcept;
+@\added{constexpr}@
+size_type find_last_not_of(const basic_string& str, size_type pos = npos) const noexcept;
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ size_type find_last_not_of(const charT* s, size_type pos, size_type n) const;
+@\added{constexpr}@
+size_type find_last_not_of(const charT* s, size_type pos, size_type n) const;
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ size_type find_last_not_of(const charT* s, size_type pos = npos) const;
+@\added{constexpr}@
+size_type find_last_not_of(const charT* s, size_type pos = npos) const;
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ size_type find_last_not_of(charT c, size_type pos = npos) const;
+@\added{constexpr}@
+size_type find_last_not_of(charT c, size_type pos = npos) const;
 \end{itemdecl}
 \end{quote}
 
@@ -1234,11 +1276,13 @@ template<class T>
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ int compare(const basic_string& str) const noexcept;
+@\added{constexpr}@
+int compare(const basic_string& str) const noexcept;
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ int compare(size_type pos1, size_type n1, const basic_string& str) const;
+@\added{constexpr}@
+int compare(size_type pos1, size_type n1, const basic_string& str) const;
 \end{itemdecl}
 
 \begin{itemdecl}
@@ -1248,15 +1292,18 @@ int compare(size_type pos1, size_type n1, const basic_string& str,
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ int compare(const charT* s) const;
+@\added{constexpr}@
+int compare(const charT* s) const;
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ int compare(size_type pos, size_type n1, const charT* s) const;
+@\added{constexpr}@
+int compare(size_type pos, size_type n1, const charT* s) const;
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ int compare(size_type pos, size_type n1, const charT* s, size_type n2) const;
+@\added{constexpr}@
+int compare(size_type pos, size_type n1, const charT* s, size_type n2) const;
 \end{itemdecl}
 \end{quote}
 
