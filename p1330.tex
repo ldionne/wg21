@@ -1,0 +1,201 @@
+\documentclass{wg21}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{csquotes}
+\usepackage{enumitem}
+\usepackage{fullpage}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{parskip}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{xcolor}
+
+\lstdefinestyle{base}{
+  language=c++,
+  breaklines=false,
+  basicstyle=\ttfamily\color{black},
+  moredelim=**[is][\color{green!50!black}]{@}{@},
+  escapeinside={(*@}{@*)}
+}
+
+\newcommand{\cc}[1]{\mintinline{c++}{#1}}
+\newminted[cpp]{c++}{}
+
+
+\title{Changing the active member of a union inside constexpr}
+\docnumber{D1330R0}
+\audience{EWG}
+\author{Louis Dionne}{ldionne@apple.com}
+\authortwo{David Vandevoorde}{daveed@edg.com}
+
+\begin{document}
+\maketitle
+
+\section{Abstract}
+We propose allowing the active member of a union to be changed inside a
+constant expression, such that the following code is valid:
+
+\begin{cpp}
+union Foo {
+  int i;
+  float f;
+};
+
+constexpr int use() {
+  Foo foo{};
+  foo.i = 3;
+  foo.f = 1.2f; // not valid today, valid with this paper
+  return 1;
+}
+
+static_assert(use());
+\end{cpp}
+
+
+\section{Motivation}
+\cite{P0784} greatly expands what can be done inside a constant expression to
+allow memory allocations, amongst other things. The explicit goal of \cite{P0784}
+is to allow standard containers to work inside constant expressions. However,
+some containers like \cc{std::string} and \cc{std::optional} use unions inside
+their implementations. Since changing the active element of a union is not
+currently allowed inside a constant expression, those containers can't be
+implemented properly with \cite{P0784} alone. The goal of this paper is to
+serve as (hopefully) the last stepping stone for \cc{std::string} being
+constexpr-friendly.
+
+
+\section{Implementability concerns}
+The implementation difficulty related to this proposal is that any member of a
+union inside the constexpr evaluator needs a field saying whether it is the
+active member of the union, and that field needs to be updated whenever the
+active member of the union changes. However, any references to that member
+of the union also have to be updated so that the constexpr evaluator can
+catch undefined behavior when accessing the union through references to a
+now inactive member. Depending on the implementation strategy used by the
+compiler, this could mean varous levels of implementation difficulty. Here's
+an extract of an email exchange between Louis Dionne and David Vandevoorde
+discussing the issue:
+
+\begin{quote}
+Louis Dionne writes:\\
+\begin{leftbar}
+  David Vandevoorde writes:\\
+  \begin{leftbar}
+  You have to think in terms of catching undefined behavior (since constexpr evaluation has to do that). A constexpr evaluator has to maintain a hidden “field” that describes the current active member.  That “field” is part of the union object representation of the evaluator.  So, presumably assigning a new value to the union object can update that part of the union object representation itself.  However, if you have an lvalue for a member of the union (an int, say), it’s not 100\% clear that you know that that int is a union subobject; if you don’t have a reliable way to reach that union representation, you cannot update its active field.
+
+  Our implementation _can_ do it and so can Clang, I believe (because all their addresses — pointers and glvalues — are represented through symbolic paths), but I’m not 100\% sure that there aren’t interesting (e.g., more efficient) implementation strategies that wouldn’t be able to do this.
+  \end{leftbar}
+
+I think I understand the problem. Basically, you need to update all "references" to that union subobject to say "this isn't the active member of the union anymore" so you can detect the UB in case the program tries to access that member of the union. It's easy when the implementation uses symbolic paths, because then you just update the original member to say "this isn't the active member of the union anymore", and all references to it will automatically see the change. However, if an implementation used a different strategy, the union may need something like a list of all the references to the active member so that you can go and update them if the active member of the union changes.
+\end{leftbar}
+\end{quote}
+
+We think that current implementations can handle that without too many problems,
+but this needs to be discussed with more implementers.
+
+
+\section{Another (not entirely related) problem}
+While surveying the implementation of \cc{std::string} in libc++, I found the
+following piece of code that is used to check whether the string being stored
+is short or long (simplified example):
+
+\begin{cpp}
+template <typename CharT>
+struct basic_string {
+  struct LongRepresentation {
+    std::size_t cap_;
+    std::size_t size_;
+    char* data_;
+  };
+
+  struct ShortRepresentation {
+    unsigned char size_;
+    char data_[SSO_SIZE];
+  };
+
+  union Representation {
+    LongRepresentation long_;
+    ShortRepresentation short_;
+  };
+
+  Representation repr_;
+
+  bool is_long() const {
+    // access possibly inactive member of the union
+    return bool(repr_.short_.size_ & SHORT_MASK);
+  }
+};
+\end{cpp}
+
+Put simply, we always reserve the very first bit of the string (whether short
+or long) to store whether the string is short or long. To check whether the
+string is long or short, we always access that first bit through the short
+string representation, which may be inactive if we're actually holding a long
+string. My understanding is that this is already undefined behavior today: this
+is not covered by \textbf{[class.mem] 10.3/25} because \cc{LongRepresentation}
+and \cc{ShortRepresentation} do not share a common initial subsequence.
+
+Unless I'm mistaken, libc++ needs to fix this problem regardless of whether
+this paper is adopted, and in fact adopting this paper is orthogonal to that.
+It may just meant that making \cc{std::string} constexpr will be a challenge
+for libc++ due to unfortunate implementation choices. Note that libstdc++'s
+implementation of \cc{std::string} does not suffer from the same problem.
+
+However, if I am wrong and libc++ does not have UB today, then
+\textbf{[expr.const] 7.7/2.8} would break \cc{std::string} inside
+constexpr:
+
+\begin{quote}
+An expression \texttt{e} is a \textit{core constant expression} unless the
+evaluation of \texttt{e}, following the rules of the abstract machine (6.8.1),
+would evaluate one of the following expressions:
+
+\begin{itemize}
+  \item [--] an lvalue-to-rvalue conversion (7.3.1) that is applied to a glvalue
+             that refers to a non-active member of a union or a subobject thereof;
+\end{itemize}
+\end{quote}
+
+
+\section{Proposed wording}
+This wording is based on the working draft \cite{N4762}.
+
+Strike \textbf{[expr.const] 7.7/2.10}:
+
+\begin{quote}
+An expression \texttt{e} is a \textit{core constant expression} unless the
+evaluation of \texttt{e}, following the rules of the abstract machine (6.8.1),
+would evaluate one of the following expressions:
+
+\begin{itemize}
+  \item[--] \texttt{this} (7.5.2), except in a constexpr function or a constexpr
+            constructor that is being evaluated as part of \texttt{e};
+  \newline
+  [...]
+  \item [--] \removed{an assignment expression (7.6.18) or invocation of an assignment
+             operator (10.3.6) that would change the active member of a union;}
+\end{itemize}
+\end{quote}
+
+
+\section{References}
+\renewcommand{\section}[2]{}%
+\begin{thebibliography}{9}
+
+\bibitem[N4762]{N4762}
+  Richard Smith,
+  \emph{Working Draft, Standard for Programming Language C++}\newline
+  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4762.pdf}
+
+\bibitem[P0784]{P0784}
+  David Vandevoorde \& al,
+  \emph{More constexpr containers}\newline
+  \url{http://wg21.link/P0784}
+
+\end{thebibliography}
+
+\end{document}
