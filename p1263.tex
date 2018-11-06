@@ -26,7 +26,7 @@
 
 
 \title{Controlling the instantiation of vtables and RTTI}
-\docnumber{P1263R0}
+\docnumber{D1263R1}
 \audience{EWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -68,7 +68,7 @@ Bar::virtual;
 \section{Motivation}
 As outlined in the abstract, this proposal is relevant for libraries and
 applications wishing to control the symbols exported in their ABI. In this
-section, we outline a couple of motivations related to ABI control.
+section, we outline a couple of motivating examples related to ABI control.
 
 \begin{enumerate}
   \item \textbf{Controlling whether the vtable/RTTI is explicitly instantiated}\\
@@ -194,9 +194,35 @@ section, we outline a couple of motivations related to ABI control.
   toolchains work, and it may also require creating a dummy virtual function.
 \end{enumerate}
 
-\section{Open questions}
-Does it make sense to declare the RTTI in a separate TU than the vtable?
-I think the Itanium ABI requires those to be in the same TU.
+\section{FAQ}
+\begin{enumerate}
+  \item How does this interact with regular (non-virtual) inheritance?\\
+        Derived classes can decide to explicitly instantiate (or not) their
+        vague linkage objects however they want: they are unaffected by what
+        their bases do in that respect.
+  \item How does this interact with virtual inheritance?\\
+        In the event of virtual inheritance, implementations use another
+        vtable called the VTT (Virtual Table Table). We suggest that
+        instantiating the vtable would also control where the VTT is
+        instantiated for that type, if that type happens to need a VTT.
+  \item Could I make the vtable/RTTI constexpr, inline, const, etc?\\
+        I don't think that makes sense, because that would imply that we can
+        name the type of the vtable/RTTI. Consider:
+        \begin{cpp}
+          template constexpr TYPE? Foo<int>::virtual;
+          template const TYPE? Foo<int>::virtual;
+          template inline TYPE? Foo<int>::virtual;
+        \end{cpp}
+        Also, vtable/RTTI today is morally \cc{constexpr} (initialized at
+        compile-time), \cc{inline} (ODR-merged across TUs except when there
+        is an anchor function), and \cc{const} (can't be modified). It's not
+        clear to me that it makes sense for it to be anything else.
+
+  \item Does it really make sense for the RTTI and the VTable not to necessarily
+        be in the same TU?\\
+        Yes, at least in the Itanium ABI. While there is a referende to the
+        RTTI from the vtable, it is not required to appear in the same TU.
+\end{enumerate}
 
 \section{Proposed wording}
 Will be provided on request.
