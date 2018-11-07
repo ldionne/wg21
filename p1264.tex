@@ -326,8 +326,9 @@ int_type get();
 \textit{Effects:} Behaves as an unformatted input function (as described above).
 After constructing a sentry object, extracts a character \texttt{c}, if one is
 available. Otherwise, \changed{the function calls setstate(failbit), which may
-throw \texttt{ios_base::failure} (27.5.5.4),}{\texttt{ios_base::failbit} is set
-in the input function's \textit{local error state} before \texttt{setstate} is called.}
+throw \texttt{ios_base::failure} (27.5.5.4),}{\texttt{ios_base::failbit} is
+turned on in the input function's \textit{local error state} before
+\texttt{setstate} is called.}
 \end{quote}
 
 In \textbf{[istream.unformatted] 27.7.4.3/6}:
@@ -339,7 +340,7 @@ basic_istream<charT, traits>& get(char_type& c);
 After constructing a sentry object, extracts a character, if one is available,
 and assigns it to \texttt{c}. Otherwise, \changed{the function calls
 \texttt{setstate(failbit)} (which may throw \texttt{ios_base::failure} (27.5.5.4))}
-{\texttt{ios_base::failbit} is set in the input function's \textit{local error state}
+{\texttt{ios_base::failbit} is turned on in the input function's \textit{local error state}
 before \texttt{setstate} is called}.
 \end{quote}
 
@@ -361,7 +362,7 @@ Characters are extracted and stored until any of the following occurs:
 \end{itemize}
 If the function stores no characters, \changed{it calls \texttt{setstate(failbit)}
 (which may throw \texttt{ios_base::failure} (27.5.5.4))}{\texttt{ios_base::failbit}
-is set in the input function's \textit{local error state} before \texttt{setstate} is called}.
+is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
 In any case, if \texttt{n} is greater than zero it then stores a
 null character into the next successive location of the array.
 \end{quote}
@@ -386,7 +387,7 @@ until any of the following occurs:
 \end{itemize}
 If the function inserts no characters, \changed{it calls \texttt{setstate(failbit)},
 which may throw \texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit}
-is set in the input function's \textit{local error state} before \texttt{setstate} is called}.
+is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
 \end{quote}
 
 In \textbf{[istream.unformatted] 27.7.4.3/18}:
@@ -411,7 +412,7 @@ These conditions are tested in the order shown.
 
 If the function extracts no characters, \changed{it calls \texttt{setstate(failbit)}
 (which may throw \texttt{ios_base::failure} (27.5.5.4))}{\texttt{ios_base::failbit}
-is set in the input function's \textit{local error state} before \texttt{setstate} is called}.
+is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
 
 In any case, if \texttt{n} is greater than zero, it then stores a null character
 (using \texttt{charT()}) into the next successive location of the array.
@@ -435,7 +436,7 @@ extracted and inserted until any of the following occurs:
 \end{itemize}
 If the function inserts no characters, \changed{it calls \texttt{setstate(failbit)},
 which may throw \texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit}
-is set in the input function's \textit{local error state} before \texttt{setstate} is called}.
+is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
 \removed{If it inserted no characters because it caught an exception
 thrown while extracting characters from \texttt{*this} and \texttt{failbit} is on
 in \texttt{exceptions()} (27.5.5.4), then the caught exception is rethrown.}
@@ -473,11 +474,9 @@ any of the following occurs:
 The conditions are tested in the order shown. In any case, after the last
 character is extracted, the sentry object is destroyed.
 
-If the function extracts no characters, \changed{it calls
-\texttt{is.setstate(ios_base::failbit)} which may throw
-\texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit} is turned
-on in the input function’s \textit{local error state} before the stream’s error state
-is updated}.
+If the function extracts no characters, \changed{it calls \texttt{is.setstate(ios_base::failbit)}
+which may throw \texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit} is turned
+on in the input function’s \textit{local error state} before \texttt{setstate} is called}.
 \end{quote}
 
 
@@ -620,7 +619,14 @@ With all this laid out, here's a couple of test cases:
   \end{tabular}
   \end{center}
 
-  My interpretation is that per (C), we create a sentry object which attempts to skip whitespace and fails because we're at the end of file. The sentry calls \cc{setstate(failbit | eofbit)}, which throws an exception because failbit is set in the exceptions. We then set \cc{badbit} on the stream and do not rethrow the exception, because \cc{badbit} is not in the exceptions. Also note that I don't think (B) applies here, because we never make it to the operations specified in (A), which I think is what (B) is referring to. Hence, libc++ is correct again here.
+  My interpretation is that per (C), we create a sentry object which attempts
+  to skip whitespace and fails because we're at the end of file. The sentry
+  calls \cc{setstate(failbit | eofbit)}, which throws an exception because
+  failbit is set in the exceptions. We then set \cc{badbit} on the stream and
+  do not rethrow the exception, because \cc{badbit} is not in the exceptions.
+  Also note that I don't think (B) applies here, because we never make it to
+  the operations specified in (A), which I think is what (B) is referring to.
+  Hence, libc++ is correct again here.
 
   \item Unformatted input operation which hits EOF
   \begin{cpp}
