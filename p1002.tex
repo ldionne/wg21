@@ -23,12 +23,21 @@
 
 
 \title{Try-catch blocks in constexpr functions}
-\docnumber{P1002R0}
-\audience{Evolution Working Group}
-\author{Louis Dionne}{ldionne.2@gmail.com}
+\docnumber{P1002R1}
+\audience{Core Working Group}
+\author{Louis Dionne}{ldionne@apple.com}
 
 \begin{document}
 \maketitle
+
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 \begin{itemize}
+              \item Handle function try-blocks for non-constructors.
+              \item Rebase on top of current WD (\cite{N4778}).
+              \end{itemize}
+\end{itemize}
 
 
 \section{Proposal}
@@ -64,31 +73,33 @@ exception guarantee.
 
 
 \section{Proposed wording}
-This wording is based on the working draft \cite{N4727}. Change in
-\textbf{[dcl.constexpr] 10.1.5/3}:
+This wording is based on the working draft \cite{N4778}.
+
+Change in \textbf{[dcl.constexpr] 9.1.5/3}:
 
 \begin{quote}
   The definition of a constexpr function shall satisfy the following requirements:
   \begin{itemize}
-    \item[--] it shall not be virtual (13.3);
     \item[--] its return type shall be a literal type;
     \item[--] each of its parameter types shall be a literal type;
-    \item[--] its \grammarterm{function-body} shall be \texttt{= delete},
+    \item[--] its \grammarterm{function-body} shall \removed{be \texttt{= delete},
               \texttt{= default}, or a \grammarterm{compound-statement} that
-              does not contain
+              does} not contain
       \begin{itemize}
         \item[--] an \grammarterm{asm-definition},
         \item[--] a \texttt{goto} statement,
-        \item[--] an identifier label (9.1),\added{ or}
+        \item[--] an identifier label (8.1),\added{ or}
         \item[--] \removed{a \grammarterm{try-block}, or}
         \item[--] a definition of a variable of non-literal type or of static
                   or thread storage duration or for which no initialization is
                   performed.
       \end{itemize}
+      \added{\textit{[Note:} A \grammarterm{function-body} that is \texttt{= delete}
+             or \texttt{= default} contains none of the above. \textit{-- end note]}}
   \end{itemize}
 \end{quote}
 
-Change in \textbf{[dcl.constexpr] 10.1.5/4}:
+Change in \textbf{[dcl.constexpr] 9.1.5/4}:
 
 \begin{quote}
   The definition of a constexpr constructor shall satisfy the following requirements:
@@ -104,10 +115,10 @@ Change in \textbf{[dcl.constexpr] 10.1.5/4}:
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
 
-  \bibitem[N4727]{N4727}
+  \bibitem[N4778]{N4778}
     Richard Smith,
     \emph{Working Draft, Standard for Programming Language C++}\newline
-    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4727.pdf}
+    \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4778.pdf}
 
   \bibitem[P0784R1]{P0784R1}
     Multiple authors,
