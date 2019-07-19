@@ -43,6 +43,7 @@
   \item R2 -- \begin{itemize}
               \item Add feature-test macro \cc{__cpp_lib_constexpr_vector}
               \item Add a note to the editor to clarify the intent of the wording
+              \item Editorial: fix placement of \cc{[[nodiscard]]} with \cc{constexpr}
               \end{itemize}
 \end{itemize}
 
@@ -190,7 +191,7 @@ namespace std {
     @\added{constexpr}@ const_reverse_iterator crend() const noexcept;
 
     // 21.3.11.3, capacity
-    @\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+    [[nodiscard]] @\added{constexpr}@ bool empty() const noexcept;
     @\added{constexpr}@ size_type size() const noexcept;
     @\added{constexpr}@ size_type max_size() const noexcept;
     @\added{constexpr}@ size_type capacity() const noexcept;
@@ -414,7 +415,7 @@ namespace std {
     @\added{constexpr}@ const_reverse_iterator crend() const noexcept;
 
     // capacity
-    @\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+    [[nodiscard]] @\added{constexpr}@ bool empty() const noexcept;
     @\added{constexpr}@ size_type size() const noexcept;
     @\added{constexpr}@ size_type max_size() const noexcept;
     @\added{constexpr}@ size_type capacity() const noexcept;
