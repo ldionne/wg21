@@ -23,12 +23,24 @@
 
 
 \title{Making \cc{std::string} constexpr}
-\docnumber{P0980R0}
+\docnumber{D0980R1}
 \audience{LEWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
 \begin{document}
 \maketitle
+
+\section{Revision history}
+\begin{itemize}
+  \item R0 -- Initial draft
+  \item R1 -- \begin{itemize}
+              \item Editorial: remove stray \textbackslash \, character, add
+                    missing spaces and fix placement of \cc{constexpr} with
+                    \cc{[[nodiscard]]}
+              \item Add feature-test macro \cc{__cpp_lib_constexpr_string}
+              \item Add a note to the editor to clarify the intent of the wording
+              \end{itemize}
+\end{itemize}
 
 \section{Abstract}
 \cc{std::string} is not currently \cc{constexpr} friendly. With the loosening
@@ -54,7 +66,14 @@ following issues:
 
 
 \section{Proposed wording}
-This wording is based on the working draft \cite{N4727}:
+This wording is based on the working draft \cite{N4727}.
+
+Direction to the editor: please also apply \cc{constexpr} to \cc{std::basic_string}'s
+functions missing from this paper, at the editor's discretion.
+
+In \textbf{[support.limits.general]}, add the new feature test macro
+\cc{__cpp_lib_constexpr_string} with the corresponding value for header
+\cc{<string>} to Table 36 \textbf{[tab:support.ft]}.
 
 Change in \textbf{[string.syn] 20.3.1}:
 \begin{quote}
@@ -356,7 +375,7 @@ namespace std {
     @\added{constexpr}@ basic_string(const charT* s, const Allocator& a = Allocator());
     @\added{constexpr}@ basic_string(size_type n, charT c, const Allocator& a = Allocator());
     template<class InputIterator>
-      @\added{constexpr}@ \
+      @\added{constexpr}@
       basic_string(InputIterator begin, InputIterator end, const Allocator& a = Allocator());
     @\added{constexpr}@ basic_string(initializer_list<charT>, const Allocator& = Allocator());
     @\added{constexpr}@ basic_string(const basic_string&, const Allocator&);
@@ -399,7 +418,7 @@ namespace std {
     @\added{constexpr}@ void reserve(size_type res_arg);
     @\added{constexpr}@ void shrink_to_fit();
     @\added{constexpr}@ void clear() noexcept;
-    @\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+    [[nodiscard]] @\added{constexpr}@ bool empty() const noexcept;
 
     // 20.3.2.5, element access
     @\added{constexpr}@ const_reference operator[](size_type pos) const;
@@ -674,14 +693,14 @@ template<class InputIterator>
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@basic_string& operator=(basic_string&& str)
+@\added{constexpr}@ basic_string& operator=(basic_string&& str)
   noexcept(allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
            allocator_traits<Allocator>::is_always_equal::value);
 \end{itemdecl}
 
 \begin{itemdecl}
 template<class T>
-  @\added{constexpr}@basic_string& operator=(const T& t);
+  @\added{constexpr}@ basic_string& operator=(const T& t);
 \end{itemdecl}
 
 \begin{itemdecl}
@@ -765,7 +784,7 @@ In \textbf{[string.capacity]/20.3.2.4}:
 \end{itemdecl}
 
 \begin{itemdecl}
-@\added{constexpr}@ [[nodiscard]] bool empty() const noexcept;
+[[nodiscard]] @\added{constexpr}@ bool empty() const noexcept;
 \end{itemdecl}
 \end{quote}
 

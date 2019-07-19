@@ -23,7 +23,7 @@
 
 
 \title{Making \cc{std::vector} constexpr}
-\docnumber{P1004R1}
+\docnumber{D1004R2}
 \audience{LWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -39,6 +39,10 @@
               \item Remove an easter egg from the wording -- I don't mess
                     with LWG.
               \item Other minor fixes from LWG Batavia meeting.
+              \end{itemize}
+  \item R2 -- \begin{itemize}
+              \item Add feature-test macro \cc{__cpp_lib_constexpr_vector}
+              \item Add a note to the editor to clarify the intent of the wording
               \end{itemize}
 \end{itemize}
 
@@ -80,6 +84,13 @@ P1002, which should be published in the same mailing as this paper.
 \section{Proposed wording}
 This wording is based on the working draft \cite{N4727}. We basically mark
 all the member and non-member functions of \cc{std::vector} \cc{constexpr}.
+
+Direction to the editor: please apply \cc{constexpr} to all of \cc{std::vector},
+including any additions that might be missing from this paper.
+
+In \textbf{[support.limits.general]}, add the new feature test macro
+\cc{__cpp_lib_constexpr_vector} with the corresponding value for header
+\cc{<vector>} to Table 36 \textbf{[tab:support.ft]}.
 
 Change in \textbf{[vector.syn] 21.3.6}:
 \begin{quote}
