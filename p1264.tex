@@ -27,7 +27,7 @@
 
 
 \title{Revising the wording of stream input operations}
-\docnumber{D1264R1}
+\docnumber{P1264R1}
 \audience{LWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -57,6 +57,8 @@ report claims that libc++'s \break \cc{operator>>(istream&, std::string&)} is
 not throwing exception when \cc{failbit} is set and \cc{failbit} exceptions
 are enabled. GCC and MSVC both behave as expected there. Unfortunately, the
 Standard seems to give reason to libc++, despite the behavior not making sense.
+Note that as of currently, libc++ has been fixed to be consistent with the
+wording in this paper.
 
 \cite{LWG2349} tries to solve this issue by applying a small patch to the current
 wording, but I think not all issues are solved this way. This wording-only
