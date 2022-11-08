@@ -27,7 +27,7 @@
 
 
 \title{Revising the wording of stream input operations}
-\docnumber{D1264R2}
+\docnumber{P1264R2}
 \audience{LWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -41,7 +41,7 @@
               \item Apply LWG small-group changes.
               \item Rebase on top of N4778.
               \end{itemize}
-  \item R2 -- Rebase on top of latest working draft
+  \item R2 -- Rebase on top of latest working draft and apply LWG feedback.
 \end{itemize}
 
 \section{Abstract}
@@ -64,7 +64,7 @@ wording in this paper.
 \cite{LWG2349} tries to solve this issue by applying a small patch to the current
 wording, but I think not all issues are solved this way. This wording-only
 proposal instead tries to overhaul the current wording to make it clearer,
-without changing the intended behavior.
+without changing the intended behavior (which is implemented by GCC and MSVC).
 
 
 \section{Proposed wording}
@@ -93,11 +93,11 @@ the called function had returned a failure indication.}
 
 
 \subsection{Revise wording for formatted input operations}
-We precise the execution of formatted input operations by introducing the
+We make precise the execution of formatted input operations by introducing the
 notion of a \textit{local error state}. In \textbf{[istream.formatted.reqmts]}:
 \begin{quote}
 Each formatted input function begins execution by constructing \added{an object
-of type \texttt{ios_base::iostate}, called the local error state, and
+of type \texttt{ios_base::iostate}, termed the local error state, and
 initializing it to \texttt{ios_base::goodbit}. It then creates} an object of
 class \texttt{sentry} with the \texttt{noskipws} (second) argument \texttt{false}.
 If the sentry object returns \texttt{true}, when converted to a value of type
@@ -105,18 +105,18 @@ If the sentry object returns \texttt{true}, when converted to a value of type
 \added{Otherwise, if the sentry constructor exits by throwing an exception or
 if the sentry object produces \texttt{false} when converted to a value of type
 \texttt{bool}, the function returns without attempting to obtain any input.
-If an extraction function \href{http://eel.is/c++draft/input.streams\#istream.general-3}{([istream.general])}
-returns \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is set in
+If \texttt{rdbuf()->sbumpc()} or \texttt{rdbuf()->sgetc()}
+return \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is set in
 the local error state and the input function stops trying to obtain the requested
-input.} If an exception is thrown during input then \texttt{ios::badbit} is
-set in \added{the local error state, \texttt{*this}'s error state is set
-to the local error state, and the exception is rethrown if
-\texttt{(exceptions() \& badbit) != 0}}. \removed{If \texttt{(exceptions()\&badbit) != 0}
-then the exception is rethrown.} \added{After extraction is done, the input
-function calls \texttt{setstate}, which sets \texttt{*this}'s error state to
-the local error state, and may throw an exception.} In any case, the
-formatted input function destroys the sentry object. If no exception has been
-thrown, it returns \texttt{*this}.
+input.} If an exception is thrown during input then \changed{\texttt{ios::badbit} is
+turned on in \texttt{*this}'s error state. If \texttt{(exceptions()\&badbit) != 0} then
+the exception is rethrown.}{\texttt{ios::badbit} is set in the local  error state,
+\texttt{*this}'s error state is set to the local error state, and the exception is
+rethrown if \texttt{(exceptions() \& badbit) != 0}. After extraction is done, the
+input function calls \texttt{setstate}, which sets \texttt{*this}'s error state to
+the local error state, and may throw an exception.}
+In any case, the formatted input function destroys the sentry object. If no exception
+has been thrown, it returns \texttt{*this}.
 \end{quote}
 
 Then, we adjust the description of formatted input operations to take advantage
@@ -168,9 +168,8 @@ same notation as for the preceding code fragment):
   } else if (numeric_limits<short>::max() < lval) {
     @\changed{err}{state}@ |= ios_base::failbit;
     val = numeric_limits<short>::max();
-  }  else @\added{\{}@
+  }  else
     val = static_cast<short>(lval);
-  @\added{\}}@
   @\removed{setstate(err);}@
 \end{codeblock}
 \end{quote}
@@ -193,9 +192,8 @@ same notation as for the preceding code fragment):
   } else if (numeric_limits<int>::max() < lval) {
     @\changed{err}{state}@ |= ios_base::failbit;
     val = numeric_limits<int>::max();
-  }  else @\added{\{}@
+  }  else
     val = static_cast<int>(lval);
-  @\added{\}}@
   @\removed{setstate(err);}@
 \end{codeblock}
 \end{quote}
@@ -293,7 +291,7 @@ is set in the input function's local error state before \texttt{setstate} is cal
 In \textbf{[istream.unformatted]/1}:
 \begin{quote}
 Each unformatted input function begins execution by constructing \added{an
-object of type \texttt{ios_base::iostate}, called the local error state, and
+object of type \texttt{ios_base::iostate}, termed the local error state, and
 initializing it to \texttt{ios_base::goodbit}. It then creates} an object
 of class \texttt{sentry} with the default argument \texttt{noskipws} (second)
 argument \texttt{true}. If the \texttt{sentry} object returns \texttt{true},
@@ -305,16 +303,17 @@ function returns without attempting to obtain any input. In either case
 the number of extracted characters is set to 0; unformatted input functions
 taking a character array of nonzero size as an argument shall also store
 a null character (using \texttt{charT()}) in the first location of the
-array. \added{If an extraction function \href{http://eel.is/c++draft/input.streams\#istream.general-3}{([istream.general])}
-returns \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is set
+array. \added{If \texttt{rdbuf()->sbumpc()} or \texttt{rdbuf()->sgetc()}
+return \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is set
 in the local error state and the input function stops trying to obtain
-the requested input.} If an exception is thrown during input then \texttt{ios_base::badbit}
-is turned on in \changed{\texttt{*this}'s error state}{the local error
-state, \texttt{*this}'s error state is set to the local error state, and
-the exception is rethrown if \texttt{(exceptions() \& badbit) != 0}}.
-\removed{(Exceptions thrown from \texttt{basic_ios<>::clear()} are not
+the requested input.} If an exception is thrown during input then
+\changed{\texttt{ios_base::badbit} is turned on in \texttt{*this}'s error
+state. (Exceptions thrown from \texttt{basic_ios<>::clear()} are not
 caught or rethrown.) If \texttt{(exceptions()&badbit) != 0} then the
 exception is rethrown. It also counts the number of characters extracted.}
+{\texttt{ios_base::badbit} is set in the local error state, \texttt{*this}'s
+error state is set to the local error state, and the exception is rethrown
+if \texttt{(exceptions()\&badbit) != 0}.}
 If no exception has been thrown it \changed{ends by storing}{stores} the
 \changed{count}{number of characters extracted} in a member object
 \removed{and returning the value specified}. \added{After extraction
@@ -492,7 +491,7 @@ them below.
   \begin{quote}
   Each formatted input function begins execution by constructing an object of
   class \cc{sentry} with the \cc{noskipws} (second) argument \cc{false}. If
-  the sentry object returns \cc{true}, when converted to a value of type
+  the \texttt{sentry} object returns \cc{true}, when converted to a value of type
   \cc{bool}, the function endeavors to obtain the requested input. If an exception
   is thrown during input then \cc{ios::badbit} is set in \cc{*this}'s error
   state. If \cc{(exceptions()&badbit) != 0} then the exception is rethrown. In
