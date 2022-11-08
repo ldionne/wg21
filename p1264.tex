@@ -27,7 +27,7 @@
 
 
 \title{Revising the wording of stream input operations}
-\docnumber{P1264R1}
+\docnumber{D1264R2}
 \audience{LWG}
 \author{Louis Dionne}{ldionne@apple.com}
 
@@ -41,6 +41,7 @@
               \item Apply LWG small-group changes.
               \item Rebase on top of N4778.
               \end{itemize}
+  \item R2 -- Rebase on top of latest working draft
 \end{itemize}
 
 \section{Abstract}
@@ -52,7 +53,7 @@ each other.
 
 This is problematic because implementations currently differ significantly
 on their handling of error flags and exceptions. For example,
-\href{https://bugs.llvm.org/show_bug.cgi?id=21586}{this} libc++ bug
+\href{https://llvm.org/PR21586}{this} libc++ bug
 report claims that libc++'s \break \cc{operator>>(istream&, std::string&)} is
 not throwing exception when \cc{failbit} is set and \cc{failbit} exceptions
 are enabled. GCC and MSVC both behave as expected there. Unfortunately, the
@@ -67,21 +68,21 @@ without changing the intended behavior.
 
 
 \section{Proposed wording}
-This wording is based on the working draft \cite{N4778}.
+This wording is based on the latest working draft as of 2022-11-07.
 
 \subsection{Remove common wording}
 First, we clean up confusing wording that overlaps with wording in the formatted
 and unformatted input operations:
 
-Remove \textbf{[istream] 27.7.4.1/3}
+Remove in \textbf{[istream.general]/4}
 \begin{quote}
 \removed{If \texttt{rdbuf()->sbumpc()} or \texttt{rdbuf()->sgetc()} returns \texttt{traits::eof()},
 then the input function, except as explicitly noted otherwise, completes its
 actions and does \texttt{setstate(eofbit)}, which may throw \texttt{ios_base::failure}
-(27.5.5.4), before returning.}
+([iostate.flags]), before returning.}
 \end{quote}
 
-Remove \textbf{[istream] 27.7.4.1/4}:
+Remove in \textbf{[istream.general]/5}:
 \begin{quote}
 \removed{If one of these called functions throws an exception, then unless explicitly noted
 otherwise, the input function sets \texttt{badbit} in error state. If \texttt{badbit}
@@ -93,10 +94,10 @@ the called function had returned a failure indication.}
 
 \subsection{Revise wording for formatted input operations}
 We precise the execution of formatted input operations by introducing the
-notion of a \textit{local error state}. In \textbf{[istream.formatted.reqmts] 27.7.4.2.1}:
+notion of a \textit{local error state}. In \textbf{[istream.formatted.reqmts]}:
 \begin{quote}
 Each formatted input function begins execution by constructing \added{an object
-of type \texttt{ios_base::iostate}, called the \textit{local error state}, and
+of type \texttt{ios_base::iostate}, called the local error state, and
 initializing it to \texttt{ios_base::goodbit}. It then creates} an object of
 class \texttt{sentry} with the \texttt{noskipws} (second) argument \texttt{false}.
 If the sentry object returns \texttt{true}, when converted to a value of type
@@ -104,43 +105,42 @@ If the sentry object returns \texttt{true}, when converted to a value of type
 \added{Otherwise, if the sentry constructor exits by throwing an exception or
 if the sentry object produces \texttt{false} when converted to a value of type
 \texttt{bool}, the function returns without attempting to obtain any input.
-If an extraction function \href{http://eel.is/c++draft/istream\#2}{(27.7.4.1/2)}
-returns \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is turned on in
-the \textit{local error state} and the input function stops trying to obtain the requested
+If an extraction function \href{http://eel.is/c++draft/input.streams\#istream.general-3}{([istream.general])}
+returns \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is set in
+the local error state and the input function stops trying to obtain the requested
 input.} If an exception is thrown during input then \texttt{ios::badbit} is
-turned on in \added{the \textit{local error state}, \texttt{*this}'s error state is set
-to the \textit{local error state}, and the exception is rethrown if
+set in \added{the local error state, \texttt{*this}'s error state is set
+to the local error state, and the exception is rethrown if
 \texttt{(exceptions() \& badbit) != 0}}. \removed{If \texttt{(exceptions()\&badbit) != 0}
 then the exception is rethrown.} \added{After extraction is done, the input
 function calls \texttt{setstate}, which sets \texttt{*this}'s error state to
-the \textit{local error state}, and may throw an exception.} In any case, the
+the local error state, and may throw an exception.} In any case, the
 formatted input function destroys the sentry object. If no exception has been
 thrown, it returns \texttt{*this}.
 \end{quote}
 
 Then, we adjust the description of formatted input operations to take advantage
-of the \textit{local error state} introduced above. In \textbf{[istream.formatted.arithmetic]
-27.7.4.2.2/1}:
+of the local error state introduced above. In \textbf{[istream.formatted.arithmetic]}:
 \begin{quote}
 \begin{codeblock}
-operator>>(unsigned short& val);
-operator>>(unsigned int& val);
-operator>>(long& val);
-operator>>(unsigned long& val);
-operator>>(long long& val);
-operator>>(unsigned long long& val);
-operator>>(float& val);
-operator>>(double& val);
-operator>>(long double& val);
-operator>>(bool& val);
-operator>>(void*& val);
+basic_istream& operator>>(unsigned short& val);
+basic_istream& operator>>(unsigned int& val);
+basic_istream& operator>>(long& val);
+basic_istream& operator>>(unsigned long& val);
+basic_istream& operator>>(long long& val);
+basic_istream& operator>>(unsigned long long& val);
+basic_istream& operator>>(float& val);
+basic_istream& operator>>(double& val);
+basic_istream& operator>>(long double& val);
+basic_istream& operator>>(bool& val);
+basic_istream& operator>>(void*& val);
 \end{codeblock}
 As in the case of the inserters, these extractors depend on the locale's
-\texttt{num_get<>} (26.4.2.1) object to perform parsing the input stream data.
-These extractors behave as formatted input functions (as described in 27.7.4.2.1).
-After a sentry object is constructed, the conversion occurs as if performed by
+\texttt{num_get<>} object to perform parsing the input stream data.
+These extractors behave as formatted input functions (as described in [istream.formatted.reqmts]).
+After a \texttt{sentry} object is constructed, the conversion occurs as if performed by
 the following code fragment\added{, where \texttt{state} represents the input
-function's \textit{local error state}}:
+function's local error state}:
 
 \begin{codeblock}
   using numget = num_get<charT, istreambuf_iterator<charT, traits>>;
@@ -150,10 +150,10 @@ function's \textit{local error state}}:
 \end{codeblock}
 \end{quote}
 
-In \textbf{[istream.formatted.arithmetic] 27.7.4.2.2/2}:
+In \textbf{[istream.formatted.arithmetic]/2}:
 \begin{quote}
 \begin{codeblock}
-operator>>(short& val);
+basic_istream& operator>>(short& val);
 \end{codeblock}
 The conversion occurs as if performed by the following code fragment (using the
 same notation as for the preceding code fragment):
@@ -168,17 +168,17 @@ same notation as for the preceding code fragment):
   } else if (numeric_limits<short>::max() < lval) {
     @\changed{err}{state}@ |= ios_base::failbit;
     val = numeric_limits<short>::max();
-  }  else
+  }  else @\added{\{}@
     val = static_cast<short>(lval);
   @\added{\}}@
   @\removed{setstate(err);}@
 \end{codeblock}
 \end{quote}
 
-In \textbf{[istream.formatted.arithmetic] 27.7.4.2.2/3}:
+In \textbf{[istream.formatted.arithmetic]/3}:
 \begin{quote}
 \begin{codeblock}
-operator>>(int& val);
+basic_istream& operator>>(int& val);
 \end{codeblock}
 The conversion occurs as if performed by the following code fragment (using the
 same notation as for the preceding code fragment):
@@ -193,31 +193,57 @@ same notation as for the preceding code fragment):
   } else if (numeric_limits<int>::max() < lval) {
     @\changed{err}{state}@ |= ios_base::failbit;
     val = numeric_limits<int>::max();
-  }  else
+  }  else @\added{\{}@
     val = static_cast<int>(lval);
   @\added{\}}@
   @\removed{setstate(err);}@
 \end{codeblock}
 \end{quote}
 
-In \textbf{[istream.extractors] 27.7.4.2.3/10}:
+In \textbf{[istream.formatted.arithmetic]/3}:
 \begin{quote}
 \begin{codeblock}
-template<class charT, class traits>
-  basic_istream<charT, traits>& operator>>(basic_istream<charT, traits>& in, charT* s);
-template<class traits>
-  basic_istream<char, traits>& operator>>(basic_istream<char, traits>& in, unsigned char* s);
-template<class traits>
-  basic_istream<char, traits>& operator>>(basic_istream<char, traits>& in, signed char* s);
+basic_istream& operator>>(extended-floating-point-type& val);
+\end{codeblock}
+[...]
+The conversion occurs as if performed by the following code fragment (using the
+same notation as for the preceding code fragment):
+\begin{codeblock}
+  using numget = num_get<charT, istreambuf_iterator<charT, traits>>;
+  @\removed{iostate err = ios_base::goodbit;}@
+  FP fval;
+  use_facet<numget>(loc).get(*this, 0, *this, @\changed{err}{state}@, fval);
+  if (fval < -numeric_limits<extended-floating-point-type>::max()) {
+    @\changed{err}{state}@ |= ios_base::failbit;
+    val = -numeric_limits<extended-floating-point-type>::max();
+  } else if (numeric_limits<extended-floating-point-type>::max() < fval) {
+    @\changed{err}{state}@ |= ios_base::failbit;
+    val = numeric_limits<extended-floating-point-type>::max();
+  } else {
+    val = static_cast<extended-floating-point-type>(fval);
+  }
+  @\removed{setstate(err);}@
+\end{codeblock}
+\end{quote}
+
+In \textbf{[istream.extractors]/10}:
+\begin{quote}
+\begin{codeblock}
+template<class charT, class traits, size_t N>
+  basic_istream<charT, traits>& operator>>(basic_istream<charT, traits>& in, charT (&s)[N]);
+template<class traits, size_t N>
+  basic_istream<char, traits>& operator>>(basic_istream<char, traits>& in, unsigned char (&s)[N]);
+template<class traits, size_t N>
+  basic_istream<char, traits>& operator>>(basic_istream<char, traits>& in, signed char (&s)[N]);
 \end{codeblock}
 [...]
 If the function extracted no characters, \changed{it calls
-\texttt{setstate(failbit)}, which may throw \texttt{ios_base::failure} (27.5.5.4)}
-{\texttt{ios_base::failbit} is turned on in the input function's \textit{local error state}
+\texttt{setstate(failbit)}, which may throw \texttt{ios_base::failure} ([iostate.flags])}
+{\texttt{ios_base::failbit} is set in the input function's local error state
 before \texttt{setstate} is called}.
 \end{quote}
 
-In \textbf{[istream.extractors] 27.7.4.2.3/12}:
+In \textbf{[istream.extractors]/12}:
 \begin{quote}
 \begin{codeblock}
 template<class charT, class traits>
@@ -227,134 +253,108 @@ template<class traits>
 template<class traits>
   basic_istream<char, traits>& operator>>(basic_istream<char, traits>& in, signed char& c);
 \end{codeblock}
-\textit{Effects:} Behaves like a formatted input member (as described in 27.7.4.2.1)
-of \texttt{in}. \changed{After a sentry object is constructed a}{A} character
+\textit{Effects:} Behaves like a formatted input member (as described in [istream.formatted.reqmts])
+of \texttt{in}. \changed{After a \texttt{sentry} object is constructed a}{A} character
 is extracted from \texttt{in}, if one is available, and stored in \texttt{c}.
-Otherwise, \changed{the function calls in.setstate(failbit)}{\texttt{ios_base::failbit}
-is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
+Otherwise, \changed{the function calls \texttt{in.setstate(failbit)}}{\texttt{ios_base::failbit}
+is set in the input function's local error state before \texttt{setstate} is called}.
 \end{quote}
 
-In \textbf{[string.io] 20.3.3.9/1}:
+In \textbf{[string.io]}:
 \begin{quote}
 \begin{codeblock}
 template<class charT, class traits, class Allocator>
   basic_istream<charT, traits>&
     operator>>(basic_istream<charT, traits>& is, basic_string<charT, traits, Allocator>& str);
 \end{codeblock}
-\textit{Effects:} Behaves as a formatted input function (27.7.4.2.1). After
-constructing a sentry object, if the sentry converts to \texttt{true}, calls
-\texttt{str.erase()} and then extracts characters from \texttt{is} and appends
-them to \texttt{str} as if by calling \texttt{str.append(1, c)}. If \texttt{is.width()}
-is greater than zero, the maximum number \texttt{n} of characters appended is
-\texttt{is.width()}; otherwise \texttt{n} is \texttt{str.max_size()}.
-Characters are extracted and appended until any of the following occurs:
-\begin{itemize}
-  \item[--] \texttt{n} characters are stored;
-  \item[--] end-of-file occurs on the input sequence;
-  \item[--] \texttt{isspace(c, is.getloc())} is \texttt{true} for the next
-            available input character \texttt{c}.
-\end{itemize}
+\textit{Effects:} [...]
 After the last character (if any) is extracted, \texttt{is.width(0)} is called
-and the sentry object is destroyed. If the function extracts no characters,
+and the \texttt{sentry} object is destroyed. If the function extracts no characters,
 \changed{it calls \texttt{is.setstate(ios::failbit)}, which may throw
-\texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit} is turned on
-in the input function's \textit{local error state} before \texttt{setstate} is called}.
+\texttt{ios_base::failure} ([iostate.flags])}{\texttt{ios_base::failbit} is set
+in the input function's local error state before \texttt{setstate} is called}.
 \end{quote}
 
-In \textbf{[bitset.operators] 19.9.4/4}:
+In \textbf{[bitset.operators]}:
 \begin{quote}
 \begin{codeblock}
 template<class charT, class traits, size_t N>
   basic_istream<charT, traits>&
     operator>>(basic_istream<charT, traits>& is, bitset<N>& x);
 \end{codeblock}
-A formatted input function (27.7.4.2).
-
-\textit{Effects:} Extracts up to \texttt{N} characters from \texttt{is}. Stores
-these characters in a temporary object \texttt{str} of type \texttt{basic_string<charT, traits>},
-then evaluates the expression \texttt{x = bitset<N>(str)}. Characters are
-extracted and stored until any of the following occurs:
-\begin{itemize}
-  \item[--] \texttt{N} characters have been extracted and stored;
-  \item[--] end-of-file occurs on the input sequence;
-  \item[--] the next input character is neither \texttt{is.widen(’0’)} nor
-            \texttt{is.widen(’1’)} (in which case the input character is not extracted).
-\end{itemize}
+[...]
 If no characters are stored in \texttt{str}, \changed{calls \texttt{is.setstate(ios_base::failbit)}
-(which may throw \texttt{ios_base::failure} (27.5.5.4))}{\texttt{ios_base::failbit}
-is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
+(which may throw \texttt{ios_base::failure} ([iostate.flags]))}{\texttt{ios_base::failbit}
+is set in the input function's local error state before \texttt{setstate} is called}.
 \end{quote}
 
 
 \subsection{Revise wording for unformatted input operations}
-In \textbf{[istream.unformatted] 27.7.4.3}:
+In \textbf{[istream.unformatted]/1}:
 \begin{quote}
 Each unformatted input function begins execution by constructing \added{an
-object of type \texttt{ios_base::iostate}, called the \textit{local error state}, and
-initializing it to \texttt{ios_base::goodbit}. It then creates} an object of
-class \texttt{sentry} with the default argument \texttt{noskipws} (second)
-argument \texttt{true}. If the sentry object returns \texttt{true}, when
-converted to a value of type \texttt{bool}, the function endeavors to obtain
-the requested input. Otherwise, if the sentry constructor exits by throwing an
-exception or if the sentry object \changed{returns}{produces} \texttt{false}\removed{,} when converted to a
-value of type \texttt{bool}, the function returns without attempting to obtain
-any input. In either case the number of extracted characters is set to \texttt{0};
-unformatted input functions taking a character array of nonzero size as an
-argument shall also store a null character (using \texttt{charT()}) in the
-first location of the array. \added{If an extraction function
-\href{http://eel.is/c++draft/istream\#2}{(27.7.4.1/2)} returns \texttt{traits::eof()},
-then \texttt{ios_base::eofbit} is turned on in the \textit{local error state} and the
-input function stops trying to obtain the requested input.} If an exception is
-thrown during input then \texttt{ios::badbit} is turned on in \changed{
-\texttt{*this}'s error state}{the \textit{local error state}, \texttt{*this}'s error
-state is set to the \textit{local error state}, and the exception is rethrown if
-\texttt{(exceptions() \& badbit) != 0}}. \removed{(Exceptions thrown from
-\texttt{basic_ios<>::clear()} are not caught or rethrown.) If
-\texttt{(exceptions()\&badbit) != 0} then the exception is rethrown. It also
-counts the number of characters extracted.} If no exception has been thrown it
-\changed{ends by storing}{stores} the \changed{count}{number of characters
-extracted} in a member object \removed{and returning the value specified}.
-\added{After extraction is done, the input function calls \texttt{setstate},
-which sets \texttt{*this}'s error state to the \textit{local error state}, and
-may throw an exception.} In any event the sentry object is destroyed before
-leaving the unformatted input function.
+object of type \texttt{ios_base::iostate}, called the local error state, and
+initializing it to \texttt{ios_base::goodbit}. It then creates} an object
+of class \texttt{sentry} with the default argument \texttt{noskipws} (second)
+argument \texttt{true}. If the \texttt{sentry} object returns \texttt{true},
+when converted to a value of type \texttt{bool}, the function endeavors to
+obtain the requested input. Otherwise, if the \texttt{sentry} constructor
+exits by throwing an exception or if the \texttt{sentry} object \changed{returns}{produces}
+\texttt{false}, when converted to a value of type \texttt{bool}, the
+function returns without attempting to obtain any input. In either case
+the number of extracted characters is set to 0; unformatted input functions
+taking a character array of nonzero size as an argument shall also store
+a null character (using \texttt{charT()}) in the first location of the
+array. \added{If an extraction function \href{http://eel.is/c++draft/input.streams\#istream.general-3}{([istream.general])}
+returns \texttt{traits::eof()}, then \texttt{ios_base::eofbit} is set
+in the local error state and the input function stops trying to obtain
+the requested input.} If an exception is thrown during input then \texttt{ios_base::badbit}
+is turned on in \changed{\texttt{*this}'s error state}{the local error
+state, \texttt{*this}'s error state is set to the local error state, and
+the exception is rethrown if \texttt{(exceptions() \& badbit) != 0}}.
+\removed{(Exceptions thrown from \texttt{basic_ios<>::clear()} are not
+caught or rethrown.) If \texttt{(exceptions()&badbit) != 0} then the
+exception is rethrown. It also counts the number of characters extracted.}
+If no exception has been thrown it \changed{ends by storing}{stores} the
+\changed{count}{number of characters extracted} in a member object
+\removed{and returning the value specified}. \added{After extraction
+is done, the input function calls \texttt{setstate}, which sets
+\texttt{*this}'s error state to the local error state, and may throw
+an exception.} In any event the \texttt{sentry} object is destroyed
+before leaving the unformatted input function.
 \end{quote}
 
-In \textbf{[istream.unformatted] 27.7.4.3/4}:
+In \textbf{[istream.unformatted]/4}:
 \begin{quote}
 \begin{codeblock}
 int_type get();
 \end{codeblock}
 \textit{Effects:} Behaves as an unformatted input function (as described above).
-After constructing a sentry object, extracts a character \texttt{c}, if one is
+After constructing a \texttt{sentry} object, extracts a character \texttt{c}, if one is
 available. Otherwise, \changed{the function calls setstate(failbit), which may
-throw \texttt{ios_base::failure} (27.5.5.4),}{\texttt{ios_base::failbit} is
-turned on in the input function's \textit{local error state} before
-\texttt{setstate} is called.}
+throw \texttt{ios_base::failure} ([iostate.flags])}{\texttt{ios_base::failbit} is
+set in the input function's local error state before \texttt{setstate} is called}.
 \end{quote}
 
-In \textbf{[istream.unformatted] 27.7.4.3/6}:
+In \textbf{[istream.unformatted]/6}:
 \begin{quote}
 \begin{codeblock}
 basic_istream<charT, traits>& get(char_type& c);
 \end{codeblock}
 \textit{Effects:} Behaves as an unformatted input function (as described above).
-After constructing a sentry object, extracts a character, if one is available,
-and assigns it to \texttt{c}. Otherwise, \changed{the function calls
-\texttt{setstate(failbit)} (which may throw \texttt{ios_base::failure} (27.5.5.4))}
-{\texttt{ios_base::failbit} is turned on in the input function's \textit{local error state}
-before \texttt{setstate} is called}.
+After constructing a \texttt{sentry} object, extracts a character, if one is
+available, and assigns it to \texttt{c}. Otherwise, \changed{the function calls
+setstate(failbit) (which may throw \texttt{ios_base::failure} ([iostate.flags]))}{
+\texttt{ios_base::failbit} is set in the input function's local error state before
+\texttt{setstate} is called.}
 \end{quote}
 
-In \textbf{[istream.unformatted] 27.7.4.3/8}:
+In \textbf{[istream.unformatted]/8}:
 \begin{quote}
 \begin{codeblock}
 basic_istream<charT, traits>& get(char_type* s, streamsize n, char_type delim);
 \end{codeblock}
-\textit{Effects:} Behaves as an unformatted input function (as described above).
-After constructing a sentry object, extracts characters and stores them into
-successive locations of an array whose first element is designated by \texttt{s}.
-Characters are extracted and stored until any of the following occurs:
+\textit{Effects:} [...]
 \begin{itemize}
   \item[--] \texttt{n} is less than one or \texttt{n - 1} characters are stored;
   \item[--] end-of-file occurs on the input sequence\removed{ (in which case the
@@ -363,21 +363,18 @@ Characters are extracted and stored until any of the following occurs:
             \texttt{c} (in which case \texttt{c} is not extracted).
 \end{itemize}
 If the function stores no characters, \changed{it calls \texttt{setstate(failbit)}
-(which may throw \texttt{ios_base::failure} (27.5.5.4))}{\texttt{ios_base::failbit}
-is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
-In any case, if \texttt{n} is greater than zero it then stores a
-null character into the next successive location of the array.
+(which may throw \texttt{ios_base::failure} ([iostate.flags]))}{\texttt{ios_base::failbit}
+is set in the input function's local error state before \texttt{setstate} is called}.
+In any case, if \texttt{n} is greater than zero it then stores a null character into the
+next successive location of the array.
 \end{quote}
 
-In \textbf{[istream.unformatted] 27.7.4.3/13}:
+In \textbf{[istream.unformatted]/13}:
 \begin{quote}
 \begin{codeblock}
 basic_istream<charT, traits>& get(basic_streambuf<char_type, traits>& sb, char_type delim);
 \end{codeblock}
-\textit{Effects:} Behaves as an unformatted input function (as described above).
-After constructing a sentry object, extracts characters and inserts them in the
-output sequence controlled by \texttt{sb}. Characters are extracted and inserted
-until any of the following occurs:
+\textit{Effects:} [...]
 \begin{itemize}
   \item[--] end-of-file occurs on the input sequence;
   \item[--] inserting in the output sequence fails (in which case the character
@@ -388,19 +385,16 @@ until any of the following occurs:
             but not rethrown).
 \end{itemize}
 If the function inserts no characters, \changed{it calls \texttt{setstate(failbit)},
-which may throw \texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit}
-is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
+which may throw \texttt{ios_base::failure} ([iostate.flags])}{\texttt{ios_base::failbit}
+is set in the input function's local error state before \texttt{setstate} is called}.
 \end{quote}
 
-In \textbf{[istream.unformatted] 27.7.4.3/18}:
+In \textbf{[istream.unformatted]/18}:
 \begin{quote}
 \begin{codeblock}
 basic_istream<charT, traits>& getline(char_type* s, streamsize n, char_type delim);
 \end{codeblock}
-\textit{Effects:} Behaves as an unformatted input function (as described above).
-After constructing a sentry object, extracts characters and stores them into
-successive locations of an array whose first element is designated by \texttt{s}.
-Characters are extracted and stored until one of the following occurs:
+\textit{Effects:} [...]
 \begin{enumerate}
   \item end-of-file occurs on the input sequence\removed{ (in which case the
         function calls \texttt{setstate(eofbit)})};
@@ -413,38 +407,28 @@ Characters are extracted and stored until one of the following occurs:
 These conditions are tested in the order shown.
 
 If the function extracts no characters, \changed{it calls \texttt{setstate(failbit)}
-(which may throw \texttt{ios_base::failure} (27.5.5.4))}{\texttt{ios_base::failbit}
-is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
+(which may throw \texttt{ios_base::failure} ([iostate.flags]))}{\texttt{ios_base::failbit}
+is set in the input function's local error state before \texttt{setstate} is called}.
 
 In any case, if \texttt{n} is greater than zero, it then stores a null character
 (using \texttt{charT()}) into the next successive location of the array.
 \end{quote}
 
-In \textbf{[istream.extractors] 27.7.4.2.3/14}:
+In \textbf{[istream.extractors]/14}:
 \begin{quote}
 \begin{codeblock}
 basic_istream<charT, traits>& operator>>(basic_streambuf<charT, traits>* sb);
 \end{codeblock}
-\textit{Effects}: Behaves as an unformatted input function (27.7.4.3). If \texttt{sb}
-is null, calls \texttt{setstate(failbit)}, which may throw \texttt{ios_base::failure}
-(27.5.5.4). After a sentry object is constructed, extracts characters from \texttt{*this}
-and inserts them in the output sequence controlled by \texttt{sb}. Characters are
-extracted and inserted until any of the following occurs:
-\begin{itemize}
-  \item[--] end-of-file occurs on the input sequence;
-  \item[--] inserting in the output sequence fails (in which case the character to
-            be inserted is not extracted);
-  \item[--] an exception occurs (in which case the exception is caught).
-\end{itemize}
+\textit{Effects}: [...]
 If the function inserts no characters, \changed{it calls \texttt{setstate(failbit)},
-which may throw \texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit}
-is turned on in the input function's \textit{local error state} before \texttt{setstate} is called}.
+which may throw \texttt{ios_base::failure} ([iostate.flags])}{\texttt{ios_base::failbit}
+is set in the input function's local error state before \texttt{setstate} is called}.
 \removed{If it inserted no characters because it caught an exception
 thrown while extracting characters from \texttt{*this} and \texttt{failbit} is on
-in \texttt{exceptions()} (27.5.5.4), then the caught exception is rethrown.}
+in \texttt{exceptions()} ([iostate.flags]), then the caught exception is rethrown.}
 \end{quote}
 
-In \textbf{[string.io] 20.3.3.9/6}:
+In \textbf{[string.io]/6}:
 \begin{quote}
 \begin{codeblock}
 template<class charT, class traits, class Allocator>
@@ -458,27 +442,22 @@ basic_istream<charT, traits>&
           basic_string<charT, traits, Allocator>& str,
           charT delim);
 \end{codeblock}
-\textit{Effects:} Behaves as an unformatted input function (27.7.4.3), except
-that it does not affect the value returned by subsequent calls to \texttt{basic_istream<>::gcount()}.
-After constructing a sentry object, if the sentry converts to \texttt{true},
-calls \texttt{str.erase()} and then extracts characters from \texttt{is} and
-appends them to \texttt{str} as if by calling \texttt{str.append(1, c)} until
-any of the following occurs:
+\textit{Effects:} [...]
 \begin{itemize}
   \item[--] end-of-file occurs on the input sequence\added{;}\removed{(in which case, the
             \texttt{getline} function calls \texttt{is.setstate(ios_base::eofbit)}).}
   \item[--] \texttt{traits::eq(c, delim)} for the next available input character
-            \texttt{c} (in which case, \texttt{c} is extracted but not appended)\changed{ (27.5.5.4)}{;}
+            \texttt{c} (in which case, \texttt{c} is extracted but not appended)\changed{ ([iostate.flags])}{;}
   \item[--] \texttt{str.max_size()} characters are stored (in which case,
-            \changed{the function calls \texttt{is.setstate(ios_base::failbit)} (27.5.5.4)}
-            {\texttt{ios_base::failbit} is turned on in the input function's \textit{local error state}})
+            \changed{the function calls \texttt{is.setstate(ios_base::failbit)} ([iostate.flags])}
+            {\texttt{ios_base::failbit} is set in the input function's local error state})
 \end{itemize}
 The conditions are tested in the order shown. In any case, after the last
 character is extracted, the sentry object is destroyed.
 
 If the function extracts no characters, \changed{it calls \texttt{is.setstate(ios_base::failbit)}
-which may throw \texttt{ios_base::failure} (27.5.5.4)}{\texttt{ios_base::failbit} is turned
-on in the input function’s \textit{local error state} before \texttt{setstate} is called}.
+which may throw \texttt{ios_base::failure} ([iostate.flags])}{\texttt{ios_base::failbit} is turned
+on in the input function’s local error state before \texttt{setstate} is called}.
 \end{quote}
 
 
@@ -491,15 +470,15 @@ First, let's introduce a few definitions from the Standard so we can refer to
 them below.
 
 \begin{enumerate}
-  \item[(A)] \textbf{[istream] 27.7.4.1/3} (applies to both formatted and unformatted input functions):
+  \item[(A)] \textbf{[istream]/3} (applies to both formatted and unformatted input functions):
   \begin{quote}
   If \cc{rdbuf()->sbumpc()} or \cc{rdbuf()->sgetc()} returns \cc{traits::eof()},
   then the input function, except as explicitly noted otherwise, completes its
   actions and does \cc{setstate(eofbit)}, which may throw \cc{ios_base::failure}
-  (27.5.5.4), before returning.
+  ([iostate.flags]), before returning.
   \end{quote}
 
-  \item[(B)] \textbf{[istream] 27.7.4.1/4} (applies to both formatted and unformatted input functions):
+  \item[(B)] \textbf{[istream]/4} (applies to both formatted and unformatted input functions):
   \begin{quote}
   If one of these called functions throws an exception, then unless explicitly
   noted otherwise, the input function sets \cc{badbit} in error state. If
@@ -509,19 +488,19 @@ them below.
   indication.
   \end{quote}
 
-  \item[(C)] \textbf{[istream.formatted.reqmts] 27.7.4.2.1/1} (applies only to formatted input functions):
+  \item[(C)] \textbf{[istream.formatted.reqmts] [istream.formatted.reqmts]/1} (applies only to formatted input functions):
   \begin{quote}
   Each formatted input function begins execution by constructing an object of
   class \cc{sentry} with the \cc{noskipws} (second) argument \cc{false}. If
   the sentry object returns \cc{true}, when converted to a value of type
   \cc{bool}, the function endeavors to obtain the requested input. If an exception
-  is thrown during input then \cc{ios::badbit} is turned on in \cc{*this}'s error
+  is thrown during input then \cc{ios::badbit} is set in \cc{*this}'s error
   state. If \cc{(exceptions()&badbit) != 0} then the exception is rethrown. In
   any case, the formatted input function destroys the sentry object. If no
   exception has been thrown, it returns \cc{*this}.
   \end{quote}
 
-  \item[(D)] \textbf{[istream.unformatted] 27.7.4.3/1} (applies only to unformatted input functions):
+  \item[(D)] \textbf{[istream.unformatted]/1} (applies only to unformatted input functions):
   \begin{quote}
   [...] If an exception is thrown during input then \cc{ios::badbit} is turned
   on in \cc{*this}'s error state. (Exceptions thrown from \cc{basic_ios<>::clear()}
@@ -574,7 +553,7 @@ With all this laid out, here's a couple of test cases:
   \end{tabular}
   \end{center}
 
-  My interpretation is that per the definition of \cc{operator>>(unsigned int&)} in \textbf{[istream.formatted.arithmetic] 27.7.4.2.2/1}, we try to extract an \cc{unsigned int} from the stream:
+  My interpretation is that per the definition of \cc{operator>>(unsigned int&)} in \textbf{[istream.formatted.arithmetic]/1}, we try to extract an \cc{unsigned int} from the stream:
   \begin{cpp}
     using numget = num_get<charT, istreambuf_iterator<charT, traits>>;
     iostate err = iostate::goodbit;
@@ -672,7 +651,7 @@ With all this laid out, here's a couple of test cases:
   \end{tabular}
   \end{center}
 
-  My interpretation is that we create the sentry, which doesn't do much because we're not trying to skip whitespace. We then try to extract a character and fail because we hit the end of file. Per the definition of \cc{basic_istream::get()} in \textbf{[istream.unformatted] 27.7.4.3/4}, we call \cc{setstate(failbit)}, which throws an exception. Per (A), we're also somehow required to call \cc{setstate(eofbit)}. Finally, per (D), we also set \cc{badbit} on the stream, and we don't rethrow any exception because \cc{badbit} is not in the exceptions. I think this makes libc++ right again.
+  My interpretation is that we create the sentry, which doesn't do much because we're not trying to skip whitespace. We then try to extract a character and fail because we hit the end of file. Per the definition of \cc{basic_istream::get()} in \textbf{[istream.unformatted]/4}, we call \cc{setstate(failbit)}, which throws an exception. Per (A), we're also somehow required to call \cc{setstate(eofbit)}. Finally, per (D), we also set \cc{badbit} on the stream, and we don't rethrow any exception because \cc{badbit} is not in the exceptions. I think this makes libc++ right again.
 
   Actually, I don't think this specification can be implemented as-is because of \cite{LWG61}, which added the part "(Exceptions thrown from \cc{basic_ios<>::clear()} are not caught or rethrown.)". This would make it effectively impossible to call both \cc{setstate(failbit)} and \cc{setstate(eofbit)}, and also to set the \cc{badbit} on the stream. Unless I'm missing a clever implementation trick, you basically have to catch and rethrow.
 \end{enumerate}
@@ -681,11 +660,6 @@ With all this laid out, here's a couple of test cases:
 \section{References}
 \renewcommand{\section}[2]{}%
 \begin{thebibliography}{9}
-
-\bibitem[N4778]{N4778}
-  Richard Smith,
-  \emph{Working Draft, Standard for Programming Language C++}\newline
-  \url{http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2018/n4778.pdf}
 
 \bibitem[LWG2349]{LWG2349}
   Zhihao Yuan,
