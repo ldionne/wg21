@@ -891,6 +891,7 @@ include this new parameter, which requires the following:
 <h3 data-number="6.1.1" id="basic.stc.dynamic.general"><span class="header-section-number">6.1.1</span> basic.stc.dynamic.general<a href="#basic.stc.dynamic.general" class="self-link"></a></h3>
 <p>Updates for <span>6.7.5.5.1
 <a href="https://wg21.link/basic.stc.dynamic.general">[basic.stc.dynamic.general]</a></span></p>
+<!-- TODO: Remove "note 2" and remove wall of text -->
 <p>Paragraph 2, Note 2:</p>
 <blockquote>
 <p>The library provides default definitions for the global allocation
@@ -1053,12 +1054,16 @@ requested, and has type std​::​size_t. If the type of the allocated object
 has new-extended alignment, the next argument is the type’s alignment,
 and has type std​::​align_val_t. If the new-placement syntax is used, the
 initializer-clauses in its expression-list are the succeeding arguments.
-If no matching function is found then - <span class="marginalizedparent"><a class="marginalized">(20.1)</a></span> if
+If no matching function is found then</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(20.1)</a></span> if
 the allocated object type has new-extended alignment, the alignment
-argument is removed from the argument list; - <span class="marginalizedparent"><a class="marginalized">(20.2)</a></span>
+argument is removed from the argument list;</li>
+<li><span class="marginalizedparent"><a class="marginalized">(20.2)</a></span>
 otherwise, an argument that is the type’s alignment and has type
 std​::​align_val_t is added into the argument list immediately after the
-first argument; and then overload resolution is performed again.</p>
+first argument; and then overload resolution is performed again.</li>
+</ul>
 </blockquote>
 <div class="add" style="color: #006e28">
 
