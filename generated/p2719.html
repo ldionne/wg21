@@ -923,21 +923,24 @@ basic.stc.dynamic.allocation<a href="#basic.stc.dynamic.allocation" class="self-
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 An allocation function that is not a class member function shall belong
 to the global scope and not have a name with internal linkage. The
-return type shall be void*. <span class="add" style="color: #006e28"><ins>If the allocation function is type-aware,
-the <em>size</em> parameter shall be the second parameter; otherwise the
-<em>size</em> parameter shall be the first parameter.</ins></span> The
-<span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>size</em></ins></span>
-parameter shall have type std​::​size_t (<span>17.2
+return type shall be void*. <span class="add" style="color: #006e28"><ins>An allocation function shall have at least
+one parameter. If the first parameter is of type
+<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
+for some type <span><code class="sourceCode default">T</code></span>,
+there shall be at least two parameters; the second parameter is called
+the size parameter. Otherwise, the first parameter is called the size
+parameter.</ins></span> The <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter shall have type
+std​::​size_t (<span>17.2
 <a href="https://wg21.link/support.types">[support.types]</a></span>).
-The <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>size</em></ins></span>
-parameter shall not have an associated default argument (<span>9.3.4.7
+The <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter
+shall not have an associated default argument (<span>9.3.4.7
 <a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).
-The value of the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>size</em></ins></span> parameter is
-interpreted as the requested size of the allocation. An allocation
-function can be a function template. Such a template shall declare its
-return type and <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>size</em></ins></span> parameter as
+The value of the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter is interpreted
+as the requested size of the allocation. An allocation function can be a
+function template. Such a template shall declare its return type and
+<span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter as
 specified above (that is, template parameter types shall not be used in
-the return type and <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>size</em></ins></span> parameter type).
+the return type and <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter type).
 Allocation function templates shall have two or more parameters.</p>
 </blockquote>
 <h3 data-number="6.1.3" id="basic.stc.dynamic.deallocation"><span class="header-section-number">6.1.3</span>
