@@ -1095,13 +1095,13 @@ eliminated from further consideration.</li>
 <blockquote>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(9.2)</a></span> If
-any of the deallocation functions are type-aware, and may be called with
-a first parameter of type
+any of the deallocation functions have a first parameter of type
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code>
 where <code class="sourceCode default">T</code> is the static type of
-the object being deleted, all deallocation functions that are not
-type-aware operator deletes are eliminated from further
-consideration.</li>
+the object being deleted, all deallocation functions that do not have a
+first parameter of type
+<code class="sourceCode default">std::type_identity&lt;T&gt;</code> are
+eliminated from further consideration.</li>
 </ul>
 </blockquote>
 
