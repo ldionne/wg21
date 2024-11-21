@@ -891,6 +891,9 @@ include this new parameter, which requires the following:
 <h3 data-number="6.1.1" id="basic.stc.dynamic.general"><span class="header-section-number">6.1.1</span> basic.stc.dynamic.general<a href="#basic.stc.dynamic.general" class="self-link"></a></h3>
 <p>Updates for <span>6.7.5.5.1
 <a href="https://wg21.link/basic.stc.dynamic.general">[basic.stc.dynamic.general]</a></span></p>
+<p>TODO: Check whether we want to remove this. TODO: Move “The type T
+may be a dependent type.” to <a href="#basic.stc.dynamic.allocation">basic.stc.dynamic.allocation</a> or
+something</p>
 <div class="add" style="color: #006e28">
 
 <blockquote>
@@ -966,22 +969,25 @@ first parameter is of type
 <a href="https://wg21.link/support.types">[support.types]</a></span>)
 for some type <code class="sourceCode default">T</code>. This parameter
 shall not have an associated default argument. A type-aware deallocation
-function shall not be a <em>destroying operator delete</em>.</p>
+function shall not be a destroying operator delete.</p>
 </blockquote>
 
 </div>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">3-&gt;4</a></span>Each
-deallocation function shall return void. <span class="add" style="color: #006e28"><ins>The <em>subject</em> parameter of a
-type-aware deallocation function shall be the second parameter;
-otherwise the <em>subject</em> shall be the first
-parameter.</ins></span> If the function is a destroying operator delete
-declared in class type C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>subbject</em></ins></span> parameter
-shall be <code class="sourceCode default">C*</code>; otherwise, the type
-of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>subject</em></ins></span> parameter
+deallocation function shall return void. <span class="add" style="color: #006e28"><ins>A deallocation function shall have at least
+one parameter. If the first parameter is of type
+<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
+for some type <span><code class="sourceCode default">T</code></span>,
+there shall be at least two parameters; the second parameter is called
+the object parameter. Otherwise, the first parameter is called the
+object parameter.</ins></span> If the function is a destroying operator
+delete declared in class type C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter shall be
+<code class="sourceCode default">C*</code>; otherwise, the type of its
+<span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter
 shall be <code class="sourceCode default">void*</code>. A deallocation
 function may have more than one parameter. A usual deallocation function
-is a deallocation function whose parameters after the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>subject</em></ins></span> are</p>
+is a deallocation function whose parameters after the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> are</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(3-&gt;4.1)</a></span>optionally,
 a parameter of type std​::​destroying_delete_t, then</li>
@@ -992,10 +998,10 @@ a parameter of type std​::​align_val_t.</li>
 </ul>
 <p>A destroying operator delete shall be a usual deallocation function.
 A deallocation function may be an instance of a function template.
-Neither the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>subject</em></ins></span> parameter nor
-the return type shall depend on a template parameter. A deallocation
-function template shall have two or more function parameters. A template
-instance <span class="rm" style="color: #bf0303"><del>is never a usual
+Neither the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter nor the return
+type shall depend on a template parameter. A deallocation function
+template shall have two or more function parameters. A template instance
+<span class="rm" style="color: #bf0303"><del>is never a usual
 deallocation function, regardless of its signature.</del></span> <span class="add" style="color: #006e28"><ins>shall only be a usual
 deallocation function if it is a type-aware deallocation function, and
 the only dependent parameter is the first parameter (i.e. the
@@ -1014,17 +1020,19 @@ where <span><code class="sourceCode default">T</code></span> is the type
 being allocated, the second argument is</ins></span> the amount of space
 requested, and has type std​::​size_t. If the type of the allocated object
 has new-extended alignment, the next argument is the type’s alignment,
-and has type std​::​align_val_t. If the new-placement syntax is used, the
-initializer-clauses in its expression-list are the succeeding arguments.
-If no matching function is found then</p>
+and has type <code class="sourceCode default">std​::​align_val_t</code>.
+If the new-placement syntax is used, the initializer-clauses in its
+expression-list are the succeeding arguments. If no matching function is
+found then</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(20.1)</a></span> if
 the allocated object type has new-extended alignment, the alignment
 argument is removed from the argument list;</li>
 <li><span class="marginalizedparent"><a class="marginalized">(20.2)</a></span>
 otherwise, an argument that is the type’s alignment and has type
-std​::​align_val_t is added into the argument list immediately after the
-first argument; and then overload resolution is performed again.</li>
+<code class="sourceCode default">std​::​align_val_t</code> is added into
+the argument list immediately after the first argument; and then
+overload resolution is performed again.</li>
 </ul>
 </blockquote>
 <div class="add" style="color: #006e28">
