@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-10-16" />
+  <meta name="dcterms.date" content="2024-11-22" />
   <title>Type-aware allocation and deallocation functions</title>
   <style>
       code{white-space: pre-wrap;}
@@ -424,11 +424,11 @@ deallocation functions</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>P2719R1</td>
+    <td>D2719R2</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-10-16</td>
+    <td>2024-11-22</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -705,14 +705,14 @@ found by name lookup for
 <td><div>
 
 <div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="dt">size_t</span><span class="op">)</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
 <div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="dt">size_t</span><span class="op">)</span></span></code></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -720,17 +720,17 @@ found by name lookup for
 <td><div>
 
 <div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T overaligned</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="dt">size_t</span>, align_val_t<span class="op">)</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="dt">size_t</span><span class="op">)</span></span></code></pre></div>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
 <div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T overaligned</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">size_t</span>, align_val_t<span class="op">)</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="dt">size_t</span>, align_val_t<span class="op">)</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="dt">size_t</span><span class="op">)</span></span></code></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -755,19 +755,19 @@ found by name lookup for
 <td><div>
 
 <div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t, <span class="op">...)</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*)</span></span></code></pre></div>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t<span class="op">{}</span>, <span class="op">...)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(*</span>ptr<span class="op">))</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
 <div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t, <span class="op">...)</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*)</span></span></code></pre></div>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t<span class="op">{}</span>, <span class="op">...)</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -775,22 +775,22 @@ found by name lookup for
 <td><div>
 
 <div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T overaligned</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t, <span class="op">...)</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*</span>, <span class="dt">size_t</span>, align_val_t<span class="op">)</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*</span>, align_val_t<span class="op">)</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*)</span></span></code></pre></div>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t<span class="op">{}</span>, <span class="op">...)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
 <div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T overaligned</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t, <span class="op">...)</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, <span class="dt">size_t</span>, align_val_t<span class="op">)</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, align_val_t<span class="op">)</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*</span>, <span class="dt">size_t</span>, align_val_t<span class="op">)</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*</span>, align_val_t<span class="op">)</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span><span class="dt">void</span><span class="op">*)</span></span></code></pre></div>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t<span class="op">{}</span>, <span class="op">...)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -935,10 +935,11 @@ end note<span> — <em>end note</em> ]</span></span></p>
 
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-Allocation and/or deallocation functions may be ‘type aware’. A type
-aware allocation or deallocation function is identified by the first
-parameter being of type
-<code class="sourceCode default">std​::type_identity&lt;T&gt;</code>(<span>17.2
+Allocation and/or deallocation functions may be <em>type-aware</em>. A
+type-aware allocation or deallocation function is identified by the
+first parameter being of type
+<code class="sourceCode default">std​::type_identity&lt;T&gt;</code>
+(<span>17.2
 <a href="https://wg21.link/support.types">[support.types]</a></span>)
 for some type <code class="sourceCode default">T</code>. The type
 <code class="sourceCode default">T</code> may be a dependent type. This
@@ -962,7 +963,7 @@ basic.stc.dynamic.allocation<a href="#basic.stc.dynamic.allocation" class="self-
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 An allocation function that is not a class member function shall belong
 to the global scope and not have a name with internal linkage. The
-return type shall be void*. <span class="add" style="color: #006e28"><ins>If the allocation function is type aware,
+return type shall be void*. <span class="add" style="color: #006e28"><ins>If the allocation function is type-aware,
 the <em>size</em> parameter shall be the second parameter; otherwise the
 <em>size</em> parameter shall be the first parameter.</ins></span> The
 <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>size</em></ins></span>
@@ -995,22 +996,21 @@ operator delete.</p>
 
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-A deallocation function is a <em>type aware</em> deallocation function
-if the first parameter is of type
+A deallocation function is a type-aware deallocation function if the
+first parameter is of type
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code>
 (<span>17.2
 <a href="https://wg21.link/support.types">[support.types]</a></span>)
 for some type <code class="sourceCode default">T</code>. This parameter
-shall not have an associated default argument. A <em>type aware</em>
-deallocation function shall not be a <em>destroying operator
-delete</em>.</p>
+shall not have an associated default argument. A type-aware deallocation
+function shall not be a <em>destroying operator delete</em>.</p>
 </blockquote>
 
 </div>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">3-&gt;4</a></span>Each
-deallocation function shall return void. <span class="add" style="color: #006e28"><ins>The <em>subject</em> parameter of a <em>type
-aware</em> deallocation function shall be the second parameter;
+deallocation function shall return void. <span class="add" style="color: #006e28"><ins>The <em>subject</em> parameter of a
+type-aware deallocation function shall be the second parameter;
 otherwise the <em>subject</em> shall be the first
 parameter.</ins></span> If the function is a destroying operator delete
 declared in class type C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins><em>subbject</em></ins></span> parameter
@@ -1034,9 +1034,8 @@ the return type shall depend on a template parameter. A deallocation
 function template shall have two or more function parameters. A template
 instance <span class="rm" style="color: #bf0303"><del>is never a usual
 deallocation function, regardless of its signature.</del></span> <span class="add" style="color: #006e28"><ins>shall only be a usual
-deallocation function if it is a <em>type aware</em> deallocation
-function, and the only dependent parameter is the first parameter
-(i.e. the
+deallocation function if it is a type-aware deallocation function, and
+the only dependent parameter is the first parameter (i.e. the
 <span><code class="sourceCode default">std::type_identity</code></span>
 may be a specialization of a dependent type).</ins></span></p>
 </blockquote>
@@ -1092,8 +1091,8 @@ void*.</del></span></p>
 
 <blockquote>
 <ul>
-<li>if the allocation function is <em>type aware</em> it passes a
-default initialized instance of
+<li>if the allocation function is type-aware it passes a default
+initialized instance of
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code>
 where <code class="sourceCode default">T</code> is the type being
 allocated as the first parameters, and the value returned from the
@@ -1120,12 +1119,12 @@ eliminated from further consideration.</li>
 <blockquote>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(9.2)</a></span> If
-any of the deallocation functions are <em>type aware</em>, and may be
-called with a first parameter of type
+any of the deallocation functions are type-aware, and may be called with
+a first parameter of type
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code>
 where <code class="sourceCode default">T</code> is the static type of
 the object being deleted, all deallocation functions that are not
-<em>type aware</em> operator deletes are eliminated from further
+type-aware operator deletes are eliminated from further
 consideration.</li>
 </ul>
 </blockquote>
@@ -1142,7 +1141,7 @@ non-preferred functions are eliminated from further consideration.</li>
 </blockquote>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span> ….
-<span class="add" style="color: #006e28"><ins>If a type aware
+<span class="add" style="color: #006e28"><ins>If a type-aware
 deallocation function is used, a default initialized instance of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>,
 where <span><code class="sourceCode default">T</code></span> is the
