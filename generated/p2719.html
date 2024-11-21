@@ -891,47 +891,6 @@ include this new parameter, which requires the following:
 <h3 data-number="6.1.1" id="basic.stc.dynamic.general"><span class="header-section-number">6.1.1</span> basic.stc.dynamic.general<a href="#basic.stc.dynamic.general" class="self-link"></a></h3>
 <p>Updates for <span>6.7.5.5.1
 <a href="https://wg21.link/basic.stc.dynamic.general">[basic.stc.dynamic.general]</a></span></p>
-<!-- TODO: Remove "note 2" and remove wall of text -->
-<p>Paragraph 2, Note 2:</p>
-<blockquote>
-<p>The library provides default definitions for the global allocation
-and deallocation functions. Some global allocation and deallocation
-functions are replaceable ([new.delete]); these are attached to the
-global module ([module.unit]). A C++ program shall provide at most one
-definition of a replaceable allocation or deallocation function. Any
-such function definition replaces the default version provided in the
-library ([replacement.functions]). The following allocation and
-deallocation functions ([support.dynamic]) are implicitly declared in
-global scope in each translation unit of a program.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span>;</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span>align_val_t<span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">[](</span>std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">[](</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span>;</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">[](</span><span class="dt">void</span><span class="op">*)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">[](</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">[](</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span>align_val_t<span class="op">)</span> <span class="kw">noexcept</span>;</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">[](</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span> <span class="kw">noexcept</span>;</span></code></pre></div>
-<p>These implicit declarations introduce only the function names
-operator new, operator new[], operator &gt; delete, and operator
-delete[]. <span class="note"><span>[ <em>Note:</em> </span>Note 2: The
-implicit declarations do not introduce the names std, std​::​size_t,
-std​::​align_val_t, <span class="add" style="color: #006e28"><ins>std::type_identity,</ins></span>, or any
-other names that the library uses to declare these names. Thus, a
-new-expression, delete-expression, or function call that refers to one
-of these functions without importing or including the header <new> or
-importing a C++ library module ([std.modules]) is well-formed. However,
-referring to std or std​::​size_t or std​::​align_val_t is ill-formed unless
-a standard library declaration ([cstddef.syn], [new.syn], [std.modules])
-of that name precedes ([basic.lookup.general]) the use of that name. —
-end note<span> — <em>end note</em> ]</span></span></p>
-</blockquote>
 <div class="add" style="color: #006e28">
 
 <blockquote>
@@ -1161,7 +1120,7 @@ parameter.</ins></span></p>
 (seemingly simpler) mechanism. Instead of using
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code> as a
 tag, the compiler would search as per the following expression:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, args<span class="op">...)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, args<span class="op">...)</span></span></code></pre></div>
 <p>The only difference here is that we’re passing the type being
 allocated directly as a template argument instead of using a
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code> tag
@@ -1174,8 +1133,8 @@ declarations.</p>
 <p>For example, a valid
 <code class="sourceCode default">operator new</code> declaration today
 would be:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> <span class="op">...</span>Args<span class="op">&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, Args<span class="op">...)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> <span class="op">...</span>Args<span class="op">&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, Args<span class="op">...)</span>;</span></code></pre></div>
 <p>Hence, an expression like
 <code class="sourceCode default">new (42) int(3)</code> which would
 result in a call like <code class="sourceCode default">operator new&lt;int&gt;(sizeof(int), 42)</code>
@@ -1217,14 +1176,14 @@ avoided through the use of
 passed<a href="#problems-with-the-value-being-passed" class="self-link"></a></h3>
 <p>The first problem is the value being passed as the tag parameter.
 Given operator signatures of the form</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="op">*</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="op">*</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
 <p>Under the hood, the compiler could perform calls like</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T* ptr = new T(...)</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span>;</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">// delete ptr</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, ptr<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T* ptr = new T(...)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span>;</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co">// delete ptr</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, ptr<span class="op">)</span>;</span></code></pre></div>
 <p>A developer could reasonably be assumed to know that the tag
 parameter to <code class="sourceCode default">operator new</code> can’t
 be anything but a null pointer. However, for
@@ -1243,9 +1202,9 @@ types<a href="#silent-conversions-to-base-types" class="self-link"></a></h3>
 <p>A scenario we have discussed is developers wishing to provide custom
 [de]allocation operators for a whole class hierarchy. When using a typed
 pointer as the tag, this would be written as:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span> <span class="op">}</span>;</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>Base<span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>Base<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span> <span class="op">}</span>;</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>Base<span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>Base<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
 <p>This operator would then also match any derived types of
 <code class="sourceCode default">Base</code>, which may or may not be
 intended. If not intended, the conversion from
@@ -1255,19 +1214,19 @@ and may not be noticed. Furthermore, this would basically defeat the
 purpose of providing type knowledge to the allocator, since only the
 type of the base class would be known. We believe that the correct way
 of implementing an operator for a hierarchy is this:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>; <span class="co">// T is the actual type being allocated</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>; <span class="co">// T is the actual type being allocated</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 <p>Or alternatively, in the global namespace:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
 <h3 data-number="7.2.3" id="performance-considerations"><span class="header-section-number">7.2.3</span> Performance considerations<a href="#performance-considerations" class="self-link"></a></h3>
 <p>There is a fundamental difference between
 <code class="sourceCode default">T*</code> and
@@ -1291,19 +1250,19 @@ design choice.</p>
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code><a href="#design-choice-location-of-stdtype_identityt" class="self-link"></a></h2>
 <p>When writing this paper, we went back and forth of the order of
 arguments. This version of the paper proposes:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span></span></code></pre></div>
 <p>Another approach would be:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span></code></pre></div>
 <p>The existing specification allows for the existence of template
 (including variadic template) declarations of operator new and delete,
 and this functionality is used in existing code bases. This leads to
@@ -1357,28 +1316,28 @@ believe it creates a user hazard. At a technical level there is no
 additional complexity in supporting type-aware destroying delete, but
 the resulting semantics seem likely to cause a lot of confusion. For
 example, given this hypothetical declaration:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Foo <span class="op">{</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, Foo<span class="op">*</span>, std<span class="op">::</span>destroying_delete_t<span class="op">)</span>;</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Bar <span class="op">:</span> Foo <span class="op">{</span> <span class="op">}</span>;</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>Foo<span class="op">*</span> foo<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> foo; <span class="co">// calls Foo::operator delete&lt;Foo&gt;</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> g<span class="op">(</span>Bar <span class="op">*</span>bar<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> bar; <span class="co">// calls Foo::operator delete&lt;Bar&gt;</span></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Foo <span class="op">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, Foo<span class="op">*</span>, std<span class="op">::</span>destroying_delete_t<span class="op">)</span>;</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Bar <span class="op">:</span> Foo <span class="op">{</span> <span class="op">}</span>;</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>Foo<span class="op">*</span> foo<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> foo; <span class="co">// calls Foo::operator delete&lt;Foo&gt;</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> g<span class="op">(</span>Bar <span class="op">*</span>bar<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> bar; <span class="co">// calls Foo::operator delete&lt;Bar&gt;</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>To a user this appears to be doing what they expect. However,
 consider the following:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Oops <span class="op">:</span> Bar <span class="op">{</span> <span class="op">}</span>;</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> h<span class="op">(</span>Oops <span class="op">*</span>oops<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  g<span class="op">(</span>oops<span class="op">)</span>; <span class="co">// calls Foo::operator delete&lt;Bar&gt; from within g()</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Oops <span class="op">:</span> Bar <span class="op">{</span> <span class="op">}</span>;</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> h<span class="op">(</span>Oops <span class="op">*</span>oops<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  g<span class="op">(</span>oops<span class="op">)</span>; <span class="co">// calls Foo::operator delete&lt;Bar&gt; from within g()</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>By design, destroying delete does not perform any polymorphic
 dispatch, and as a result the type being passed to the operator is not
 be the dynamic type of the object being destroyed, but rather its static
@@ -1415,11 +1374,11 @@ which means that developers would have to appropriately constrain their
 type-aware operators anyway. In other words, we believe that a
 declaration like this would never have been a good idea in the first
 place:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> lib <span class="op">{</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// intent: override for all types in this namespace</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> lib <span class="op">{</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// intent: override for all types in this namespace</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>There are too many ways in which an unconstrained declaration like
 this can break, including an unexpected set of associated namespaces or
 even a mere
