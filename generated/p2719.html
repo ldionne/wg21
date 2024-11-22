@@ -689,6 +689,7 @@ found by name lookup for
 <p>If the user writes
 <code class="sourceCode default">new T(...)</code>, the compiler checks
 (in order):</p>
+<!-- # TODO: add aligned lookup of unaligned aligned types -->
 <table>
 <thead>
 <tr class="header">
@@ -705,14 +706,17 @@ found by name lookup for
 <td><div>
 
 <div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span></code></pre></div>
 
 </div></td>
 <td><div>
 
 <div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span></code></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>NEW<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span></code></pre></div>
 
 </div></td>
 </tr>
@@ -888,37 +892,24 @@ include this new parameter, which requires the following:
 -->
 <h1 data-number="6" id="proposed-wording"><span class="header-section-number">6</span> Proposed wording<a href="#proposed-wording" class="self-link"></a></h1>
 <h2 data-number="6.1" id="basic.stc.dynamic"><span class="header-section-number">6.1</span> basic.stc.dynamic<a href="#basic.stc.dynamic" class="self-link"></a></h2>
-<h3 data-number="6.1.1" id="basic.stc.dynamic.general"><span class="header-section-number">6.1.1</span> basic.stc.dynamic.general<a href="#basic.stc.dynamic.general" class="self-link"></a></h3>
-<p>Updates for <span>6.7.5.5.1
-<a href="https://wg21.link/basic.stc.dynamic.general">[basic.stc.dynamic.general]</a></span></p>
-<p>TODO: Check whether we want to remove this. TODO: Move “The type T
-may be a dependent type.” to <a href="#basic.stc.dynamic.allocation">basic.stc.dynamic.allocation</a> or
-something</p>
-<div class="add" style="color: #006e28">
+<!-- ### basic.stc.dynamic.general
 
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-Allocation and/or deallocation functions may be <em>type-aware</em>. A
-type-aware allocation or deallocation function is identified by the
-first parameter being of type
-<code class="sourceCode default">std​::type_identity&lt;T&gt;</code>
-(<span>17.2
-<a href="https://wg21.link/support.types">[support.types]</a></span>)
-for some type <code class="sourceCode default">T</code>. The type
-<code class="sourceCode default">T</code> may be a dependent type. This
-parameter shall not have an associated default argument (<span>9.3.4.7
-<a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).</p>
-</blockquote>
+Updates for [basic.stc.dynamic.general]{.sref}
 
-</div>
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">3-&gt;4</a></span> If
-the behavior of an allocation or deallocation function does not satisfy
-the semantic constraints specified in <a href="#basic.stc.dynamic.allocation">basic.stc.dynamic.allocation</a>
-and <a href="#basic.stc.dynamic.deallocation">basic.stc.dynamic.deallocation</a>,
-the behavior is undefined.</p>
-</blockquote>
-<h3 data-number="6.1.2" id="basic.stc.dynamic.allocation"><span class="header-section-number">6.1.2</span>
+TODO: Check whether we want to remove this.
+TODO: Move "The type T may be a dependent type." to [basic.stc.dynamic.allocation] or something
+
+::: add
+> [3]{.pnum} Allocation and/or deallocation functions may be _type-aware_. A type-aware allocation or
+> deallocation function is identified by the first parameter being of type `std​::type_identity<T>` ([support.types]{.sref})
+> for some type `T`. The type `T` may be a dependent type. This parameter shall not have an associated default
+> argument ([dcl.fct.default]{.sref}).
+:::
+
+> [3->4]{.pnum} If the behavior of an allocation or deallocation function does not satisfy the semantic
+> constraints specified in [basic.stc.dynamic.allocation] and [basic.stc.dynamic.deallocation], the
+> behavior is undefined. -->
+<h3 data-number="6.1.1" id="basic.stc.dynamic.allocation"><span class="header-section-number">6.1.1</span>
 basic.stc.dynamic.allocation<a href="#basic.stc.dynamic.allocation" class="self-link"></a></h3>
 <p>Updates for <span>6.7.5.5.2
 <a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span></p>
@@ -929,24 +920,33 @@ to the global scope and not have a name with internal linkage. The
 return type shall be void*. <span class="add" style="color: #006e28"><ins>An allocation function shall have at least
 one parameter. If the first parameter is of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
-for some type <span><code class="sourceCode default">T</code></span>,
-there shall be at least two parameters; the second parameter is called
-the size parameter. Otherwise, the first parameter is called the size
+for some type <span><code class="sourceCode default">T</code></span>
+there shall be at least two parameters; the first parameter is called
+the type-identity, the second parameter is called the size parameter.
+Otherwise, the first parameter is called the size
 parameter.</ins></span> The <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter shall have type
-std​::​size_t (<span>17.2
+<code class="sourceCode default">std​::​size_t</code> (<span>17.2
 <a href="https://wg21.link/support.types">[support.types]</a></span>).
-The <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter
-shall not have an associated default argument (<span>9.3.4.7
+<span class="rm" style="color: #bf0303"><del>The first</del></span><span class="add" style="color: #006e28"><ins>Both the type-identity, if
+presence, and the size</ins></span> parameters shall not have an
+associated default argument (<span>9.3.4.7
 <a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).
 The value of the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter is interpreted
 as the requested size of the allocation. An allocation function can be a
 function template. Such a template shall declare its return type and
 <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter as
-specified above (that is, template parameter types shall not be used in
-the return type and <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter type).
-Allocation function templates shall have two or more parameters.</p>
+specified above<span class="add" style="color: #006e28"><ins>, and the
+type-identity parameter must be specified as some specialization of
+<span><code class="sourceCode default">std::type_identity</code></span></ins></span>
+(that is, template parameter types shall not be used in the return type
+and <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter
+type<span class="add" style="color: #006e28"><ins>, and may only be used
+in the template parameters to
+<span><code class="sourceCode default">std::type_identity</code></span>
+in the type-identity type</ins></span>). Allocation function templates
+shall have two or more parameters.</p>
 </blockquote>
-<h3 data-number="6.1.3" id="basic.stc.dynamic.deallocation"><span class="header-section-number">6.1.3</span>
+<h3 data-number="6.1.2" id="basic.stc.dynamic.deallocation"><span class="header-section-number">6.1.2</span>
 basic.stc.dynamic.deallocation<a href="#basic.stc.dynamic.deallocation" class="self-link"></a></h3>
 <p>Updates for <span>6.7.5.5.3
 <a href="https://wg21.link/basic.stc.dynamic.deallocation">[basic.stc.dynamic.deallocation]</a></span></p>
@@ -958,42 +958,28 @@ least two parameters and its second parameter is of type
 destroying operator delete shall be a class member function named
 operator delete.</p>
 </blockquote>
-<div class="add" style="color: #006e28">
-
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
-A deallocation function is a type-aware deallocation function if the
-first parameter is of type
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code>
-(<span>17.2
-<a href="https://wg21.link/support.types">[support.types]</a></span>)
-for some type <code class="sourceCode default">T</code>. This parameter
-shall not have an associated default argument. A type-aware deallocation
-function shall not be a destroying operator delete.</p>
-</blockquote>
-
-</div>
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">3-&gt;4</a></span>Each
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>Each
 deallocation function shall return void. <span class="add" style="color: #006e28"><ins>A deallocation function shall have at least
-one parameter. If the first parameter is of type
+one parameter. If the first parameter is a of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
 for some type <span><code class="sourceCode default">T</code></span>,
-there shall be at least two parameters; the second parameter is called
-the object parameter. Otherwise, the first parameter is called the
-object parameter.</ins></span> If the function is a destroying operator
-delete declared in class type C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter shall be
+there shall be at least two parameters; the first parameter is called
+the type-identity, the second parameter is called the object parameter.
+Otherwise, the first parameter is called the object
+parameter.</ins></span> If the function is a destroying operator delete
+declared in class type C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter shall be
 <code class="sourceCode default">C*</code>; otherwise, the type of its
 <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter
 shall be <code class="sourceCode default">void*</code>. A deallocation
 function may have more than one parameter. A usual deallocation function
 is a deallocation function whose parameters after the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> are</p>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(3-&gt;4.1)</a></span>optionally,
+<li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>optionally,
 a parameter of type std​::​destroying_delete_t, then</li>
-<li><span class="marginalizedparent"><a class="marginalized">(3-&gt;4.2)</a></span>optionally,
+<li><span class="marginalizedparent"><a class="marginalized">(3.2)</a></span>optionally,
 a parameter of type std​::​size_t, then</li>
-<li><span class="marginalizedparent"><a class="marginalized">(3-&gt;4.3)</a></span>optionally,
+<li><span class="marginalizedparent"><a class="marginalized">(3.3)</a></span>optionally,
 a parameter of type std​::​align_val_t.</li>
 </ul>
 <p>A destroying operator delete shall be a usual deallocation function.
@@ -1002,26 +988,29 @@ Neither the <span class="rm" style="color: #bf0303"><del>first</del></span><span
 type shall depend on a template parameter. A deallocation function
 template shall have two or more function parameters. A template instance
 <span class="rm" style="color: #bf0303"><del>is never a usual
-deallocation function, regardless of its signature.</del></span> <span class="add" style="color: #006e28"><ins>shall only be a usual
-deallocation function if it is a type-aware deallocation function, and
-the only dependent parameter is the first parameter (i.e. the
-<span><code class="sourceCode default">std::type_identity</code></span>
-may be a specialization of a dependent type).</ins></span></p>
+deallocation function, regardless of its signature.</del></span><span class="add" style="color: #006e28"><ins>is only a usual deallocation
+function if it has at least two parameters, the first parameter is a
+type-identity, and the type-identity is the only dependent parameter
+(i.e. the type-identity may be of type
+<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
+where <span><code class="sourceCode default">T</code></span> is a
+dependent type).</ins></span></p>
 </blockquote>
 <h2 data-number="6.2" id="expr.new"><span class="header-section-number">6.2</span> expr.new<a href="#expr.new" class="self-link"></a></h2>
 <p>Updates to <span>7.6.2.8
 <a href="https://wg21.link/expr.new">[expr.new]</a></span></p>
+<div class="rm" style="color: #bf0303">
+
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">20</a></span>
 Overload resolution is performed on a function call created by
-assembling an argument list. The first argument <span class="add" style="color: #006e28"><ins>is a default initialized instance of
-<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
-where <span><code class="sourceCode default">T</code></span> is the type
-being allocated, the second argument is</ins></span> the amount of space
-requested, and has type std​::​size_t. If the type of the allocated object
-has new-extended alignment, the next argument is the type’s alignment,
-and has type <code class="sourceCode default">std​::​align_val_t</code>.
-If the new-placement syntax is used, the initializer-clauses in its
+assembling an argument list. The first argument is the amount of space
+requested, and has type
+<code class="sourceCode default">std​::​size_t</code>. If the type of the
+allocated object has new-extended alignment, the next argument is the
+type’s alignment, and has type
+<code class="sourceCode default">std​::​align_val_t</code>. If the
+new-placement syntax is used, the initializer-clauses in its
 expression-list are the succeeding arguments. If no matching function is
 found then</p>
 <ul>
@@ -1035,15 +1024,48 @@ the argument list immediately after the first argument;</li>
 </ul>
 <p>and then overload resolution is performed again.</p>
 </blockquote>
+
+</div>
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<p>If no matching function is found after these steps and the first
-parameter in the argument list is a
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code>, the
-full resolution process shall be repeated, without including the
-implicit <code class="sourceCode default">std::type_identity</code>
-parameter.</p>
+<p><span class="marginalizedparent"><a class="marginalized">20</a></span> The
+type-identity is a default-initialized object of type
+<code class="sourceCode default">std::type_identity&lt;T&gt;</code>,
+where <code class="sourceCode default">T</code> is the type of the
+allocated object.</p>
+<p><span class="marginalizedparent"><a class="marginalized">21</a></span>
+Overload resolution is performed on a function call created by
+assembling an argument list.</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(21.1)</a></span> The
+first argument is the type-identity, the second argument is the amount
+of space requested, and has type
+<code class="sourceCode default">std​::​size_t</code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(21.2)</a></span> If
+the type of the allocated object has new-extended alignment, the next
+argument is the type’s alignment, and has type
+<code class="sourceCode default">std​::​align_val_t</code>. If the
+new-placement syntax is used, the initializer-clauses in its
+expression-list are the succeeding arguments. If no matching function is
+found then</p>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">(21.2.1)</a></span>
+if the allocated object type has new-extended alignment, the alignment
+argument is removed from the argument list;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(21.2.2)</a></span>
+otherwise, an argument that is the type’s alignment and has type
+<code class="sourceCode default">std​::​align_val_t</code> is added into
+the argument list immediately after the first argument;</p></li>
+</ul></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(21.3)</a></span> and
+then overload resolution is performed again.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(21.4)</a></span> If
+no matching function is found then steps [21.3]-[21.4] are repeated
+starting with an argument list consisting of a single parameter that is
+the amount of space requested, and has type
+<code class="sourceCode default">std​::​size_t</code>.</p></li>
+</ul>
 </blockquote>
 
 </div>
@@ -1051,42 +1073,78 @@ parameter.</p>
 <p><span class="marginalizedparent"><a class="marginalized">29</a></span> A
 declaration of a placement deallocation function matches the declaration
 of a placement allocation function if it has the same number of
-parameters and, after parameter transformations ([dcl.fct]), all
-parameter types except <span class="rm" style="color: #bf0303"><del>the
-first</del></span>[if the function is type aware the second; otherwise
-the first] are identical.</p>
+parameters and, after parameter transformations (<span>9.3.4.6
+<a href="https://wg21.link/dcl.fct">[dcl.fct]</a></span>), all parameter
+types except <span class="rm" style="color: #bf0303"><del>the
+first</del></span><span class="add" style="color: #006e28"><ins>the size
+and object</ins></span> are identical.</p>
 </blockquote>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">30</a></span> If a
-new-expression calls a deallocation function it passes the value
-returned from the allocation function call as the <span class="rm" style="color: #bf0303"><del>first argument of type
-<span><code class="sourceCode default">void*</code></span></del></span><span class="add" style="color: #006e28"><ins>argument for the object
-parameter</ins></span>.</p>
+new-expression calls a deallocation function it passes <span class="add" style="color: #006e28"><ins>the type-identity as the first argument if
+it was passed to the allocation function, and</ins></span> the value
+returned from the allocation function call as the <span class="rm" style="color: #bf0303"><del>first argument</del></span><span class="add" style="color: #006e28"><ins>argument for the object
+parameter</ins></span> of type
+<code class="sourceCode default">void *</code>.</p>
 </blockquote>
-<div class="add" style="color: #006e28">
-
-<blockquote>
-<ul>
-<li>if the allocation function is type-aware it passes a default
-initialized instance of
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code>
-where <code class="sourceCode default">T</code> is the type being
-allocated as the first parameters, and the value returned from the
-allocation function as the second parameter; otherwise</li>
-<li>it passes the value returned from the allocation function call as
-the first argument of type void*.</li>
-</ul>
-</blockquote>
-
-</div>
 <h2 data-number="6.3" id="expr.delete"><span class="header-section-number">6.3</span> expr.delete<a href="#expr.delete" class="self-link"></a></h2>
+<div class="add" style="color: #006e28">
+
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">9</a></span>The
-deallocation function to be called is selected as follows:</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+The type-identity is an object with an unspecified value of type
+std::type_identity<T> where T is the static type of the operand <span class="note"><span>[ <em>Note:</em> </span>For Review: is this
+sufficient to say that given
+<code class="sourceCode default">X *Obj</code> for
+<code class="sourceCode default">delete Obj</code> and
+<code class="sourceCode default">delete [] Obj</code> will have a
+type-identity of type
+<code class="sourceCode default">std::type_identity&lt;X&gt;</code>?<span>
+— <em>end note</em> ]</span></span>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+Construct a set of candidate deallocation functions</p>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span> If
-any of the deallocation functions is a destroying operator delete, all
-deallocation functions that are not destroying operator deletes are
+<li><p><span class="marginalizedparent"><a class="marginalized">(10.1)</a></span> All
+found declarations for which the first parameter is of a pointer type
+<span class="note"><span>[ <em>Note:</em> </span>either
+<code class="sourceCode default">void *</code>, or a
+<code class="sourceCode default">C*</code> if a destroying delete for
+some type <code class="sourceCode default">C</code><span> — <em>end
+note</em> ]</span></span> or the same type as the type-identity are
+added to the set of candidate functions.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span> For
+each function template found, function template argument deduction
+(<span>13.10.3
+<a href="https://wg21.link/temp.deduct">[temp.deduct]</a></span>) is
+performed using the type of the type-identity as the first parameter,
+and the type of each subsequent parameter in the candidate function
+template. If argument deduction and checking succeeds, the deduced
+template-arguments are used to synthesize the declaration of a single
+function template specialization. If the first parameter of the
+synthesized function is of the same type as the type-identity, it is
+added to the set of candidates. <span class="note"><span>[
+<em>Note:</em> </span>For Review: It is unclear if this last constraint
+needs to be stated explicitly as it would require a non-standard
+declaration of std::type_identity which I think would be UB?<span> —
+<em>end note</em> ]</span></span></p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span> If
+multiple candidate functions have the same type, all candidates other
+than the candidate that is the best viable function as described in
+<span>12.2.4
+<a href="https://wg21.link/over.match.best">[over.match.best]</a></span>
+are removed from the set of candidates.</p></li>
+</ul>
+</blockquote>
+
+</div>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>The
+deallocation function to be called is selected <span class="add" style="color: #006e28"><ins>from the candidate set</ins></span> as
+follows:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(9.1-&gt;11.1)</a></span>
+If any of the deallocation functions is a destroying operator delete,
+all deallocation functions that are not destroying operator deletes are
 eliminated from further consideration.</li>
 </ul>
 </blockquote>
@@ -1094,39 +1152,32 @@ eliminated from further consideration.</li>
 
 <blockquote>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(9.2)</a></span> If
-any of the deallocation functions have a first parameter of type
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code>
-where <code class="sourceCode default">T</code> is the static type of
-the object being deleted, all deallocation functions that do not have a
-first parameter of type
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code> are
-eliminated from further consideration.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(11.2)</a></span> If
+any of the deallocation candidates have a first parameter of the same
+type as the type-identity, all deallocation functions that do not have a
+first parameter of that type are eliminated from further
+consideration.</li>
 </ul>
 </blockquote>
 
 </div>
 <blockquote>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(9.2-&gt;3)</a></span>
+<li><span class="marginalizedparent"><a class="marginalized">(9.2-&gt;11.3)</a></span>
 If the type has new-extended alignment, a function with a parameter of
 type std​::​align_val_t is preferred; otherwise a function without such a
 parameter is preferred. If any preferred functions are found, all
 non-preferred functions are eliminated from further consideration.</li>
 </ul>
-</blockquote>
-<!--
-TODO: More context.
-TODO: Find a cute name to refer to `type `std::type_identity<T>`, where T is the static type of the object being deleted`
--->
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">10</a></span> ….
-<span class="add" style="color: #006e28"><ins>If a type-aware
-deallocation function is used, a default initialized object of type
-<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>,
-where <span><code class="sourceCode default">T</code></span> is the
-static type of the object being deleted, is passed as the first
-parameter.</ins></span></p>
+<p>…</p>
+<p><span class="marginalizedparent"><a class="marginalized">10-&gt;12</a></span>
+<span class="add" style="color: #006e28"><ins>If the first parameter of
+the selected deallocation function is the same type as the
+type-identity, the type-identity is passed as the first argument to the
+deallocation call.</ins></span> For a single-object delete expression,
+the deleted object is the object A pointed to by the operand if the
+static type of <em>A</em> does not have a virtual destructor, and the
+most-derived object of <em>A</em> otherwise. …</p>
 </blockquote>
 <h1 data-number="7" id="design-choices-and-notes"><span class="header-section-number">7</span> Design choices and notes<a href="#design-choices-and-notes" class="self-link"></a></h1>
 <h2 data-number="7.1" id="design-choice-stdtype_identityt-vs-raw-template-argument"><span class="header-section-number">7.1</span> Design choice:
