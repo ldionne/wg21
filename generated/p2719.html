@@ -1093,8 +1093,10 @@ parameter</ins></span> of type
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 The type-identity is an object with an unspecified value of type
-std::type_identity<T> where T is the static type of the operand <span class="note"><span>[ <em>Note:</em> </span>For Review: is this
-sufficient to say that given
+<code class="sourceCode default">std::type_identity&lt;T&gt;</code>
+where <code class="sourceCode default">T</code> is the static type of
+the operand <span class="note"><span>[ <em>Note:</em> </span>For Review:
+is this sufficient to say that given
 <code class="sourceCode default">X *Obj</code> for
 <code class="sourceCode default">delete Obj</code> and
 <code class="sourceCode default">delete [] Obj</code> will have a
