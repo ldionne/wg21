@@ -458,25 +458,22 @@ relocation</h1>
 <li><a href="#proposal" id="toc-proposal"><span class="toc-section-number">3</span> Proposal<span></span></a></li>
 <li><a href="#usage-examples" id="toc-usage-examples"><span class="toc-section-number">4</span> Usage examples<span></span></a>
 <ul>
-<li><a href="#vectoremplace-vectorinsert" id="toc-vectoremplace-vectorinsert"><span class="toc-section-number">4.1</span>
-<code class="sourceCode default">vector::emplace</code> /
-<code class="sourceCode default">vector::insert</code><span></span></a></li>
-<li><a href="#vectorerase" id="toc-vectorerase"><span class="toc-section-number">4.2</span>
-<code class="sourceCode default">vector::erase</code><span></span></a></li>
-<li><a href="#vectoremplace_back-vectorpush_back" id="toc-vectoremplace_back-vectorpush_back"><span class="toc-section-number">4.3</span>
-<code class="sourceCode default">vector::emplace_back</code> /
-<code class="sourceCode default">vector::push_back</code><span></span></a></li>
+<li><a href="#vectoremplace-vectorinsert" id="toc-vectoremplace-vectorinsert"><span class="toc-section-number">4.1</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace</code> /
+<code class="sourceCode cpp">vector<span class="op">::</span>insert</code><span></span></a></li>
+<li><a href="#vectorerase" id="toc-vectorerase"><span class="toc-section-number">4.2</span> <code class="sourceCode cpp">vector<span class="op">::</span>erase</code><span></span></a></li>
+<li><a href="#vectoremplace_back-vectorpush_back" id="toc-vectoremplace_back-vectorpush_back"><span class="toc-section-number">4.3</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace_back</code>
+/ <code class="sourceCode cpp">vector<span class="op">::</span>push_back</code><span></span></a></li>
 </ul></li>
 <li><a href="#wording" id="toc-wording"><span class="toc-section-number">5</span> Wording<span></span></a></li>
 </ul>
 </div>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
-<p><a href="http://wg21.link/P2786">P2786</a> is currently making
+<p><a href="https://wg21.link/P2786">P2786</a> is currently making
 progress through EWG and LEWG. In Poland, LEWG expressed a strong desire
 for that language feature to come with a proper user-facing library
 interface. This paper proposes such an interface. That interface is
 heavily influenced by the uninitialized algorithms that were originally
-proposed in <a href="http://wg21.link/P1144">P1144</a> which, after
+proposed in <a href="https://wg21.link/P1144">P1144</a> which, after
 implementation experience in libc++, seem to be what’s right for the
 library.</p>
 <h1 data-number="2" id="motivation"><span class="header-section-number">2</span> Motivation<a href="#motivation" class="self-link"></a></h1>
@@ -492,29 +489,28 @@ algorithms and containers written in terms of relocation today would
 benefit from a massive speedup for trivially relocatable types, without
 requiring any change.</p>
 <h1 data-number="3" id="proposal"><span class="header-section-number">3</span> Proposal<a href="#proposal" class="self-link"></a></h1>
-<p>We propose adding algorithms
-<code class="sourceCode default">std::uninitialized_relocate</code>,
-<code class="sourceCode default">std::uninitialized_relocate_n</code>,
-and <code class="sourceCode default">std::uninitialized_relocate_backward</code>.
+<p>We propose adding algorithms <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate</code>,
+<code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate_n</code>,
+and <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate_backward</code>.
 We also add the equivalent
-<code class="sourceCode default">ranges::</code> functions and the
-parallel algorithm overloads. At a high level, these algorithms relocate
-a range of objects from one memory location to another, which is a very
-useful primitive when writing containers and algorithms.</p>
+<code class="sourceCode cpp">ranges<span class="op">::</span></code>
+functions and the parallel algorithm overloads. At a high level, these
+algorithms relocate a range of objects from one memory location to
+another, which is a very useful primitive when writing containers and
+algorithms.</p>
 <p>However, the library interface proposed here is intentionally
 independent of the details of the underlying language feature.</p>
 <p>Design points:</p>
 <ul>
 <li>These functions behave similarly to the other uninitialized
-algorithms like
-<code class="sourceCode default">std::uninitialized_copy</code>, with
-the difference that the new proposed relocation algorithms support
+algorithms like <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_copy</code>,
+with the difference that the new proposed relocation algorithms support
 overlapping input/output ranges like
-<code class="sourceCode default">std::move</code> and
-<code class="sourceCode default">std::move_backward</code>. That is
-necessary in order to support most use cases where one is relocating a
-range a bit “to the right” or a bit “to the left” of its current
-location.</li>
+<code class="sourceCode cpp">std<span class="op">::</span>move</code>
+and <code class="sourceCode cpp">std<span class="op">::</span>move_backward</code>.
+That is necessary in order to support most use cases where one is
+relocating a range a bit “to the right” or a bit “to the left” of its
+current location.</li>
 <li>Unlike P2786 which talks of <em>trivial relocation</em>, these
 algorithms talk of <em>relocation</em> in the general sense. This is
 because it’s generally more useful (and easier!) to write an algorithm
@@ -529,13 +525,12 @@ implementations optimize under the as-if rule.</li>
 exception, the whole source range is destroyed and the whole destination
 range as well. Otherwise, the ranges would contain an unknown number of
 alive objects, making it impossible for the caller to perform a clean
-up. This turns out to work well with what e.g.
-<code class="sourceCode default">std::vector::insert</code> requires in
-order to provide the basic exception safety guarantee (see the examples
-below).</li>
+up. This turns out to work well with what e.g. <code class="sourceCode cpp">std<span class="op">::</span>vector<span class="op">::</span>insert</code>
+requires in order to provide the basic exception safety guarantee (see
+the examples below).</li>
 <li>The algorithms accept
-<code class="sourceCode default">input_iterator</code>s (or
-<code class="sourceCode default">bidirectional_iterator</code>s for the
+<code class="sourceCode cpp">input_iterator</code>s (or
+<code class="sourceCode cpp">bidirectional_iterator</code>s for the
 backward variant) for the input range. This iterator category is
 sufficient to implement these algorithms properly. However, it does mean
 that the range overlap precondition cannot be checked at runtime for
@@ -550,13 +545,12 @@ does not contain any elements after performing the operation.</li>
 </ul>
 <h1 data-number="4" id="usage-examples"><span class="header-section-number">4</span> Usage examples<a href="#usage-examples" class="self-link"></a></h1>
 <p>In these examples, we ignore allocator support for simplicity, and we
-use <code class="sourceCode default">iterator</code> instead of
-<code class="sourceCode default">const_iterator</code> as the parameter
+use <code class="sourceCode cpp">iterator</code> instead of
+<code class="sourceCode cpp">const_iterator</code> as the parameter
 types to lighten the code. The “real” code for implementing these
 functions does not look meaningfully different.</p>
-<h2 data-number="4.1" id="vectoremplace-vectorinsert"><span class="header-section-number">4.1</span>
-<code class="sourceCode default">vector::emplace</code> /
-<code class="sourceCode default">vector::insert</code><a href="#vectoremplace-vectorinsert" class="self-link"></a></h2>
+<h2 data-number="4.1" id="vectoremplace-vectorinsert"><span class="header-section-number">4.1</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace</code> /
+<code class="sourceCode cpp">vector<span class="op">::</span>insert</code><a href="#vectoremplace-vectorinsert" class="self-link"></a></h2>
 <table>
 <thead>
 <tr class="header">
@@ -661,32 +655,29 @@ contain moved-from objects, like in the assignment-based one.</li>
 <li>Both implementations provide the basic exception safety guarantee,
 but they provide it differently. After an exception, the
 assignment-based implementation will contain the same number of elements
-as before calling <code class="sourceCode default">emplace</code>, but
+as before calling <code class="sourceCode cpp">emplace</code>, but
 unknown elements in the vector will be in a moved-from state. The
 relocation-based implementation instead ends up with the elements in
-<code class="sourceCode default">[position, end())</code> being erased
-from the vector. It’s unclear whether one behavior is really superior
-over the other, but both are conforming.</li>
+<code class="sourceCode cpp"><span class="op">[</span>position, end<span class="op">())</span></code>
+being erased from the vector. It’s unclear whether one behavior is
+really superior over the other, but both are conforming.</li>
 <li>There is no mention of trivial relocation in the implementation. We
 relocate elements even when that is not equivalent to
-<code class="sourceCode default">std::memcpy</code> (or whatever the
-language definition is).</li>
+<code class="sourceCode cpp">std<span class="op">::</span>memcpy</code>
+(or whatever the language definition is).</li>
 <li>An implementation that considers the usage of move-assignment to be
 part of the function’s API may want to preserve that behavior, in which
 case the relocating code path may be guarded by something like P2786’s
-<code class="sourceCode default">is_replaceable_v&lt;T&gt;</code> (and
-otherwise fallback to move-assignment). In the absence of
-<code class="sourceCode default">is_replaceable</code>, a conservative
-implementation could use
-<code class="sourceCode default">std::is_trivially_copyable</code> as a
-guard.</li>
+<code class="sourceCode cpp">is_replaceable_v<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
+(and otherwise fallback to move-assignment). In the absence of
+<code class="sourceCode cpp">is_replaceable</code>, a conservative
+implementation could use <code class="sourceCode cpp">std<span class="op">::</span>is_trivially_copyable</code>
+as a guard.</li>
 </ul>
-<p>Inserting in the middle of a
-<code class="sourceCode default">std::vector&lt;std::string&gt;</code>
+<p>Inserting in the middle of a <code class="sourceCode cpp">std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>string<span class="op">&gt;</span></code>
 is roughly TODOx times faster with relocation than with assignments.</p>
 <!-- TODO: Measure and provide a link to the benchmarks -->
-<h2 data-number="4.2" id="vectorerase"><span class="header-section-number">4.2</span>
-<code class="sourceCode default">vector::erase</code><a href="#vectorerase" class="self-link"></a></h2>
+<h2 data-number="4.2" id="vectorerase"><span class="header-section-number">4.2</span> <code class="sourceCode cpp">vector<span class="op">::</span>erase</code><a href="#vectorerase" class="self-link"></a></h2>
 <table>
 <thead>
 <tr class="header">
@@ -742,37 +733,36 @@ is roughly TODOx times faster with relocation than with assignments.</p>
 </table>
 <p>Things worth noting:</p>
 <ul>
-<li>In the case of
-<code class="sourceCode default">vector::erase</code>, we cannot
-unconditionally use relocation when it is potentially throwing. This is
-because <code class="sourceCode default">vector::erase</code> is
+<li>In the case of <code class="sourceCode cpp">vector<span class="op">::</span>erase</code>, we
+cannot unconditionally use relocation when it is potentially throwing.
+This is because <code class="sourceCode cpp">vector<span class="op">::</span>erase</code> is
 required not to throw an exception unless
-<code class="sourceCode default">T</code>’s move-assignment operator
-throws. We view this as an overspecification in the Standard that could
-be relaxed – this is probably an artifact of the fact that
-implementations were assumed to use assignment.</li>
+<code class="sourceCode cpp">T</code>’s move-assignment operator throws.
+We view this as an overspecification in the Standard that could be
+relaxed – this is probably an artifact of the fact that implementations
+were assumed to use assignment.</li>
 <li>There is no mention of trivial relocation above. However, if the
 language offered one, and if
-<code class="sourceCode default">is_trivially_relocatable</code> were
-independent from <code class="sourceCode default">std::is_nothrow_move_constructible</code>, we
-could generalize the <code class="sourceCode default">if</code>
-statement above by also performing relocation when it is trivial, even
-if the move constructor is potentially throwing.</li>
-<li>Like for <code class="sourceCode default">vector::emplace</code>, an
-implementation that considers the usage of move-assignment to be part of
-the function’s API may want to preserve that behavior by further
+<code class="sourceCode cpp">is_trivially_relocatable</code> were
+independent from <code class="sourceCode cpp">std<span class="op">::</span>is_nothrow_move_constructible</code>,
+we could generalize the
+<code class="sourceCode cpp"><span class="cf">if</span></code> statement
+above by also performing relocation when it is trivial, even if the move
+constructor is potentially throwing.</li>
+<li>Like for <code class="sourceCode cpp">vector<span class="op">::</span>emplace</code>,
+an implementation that considers the usage of move-assignment to be part
+of the function’s API may want to preserve that behavior by further
 constraining the usage of relocation.</li>
 </ul>
-<p>Erasing in the middle of a
-<code class="sourceCode default">std::vector&lt;std::string&gt;</code>
+<p>Erasing in the middle of a <code class="sourceCode cpp">std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>string<span class="op">&gt;</span></code>
 is roughly TODOx times faster with relocation than with assignments.</p>
 <!-- TODO: Perf numbers -->
-<h2 data-number="4.3" id="vectoremplace_back-vectorpush_back"><span class="header-section-number">4.3</span>
-<code class="sourceCode default">vector::emplace_back</code> /
-<code class="sourceCode default">vector::push_back</code><a href="#vectoremplace_back-vectorpush_back" class="self-link"></a></h2>
+<h2 data-number="4.3" id="vectoremplace_back-vectorpush_back"><span class="header-section-number">4.3</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace_back</code>
+/ <code class="sourceCode cpp">vector<span class="op">::</span>push_back</code><a href="#vectoremplace_back-vectorpush_back" class="self-link"></a></h2>
 <p>Note that the vector growth policy presented here is more naive than
-what <code class="sourceCode default">std::vector</code> typically
-does.</p>
+what
+<code class="sourceCode cpp">std<span class="op">::</span>vector</code>
+typically does.</p>
 <table>
 <thead>
 <tr class="header">
@@ -858,80 +848,373 @@ TODO: For emplace_back based on move constructions, we must make sure to support
 TODO: Wording bug: we allow input iterators but the "Equivalent to" shows us dereferencing the iterator twice. Is that OK?
 -->
 <h1 data-number="5" id="wording"><span class="header-section-number">5</span> Wording<a href="#wording" class="self-link"></a></h1>
-<p>Add to ???:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> relocate<span class="op">-</span>at<span class="op">(</span>T<span class="op">*</span> source, T<span class="op">*</span> dest<span class="op">)</span>; <span class="co">// exposition-only</span></span></code></pre></div>
-<p><em>Preconditions</em>:
-<code class="sourceCode default">source</code> and
-<code class="sourceCode default">dest</code> point to different
-objects</p>
-<p><em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">::</span><span class="kw">new</span> <span class="op">(</span>dest<span class="op">)</span> T<span class="op">(</span>std<span class="op">::</span>move<span class="op">(*</span>source<span class="op">))</span>;</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>destroy_at<span class="op">(</span>source<span class="op">)</span>;</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>destroy_at<span class="op">(</span>source<span class="op">)</span>;</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>Add to <a href="http://eel.is/c++draft/specialized.algorithms"><code class="sourceCode default">[specialized.algorithms]</code></a>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> InputIterator, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> NoThrowForwardIterator</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>uninitialized_relocate<span class="op">(</span>InputIterator first,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                       InputIterator last,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                       NoThrowForwardIterator result<span class="op">)</span>;</span></code></pre></div>
-<p><em>Preconditions</em>:
-<code class="sourceCode default">result</code> is not in the range
-<code class="sourceCode default">[first, last)</code></p>
-<p><em>Effects</em>: Equivalent to:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>result, <span class="op">++</span>first<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    relocate<span class="op">-</span>at<span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>destroy<span class="op">(++</span>first, last<span class="op">)</span>;</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result;</span></code></pre></div>
-<p>Add to <a href="http://eel.is/c++draft/specialized.algorithms"><code class="sourceCode default">[specialized.algorithms]</code></a>:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> InputIterator, <span class="kw">class</span> Size<span class="op">&gt;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> NoThrowForwardIterator</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>uninitialized_relocate_n<span class="op">(</span>InputIterator first,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                         Size n,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                         NoThrowForwardIterator result<span class="op">)</span>;</span></code></pre></div>
-<p><em>Preconditions</em>:
-<code class="sourceCode default">result</code> is not in the range
-<code class="sourceCode default">[first, first + n)</code></p>
-<p><em>Effects</em>: Equivalent to:</p>
+<p>Modify <span>26.2
+<a href="https://wg21.link/algorithms.requirements">[algorithms.requirements]</a></span>
+as shown:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
+an algorithm’s template parameter is named
+<code class="sourceCode cpp">InputIterator</code>,
+<code class="sourceCode cpp">InputIterator1</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
+<code class="sourceCode cpp">InputIterator2</code>, <span class="add" style="color: #006e28"><ins>or
+<span><code class="sourceCode default">NoThrowInputIterator</code></span>,</ins></span>
+the template argument shall meet the <em>Cpp17InputIterator</em>
+requirements ([input.iterators]).</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
+an algorithm’s template parameter is named
+<code class="sourceCode cpp">OutputIterator</code>,
+<code class="sourceCode cpp">OutputIterator1</code>, or
+<code class="sourceCode cpp">OutputIterator2</code>, the template
+argument shall meet the <em>Cpp17OutputIterator</em> requirements
+([output.iterators]).</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
+an algorithm’s template parameter is named
+<code class="sourceCode cpp">ForwardIterator</code>,
+<code class="sourceCode cpp">ForwardIterator1</code>,
+<code class="sourceCode cpp">ForwardIterator2</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
+<code class="sourceCode cpp">NoThrowForwardIterator</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">NoThrowForwardIterator1</code></span>,
+or
+<span><code class="sourceCode default">NoThrowForwardIterator2</code></span>,</ins></span>
+the template argument shall meet the <em>Cpp17ForwardIterator</em>
+requirements ([forward.iterators]) if it is required to be a mutable
+iterator, or model <code class="sourceCode cpp">forward_iterator</code>
+([iterator.concept.forward]) otherwise.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span>
+<span class="rm" style="color: #bf0303"><del>If an algorithm’s template
+parameter is named
+<span><code class="sourceCode default">NoThrowForwardIterator</code></span>,
+the template argument is also required to have the property that no
+exceptions are thrown from increment, assignment, or comparison of, or
+indirection through, valid iterators.</del></span></li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
+an algorithm’s template parameter is named
+<code class="sourceCode cpp">BidirectionalIterator</code>,
+<code class="sourceCode cpp">BidirectionalIterator1</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
+<code class="sourceCode cpp">BidirectionalIterator2</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">NoThrowBidirectionalIterator1</code></span>,
+or
+<span><code class="sourceCode default">NoThrowBidirectionalIterator2</code></span>,</ins></span>
+the template argument shall meet the <em>Cpp17BidirectionalIterator</em>
+requirements ([bidirectional.iterators]) if it is required to be a
+mutable iterator, or model
+<code class="sourceCode cpp">bidirectional_iterator</code>
+([iterator.concept.bidir]) otherwise.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
+an algorithm’s template parameter is named
+<code class="sourceCode cpp">RandomAccessIterator</code>,
+<code class="sourceCode cpp">RandomAccessIterator1</code>, or
+<code class="sourceCode cpp">RandomAccessIterator2</code>, the template
+argument shall meet the <em>Cpp17RandomAccessIterator</em> requirements
+([random.access.iterators]) if it is required to be a mutable iterator,
+or model <code class="sourceCode cpp">random_access_iterator</code>
+([iterator.concept.random.access]) otherwise.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span>
+<span class="add" style="color: #006e28"><ins>If an algorithm’s template
+parameter is named
+<span><code class="sourceCode default">NoThrowInputIterator</code></span>,
+<span><code class="sourceCode default">NoThrowForwardIterator</code></span>,
+<span><code class="sourceCode default">NoThrowForwardIterator1</code></span>,
+<span><code class="sourceCode default">NoThrowForwardIterator2</code></span>,
+<span><code class="sourceCode default">NoThrowBidirectionalIterator1</code></span>,
+or
+<span><code class="sourceCode default">NoThrowBidirectionalIterator2</code></span>,
+the template argument is also required to have the property that no
+exceptions are thrown from increment, assignment, or comparison of, or
+indirection through, valid iterators.</ins></span></li>
+</ul>
+<hr />
+<p>Modify <span>26.11.1
+<a href="https://wg21.link/specialized.algorithms.general">[specialized.algorithms.general]</a></span>
+as shown:</p>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">4</a></span> Some
+algorithms specified in [specialized.algorithms] make use of the <span class="rm" style="color: #bf0303"><del>exposition-only function template
+<em><span><code class="sourceCode default">voidify</code></span></em></del></span>
+<span class="add" style="color: #006e28"><ins>following exposition-only
+function templates</ins></span>:</li>
+</ul>
+<div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T&gt;</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  constexpr void* <em>voidify</em>(T&amp; obj) noexcept {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    return addressof(obj);</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class T&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="va">+  constexpr void <em>relocate-at</em>(T* dest, T* source) {</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="va">+      ::new (<em>voidify</em>(*dest)) T(std::move(*source));</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="va">+      destroy_at(source);</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="va">+  }</span></span></code></pre></div>
+</div>
+<!--
+TODO: MOST OF THESE QUESTIONS DON'T MATTER, AS IT'S EXPOSITION ONLY.
+TODO: do we want relocate_at(dest, source) -- symmetric with construct_at -- or (source, dest)?
+TODO: should it have prerequisites spelled out? 1. source != dest, 2. T is complete
+TODO: should it unconditionally destroy the source? For the single element relocate, there's a recovery option.
+TODO: should it return dest?
+-->
+<hr />
+<p>Add at the end of <span>26.11.2
+<a href="https://wg21.link/special.mem.concepts">[special.mem.concepts]</a></span>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-bidirectional-iterator</em> <span class="op">=</span> <span class="co">// exposition only</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em><span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  bidirectional_iterator<span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I, I<span class="op">&gt;</span>;</span></code></pre></div>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">?</a></span>
+[<em>Note</em> ?: This concept allows some
+<code class="sourceCode cpp">bidirectional_iterator</code>
+([iterator.concept.bidir]) operations to throw exceptions. — <em>end
+note</em>]</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-bidirectional-range</em> <span class="op">=</span> <span class="co">// exposition only</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-range</em><span class="op">&lt;</span>R<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em><span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span>;</span></code></pre></div>
+<!--
+TODO
+
+The range algorithms below should be constrained on some (exp. only) concept "relocatable_from".
+Could probably be added in the section above.
+It should probably be something like
+
+template<class S, class D>
+  concept relocatable-from = // exposition only
+  
+    same_as<S, D> &&         // can't relocate between different types. Or do we want to? Should relocate-at have different parameters? That sounds like a generalization that no one needs right now.
+    
+    move_constructible<D>;   // with TR, this could be OR'd with trivially_relocatable<D>
+-->
+<hr />
+<p>In <span>20.2.2
+<a href="https://wg21.link/memory.syn">[memory.syn]</a></span>, add to
+the <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
+header synopsis (before <code class="sourceCode cpp"><span class="op">[</span>unique_ptr<span class="op">]</span></code>):</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowInputIterator first,    <span class="co">// freestanding</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                           NoThrowInputIterator last,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator result<span class="op">)</span>;</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,    <span class="co">// see [algorithms.parallel.overloads]</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 first,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span>  </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowInputIterator first,    <span class="co">// freestanding</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator result<span class="op">)</span>;</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,    <span class="co">// see [algorithms.parallel.overloads]</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator1 first,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowBidirectionalIterator1, NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,    <span class="co">// freestanding</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, O2 olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-range</em> IR, <em>nothrow-forward_range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_n_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I,</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_backward_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-bidirectional-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_backward_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-range</em> IR, <em>nothrow-bidirectional-range</em> OR<span class="op">&gt;</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_backward_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<hr />
+<p>Append to <span>26.11
+<a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>
+a new subclause,
+<code class="sourceCode cpp">uninitialized_relocate</code>
+[special.relocate], with these contents:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowInputIterator first,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                           NoThrowInputIterator last,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator result<span class="op">)</span>;</span></code></pre></div>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Equivalent to:</p></li>
+</ul>
 <div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    relocate<span class="op">-</span>at<span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>destroy<span class="op">(++</span>first, last<span class="op">)</span>;</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result;</span></code></pre></div>
-<p>Add to <a href="http://eel.is/c++draft/specialized.algorithms"><code class="sourceCode default">[specialized.algorithms]</code></a>:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                                NoThrowBidirectionalIterator1 last,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span></code></pre></div>
-<p><em>Preconditions</em>:
-<code class="sourceCode default">result</code> is not in the range
-<code class="sourceCode default">(first, last]</code></p>
-<p><em>Effects</em>: Equivalent to:</p>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; first <span class="op">!=</span> last; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>result, <span class="op">++</span>first<span class="op">)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first, last<span class="op">)</span>;</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, last<span class="op">}</span>;</span></code></pre></div>
+<hr />
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, O2 olast<span class="op">)</span>;</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-range</em> IR, <em>nothrow-forward_range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">ofirst</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>ifirst, olast<span class="op">)</span></code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Equivalent to:</p></li>
+</ul>
 <div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; last <span class="op">!=</span> first; <span class="op">++</span>result<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>last;</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    relocate<span class="op">-</span>at<span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>last<span class="op">))</span>;</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>destroy<span class="op">(</span>first, <span class="op">--</span>last<span class="op">)</span>;</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result;</span></code></pre></div>
-<p>TODO: Finish wording for ranges and parallel algorithms</p>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast; <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>ofirst, <span class="op">++</span>ifirst<span class="op">)</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>ofirst<span class="op">)</span>, addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>ifirst, ilast<span class="op">)</span>;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
+<hr />
+<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowInputIterator first,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator result<span class="op">)</span>;</span></code></pre></div>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>first, first <span class="op">+</span> n<span class="op">)</span></code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Equivalent to:</p></li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
+<hr />
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">ofirst</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>ifirst, ifirst <span class="op">+</span> n<span class="op">)</span></code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Equivalent to:</p></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> t <span class="op">=</span> uninitialized_relocate<span class="op">(</span>counted_iterator<span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, n<span class="op">)</span>,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                                default_sentinel,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                                ofirst, olast<span class="op">)</span>;</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>t<span class="op">.</span>in<span class="op">).</span>base<span class="op">()</span>, t<span class="op">.</span>out<span class="op">}</span>;</span></code></pre></div>
+<hr />
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowBidirectionalIterator1, NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span></code></pre></div>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
+not in the range <code class="sourceCode cpp"><span class="op">(</span>first, last<span class="op">]</span></code>.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Equivalent to:</p></li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>first <span class="op">!=</span> last<span class="op">)</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*(--</span>result<span class="op">))</span>, addressof<span class="op">(*(--</span>last<span class="op">)))</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first, last<span class="op">)</span>;</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
+<hr />
+<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-bidirectional-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_backward_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-range</em> IR, <em>nothrow-bidirectional-range</em> OR<span class="op">&gt;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <span class="op">...</span> <span class="co">// </span><span class="al">FIXME</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>      uninitialized_relocate_backward_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<ul>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Preconditions</em>: <code class="sourceCode cpp">olast</code> is not
+in the range (ifirst, ilast]`.</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Equivalent to:</p></li>
+</ul>
+<!--
+TODO.
+
+Need to figure if it's a good idea that these algorithms take ranges and not just a bidirectional iterator as output.
+There seems to be some inconsistency: std::ranges::move_backward takes range+single iterator. But std::ranges::uninitialized_copy takes 2 ranges. Which one to follow here?
+-->
 <!--
 
 If we assume the existence of is_trivially_relocatable, we would also accept ranges like this
@@ -944,22 +1227,6 @@ using is-trivially-relocatable-range = // exposition-only
   is_trivially_relocatable_v<iter_value_t<I>>;
 
 -->
-<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> ranges<span class="op">::</span>uninitialized_relocate_result <span class="op">=</span> ranges<span class="op">::</span>in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>input_iterator I, sentinel_for<span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>          NothrowForwardIterator O, NothrowSentinelFor<span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> constructible_from<span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;</span>,</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                            iter_rvalue_reference_t<span class="op">&lt;</span>I<span class="op">&gt;&gt;</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> ranges<span class="op">::</span>uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>ranges<span class="op">::</span>uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>ranges<span class="op">::</span>input_range IR, NothrowForwardRange OR<span class="op">&gt;</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="kw">requires</span> constructible_from<span class="op">&lt;</span>ranges<span class="op">::</span>range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;</span>,</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                            ranges<span class="op">::</span>range_rvalue_reference_t<span class="op">&lt;</span>IR<span class="op">&gt;&gt;</span> <span class="op">||</span></span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> ranges<span class="op">::</span>uninitialized_relocate_result<span class="op">&lt;</span>ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>,</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>                                                ranges<span class="op">::</span>borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>ranges<span class="op">::</span>uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span></code></pre></div>
 </div>
 </div>
 </body>
