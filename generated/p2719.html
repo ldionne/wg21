@@ -930,26 +930,6 @@ include this new parameter, which requires the following:
   only dependent parameter is a `std::type_identity` specialization in the first parameter position.
 -->
 <h1 data-number="6" id="proposed-wording"><span class="header-section-number">6</span> Proposed wording<a href="#proposed-wording" class="self-link"></a></h1>
-<!--
-## basic.stc.dynamic
-
-### basic.stc.dynamic.general
-
-Updates for [basic.stc.dynamic.general]{.sref}
-
-TODO: Check whether we want to remove this.
-TODO: Move "The type T may be a dependent type." to [basic.stc.dynamic.allocation] or something
-
-::: add
-> [3]{.pnum} Allocation and/or deallocation functions may be _type-aware_. A type-aware allocation or
-> deallocation function is identified by the first parameter being of type `std​::type_identity<T>` ([support.types]{.sref})
-> for some type `T`. The type `T` may be a dependent type. This parameter shall not have an associated default
-> argument ([dcl.fct.default]{.sref}).
-:::
-
-> [3->4]{.pnum} If the behavior of an allocation or deallocation function does not satisfy the semantic
-> constraints specified in [basic.stc.dynamic.allocation] and [basic.stc.dynamic.deallocation], the
-> behavior is undefined. -->
 <h2 data-number="6.1" id="basic.stc.dynamic.allocation"><span class="header-section-number">6.1</span> basic.stc.dynamic.allocation<a href="#basic.stc.dynamic.allocation" class="self-link"></a></h2>
 <p>Updates for <span>6.7.5.5.2
 <a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span>
