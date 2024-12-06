@@ -444,7 +444,7 @@ relocation</h1>
     <td style="vertical-align:top">Reply-to:</td>
     <td>
       Louis Dionne<br>&lt;<a href="mailto:ldionne.2@gmail.com" class="email">ldionne.2@gmail.com</a>&gt;<br>
-      ????<br>&lt;????&gt;<br>
+      Giuseppe D’Angelo<br>&lt;<a href="mailto:giuseppe.dangelo@kdab.com" class="email">giuseppe.dangelo@kdab.com</a>&gt;<br>
     </td>
   </tr>
 </table>
@@ -589,7 +589,7 @@ functions does not look meaningfully different.</p>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The element before the last one is moved-from:</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// shift everything else by one position to the</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// right to open a gap at the insert location.</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>move_backward<span class="op">(</span>position, end<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span>, position <span class="op">+</span> <span class="dv">1</span><span class="op">)</span>;</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    std<span class="op">::</span>move_backward<span class="op">(</span>position, end<span class="op">()</span> <span class="op">-</span> <span class="dv">2</span>, end<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span>;</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Now there&#39;s a gap at the insert location, move the</span></span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// new element into it.</span></span>
@@ -619,7 +619,7 @@ functions does not look meaningfully different.</p>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// everything to the right.</span></span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span> <span class="op">{</span></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      std<span class="op">::</span>uninitialized_relocate_backward<span class="op">(</span>position, end<span class="op">()</span>,</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                                           position <span class="op">+</span> <span class="dv">1</span><span class="op">)</span>;</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>                                           end<span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">)</span>;</span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
 <span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      <span class="co">// basic guarantee: vector lost its tail</span></span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>      end_ <span class="op">=</span> std<span class="op">::</span>to_address<span class="op">(</span>position<span class="op">)</span>;</span>
@@ -654,9 +654,11 @@ just relocate things around instead of creating artificial gaps that
 contain moved-from objects, like in the assignment-based one.</li>
 <li>Both implementations provide the basic exception safety guarantee,
 but they provide it differently. After an exception, the
-assignment-based implementation will contain the same number of elements
-as before calling <code class="sourceCode cpp">emplace</code>, but
-unknown elements in the vector will be in a moved-from state. The
+assignment-based implementation may leave elements in the <code class="sourceCode cpp"><span class="op">[</span>position, end<span class="op">())</span></code>
+range in a moved-from state, and the vector size may or may not have
+been incremented by 1. Whether this is actually the case or not depends
+on which operation exactly throws. Either way, the user has no direct
+means to know which elements have been left in a moved-from state. The
 relocation-based implementation instead ends up with the elements in
 <code class="sourceCode cpp"><span class="op">[</span>position, end<span class="op">())</span></code>
 being erased from the vector. It’s unclear whether one behavior is
@@ -1136,15 +1138,14 @@ not in the range <code class="sourceCode cpp"><span class="op">[</span>first, fi
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
 <div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">++</span>result, <span class="op">(</span><span class="dt">void</span><span class="op">)++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span>; n <span class="op">&gt;</span> <span class="dv">0</span>; <span class="op">(</span><span class="dt">void</span><span class="op">)</span> <span class="op">++</span>first, <span class="op">--</span>n<span class="op">)</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  destroy_n<span class="op">(</span>first, n<span class="op">)</span>;</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
 <hr />
 <div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I,</span>
@@ -1179,14 +1180,18 @@ not in the range <code class="sourceCode cpp"><span class="op">(</span>first, la
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
 <div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>first <span class="op">!=</span> last<span class="op">)</span> </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*(--</span>result<span class="op">))</span>, addressof<span class="op">(*(--</span>last<span class="op">)))</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first, last<span class="op">)</span>;</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>first <span class="op">!=</span> last<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>last;</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>result;</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>last<span class="op">))</span>;</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>last;</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first, last<span class="op">)</span>;</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
 <hr />
 <div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
