@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-22" />
   <title>Type-aware allocation and deallocation functions</title>
   <style>
       code{white-space: pre-wrap;}
@@ -410,6 +409,34 @@ ol.enumerate { list-style-type: none; background: inherit; }
 
 code.sourceCode > span { display: inline; }
 </style>
+  <style type="text/css">.draftnote {
+font-style: oblique;
+}
+.draftnote[data-question]:before {
+font-weight: bold;
+color: blue;
+font-family: monospace;
+content: "[Drafting Note - question for " attr(data-question) ": ";
+}
+.draftnote[data-audience]:before {
+font-weight: bold;
+color: blue;
+font-family: monospace;
+content: "[Drafting Note for " attr(data-audience) ": ";
+}
+.draftnote:before {
+font-weight: bold;
+color: blue;
+font-family: monospace;
+content: "[Drafting Note: ";
+}
+.draftnote:after {
+font-style: bold;
+color: blue;
+font-family: monospace;
+content: "]";
+}
+</style>
   <link href="data:image/x-icon;base64,AAABAAIAEBAAAAEAIABoBAAAJgAAACAgAAABACAAqBAAAI4EAAAoAAAAEAAAACAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAVoJEAN6CRADegkQAWIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wCCRAAAgkQAAIJEAACCRAAsgkQAvoJEAP+CRAD/gkQA/4JEAP+CRADAgkQALoJEAACCRAAAgkQAAP///wD///8AgkQAAIJEABSCRACSgkQA/IJEAP99PQD/dzMA/3czAP99PQD/gkQA/4JEAPyCRACUgkQAFIJEAAD///8A////AHw+AFiBQwDqgkQA/4BBAP9/PxP/uZd6/9rJtf/bybX/upd7/39AFP+AQQD/gkQA/4FDAOqAQgBc////AP///wDKklv4jlEa/3o7AP+PWC//8+3o///////////////////////z7un/kFox/35AAP+GRwD/mVYA+v///wD///8A0Zpk+NmibP+0d0T/8evj///////+/fv/1sKz/9bCs//9/fr//////+/m2/+NRwL/nloA/5xYAPj///8A////ANKaZPjRmGH/5cKh////////////k149/3UwAP91MQD/lmQ//86rhv+USg3/m1YA/5hSAP+bVgD4////AP///wDSmmT4zpJY/+/bx///////8+TV/8mLT/+TVx//gkIA/5lVAP+VTAD/x6B//7aEVv/JpH7/s39J+P///wD///8A0ppk+M6SWP/u2sf///////Pj1f/Nj1T/2KFs/8mOUv+eWhD/lEsA/8aee/+0glT/x6F7/7J8Rvj///8A////ANKaZPjRmGH/48Cf///////+/v7/2qt//82PVP/OkFX/37KJ/86siv+USg7/mVQA/5hRAP+bVgD4////AP///wDSmmT40ppk/9CVXP/69O////////7+/v/x4M//8d/P//7+/f//////9u7n/6tnJf+XUgD/nFgA+P///wD///8A0ppk+NKaZP/RmWL/1qNy//r07///////////////////////+vXw/9akdP/Wnmn/y5FY/6JfFvj///8A////ANKaZFTSmmTo0ppk/9GYYv/Ql1//5cWm//Hg0P/x4ND/5cWm/9GXYP/RmGH/0ppk/9KaZOjVnmpY////AP///wDSmmQA0ppkEtKaZI7SmmT60ppk/9CWX//OkVb/zpFW/9CWX//SmmT/0ppk/NKaZJDSmmQS0ppkAP///wD///8A0ppkANKaZADSmmQA0ppkKtKaZLrSmmT/0ppk/9KaZP/SmmT/0ppkvNKaZCrSmmQA0ppkANKaZAD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkUtKaZNzSmmTc0ppkVNKaZADSmmQA0ppkANKaZADSmmQA////AP5/AAD4HwAA4AcAAMADAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAMADAADgBwAA+B8AAP5/AAAoAAAAIAAAAEAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAyCRACMgkQA6oJEAOqCRACQgkQAEIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRABigkQA5oJEAP+CRAD/gkQA/4JEAP+CRADqgkQAZoJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAA4gkQAwoJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQAxIJEADyCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAP///wD///8A////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAWgkQAmIJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAJyCRAAYgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAdIJEAPCCRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAPSCRAB4gkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQASoJEANKCRAD/gkQA/4JEAP+CRAD/g0YA/39AAP9zLgD/bSQA/2shAP9rIQD/bSQA/3MuAP9/PwD/g0YA/4JEAP+CRAD/gkQA/4JEAP+CRADUgkQAToJEAACCRAAAgkQAAP///wD///8A////AP///wB+PwAAgkUAIoJEAKiCRAD/gkQA/4JEAP+CRAD/hEcA/4BBAP9sIwD/dTAA/5RfKv+viF7/vp56/76ee/+wiF7/lWAr/3YxAP9sIwD/f0AA/4RHAP+CRAD/gkQA/4JEAP+CRAD/gkQArIJEACaBQwAA////AP///wD///8A////AIBCAEBzNAD6f0EA/4NFAP+CRAD/gkQA/4VIAP92MwD/bSUA/6N1Tv/ezsL/////////////////////////////////38/D/6V3Uv9uJgD/dTEA/4VJAP+CRAD/gkQA/4JEAP+BQwD/fUAA/4FDAEj///8A////AP///wD///8AzJRd5qBlKf91NgD/dDUA/4JEAP+FSQD/cy4A/3YyAP/PuKP//////////////////////////////////////////////////////9K7qP94NQD/ciwA/4VJAP+CRAD/fkEA/35BAP+LSwD/mlYA6v///wD///8A////AP///wDdpnL/4qx3/8KJUv+PUhf/cTMA/3AsAP90LgD/4dK+/////////////////////////////////////////////////////////////////+TYxf91MAD/dTIA/31CAP+GRwD/llQA/6FcAP+gWwD8////AP///wD///8A////ANGZY/LSm2X/4ap3/92mcP+wdT3/byQA/8mwj////////////////////////////////////////////////////////////////////////////+LYxv9zLgP/jUoA/59bAP+hXAD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/RmWL/1p9q/9ubXv/XqXj////////////////////////////7+fD/vZyG/6BxS/+gcUr/vJuE//r37f//////////////////////3MOr/5dQBf+dVQD/nVkA/5xYAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmWP/yohJ//jo2P//////////////////////4NTG/4JDFf9lGAD/bSQA/20kAP9kGAD/fz8S/+Xb0f//////5NG9/6txN/+LOgD/m1QA/51aAP+cWAD/m1cA/5xYAP+cWADy////AP///wD///8A////ANKaZPLSmmT/0ppk/8+TWf/Unmv//v37//////////////////////+TWRr/VwsA/35AAP+ERgD/g0UA/4JGAP9lHgD/kFga/8KXX/+TRwD/jT4A/49CAP+VTQD/n10A/5xYAP+OQQD/lk4A/55cAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/y4tO/92yiP//////////////////////8NnE/8eCQP+rcTT/ez0A/3IyAP98PgD/gEMA/5FSAP+USwD/jj8A/5lUAP+JNwD/yqV2/694Mf+HNQD/jkAA/82rf/+laBj/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/LiUr/4byY///////////////////////gupX/0I5P/+Wuev/Lklz/l1sj/308AP+QSwD/ol0A/59aAP+aVQD/k0oA/8yoh///////+fXv/6pwO//Lp3v///////Pr4f+oay7y////AP///wD///8A////ANKaZPLSmmT/0ppk/8uJSv/hvJj//////////////////////+G7l//Jhkb/0ppk/96nc//fqXX/x4xO/6dkFP+QSQD/llEA/5xXAP+USgD/yaOA///////38uv/qG05/8ijdv//////8efb/6ZpLPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/zIxO/9yxh///////////////////////7dbA/8iEQf/Sm2X/0Zlj/9ScZv/eqHf/2KJv/7yAQf+XTgD/iToA/5lSAP+JNgD/yKFv/611LP+HNQD/jT8A/8qmeP+kZRT/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/Pk1n/1J5q//78+//////////////////+/fv/1aFv/8iEQv/Tm2b/0ppl/9GZY//Wn2z/1pZc/9eldf/Bl2b/kUcA/4w9AP+OQAD/lUwA/59eAP+cWQD/jT8A/5ZOAP+eXADy////AP///wD///8A////ANKaZPLSmmT/0ppk/9KZY//KiEn/8d/P///////////////////////47+f/05tm/8iCP//KiEj/yohJ/8eCP//RmGH//vfy///////n1sP/rXQ7/4k4AP+TTAD/nVoA/5xYAP+cVwD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/0ptl/8uLTf/aq37////////////////////////////+/fz/6c2y/961jv/etY7/6Myx//78+v//////////////////////3MWv/5xXD/+ORAD/mFQA/51ZAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmmT/0ppk/8mFRP/s1b//////////////////////////////////////////////////////////////////////////////+PD/0JFU/7NzMv+WUQD/kUsA/5tXAP+dWQDy////AP///wD///8A////ANKaZP/SmmT/0ppk/9KaZP/Sm2X/z5NZ/8yMT//z5NX/////////////////////////////////////////////////////////////////9Ofa/8yNUP/UmGH/36p5/8yTWv+qaSD/kksA/5ROAPz///8A////AP///wD///8A0ppk5NKaZP/SmmT/0ppk/9KaZP/TnGf/zY9T/82OUv/t1sD//////////////////////////////////////////////////////+7Yw//OkFX/zI5R/9OcZ//SmmP/26V0/9ymdf/BhUf/ol8R6P///wD///8A////AP///wDSmmQ80ppk9tKaZP/SmmT/0ppk/9KaZP/TnGj/zpFW/8qJSv/dson/8uHS//////////////////////////////////Lj0//etIv/y4lL/86QVf/TnGj/0ppk/9KaZP/RmWP/05xn/9ymdfjUnWdC////AP///wD///8A////ANKaZADSmmQc0ppkotKaZP/SmmT/0ppk/9KaZP/Tm2b/0Zli/8qJSf/NjlH/16Z3/+G8mP/myKr/5siq/+G8mP/Xp3f/zY5S/8qISf/RmGH/05tm/9KaZP/SmmT/0ppk/9KaZP/SmmSm0pljINWdaQD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkQtKaZMrSmmT/0ppk/9KaZP/SmmT/0ptl/9GYYf/Nj1P/y4lL/8qISP/KiEj/y4lK/82PU//RmGH/0ptl/9KaZP/SmmT/0ppk/9KaZP/SmmTO0ppkRtKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZGzSmmTu0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmTw0ppkcNKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZBLSmmSQ0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppklNKaZBTSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQy0ppkutKaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppkvtKaZDbSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkXNKaZODSmmT/0ppk/9KaZP/SmmT/0ppk5NKaZGDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkBtKaZIbSmmTo0ppk6tKaZIrSmmQK0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP/8P///+B///+AH//+AAf//AAD//AAAP/AAAA/gAAAHwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA+AAAAfwAAAP/AAAP/8AAP//gAH//+AH///4H////D//" rel="icon" />
   
   <!--[if lt IE 9]>
@@ -424,11 +451,11 @@ deallocation functions</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D2719R2</td>
+    <td>P2719R3</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-22</td>
+    <td>2024-12-xx</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -476,12 +503,15 @@ example<span></span></a></li>
 </ul></li>
 <li><a href="#proposed-wording" id="toc-proposed-wording"><span class="toc-section-number">6</span> Proposed wording<span></span></a>
 <ul>
-<li><a href="#basic.stc.dynamic.allocation" id="toc-basic.stc.dynamic.allocation"><span class="toc-section-number">6.1</span>
+<li><a href="#cpp.predefined" id="toc-cpp.predefined"><span class="toc-section-number">6.1</span>
+cpp.predefined<span></span></a></li>
+<li><a href="#basic.stc.dynamic.allocation" id="toc-basic.stc.dynamic.allocation"><span class="toc-section-number">6.2</span>
 basic.stc.dynamic.allocation<span></span></a></li>
-<li><a href="#basic.stc.dynamic.deallocation" id="toc-basic.stc.dynamic.deallocation"><span class="toc-section-number">6.2</span>
+<li><a href="#basic.stc.dynamic.deallocation" id="toc-basic.stc.dynamic.deallocation"><span class="toc-section-number">6.3</span>
 basic.stc.dynamic.deallocation<span></span></a></li>
-<li><a href="#expr.new" id="toc-expr.new"><span class="toc-section-number">6.3</span> expr.new<span></span></a></li>
-<li><a href="#expr.delete" id="toc-expr.delete"><span class="toc-section-number">6.4</span> expr.delete<span></span></a></li>
+<li><a href="#expr.new" id="toc-expr.new"><span class="toc-section-number">6.4</span> expr.new<span></span></a></li>
+<li><a href="#expr.delete" id="toc-expr.delete"><span class="toc-section-number">6.5</span> expr.delete<span></span></a></li>
+<li><a href="#expr.const" id="toc-expr.const"><span class="toc-section-number">6.6</span> expr.const<span></span></a></li>
 </ul></li>
 <li><a href="#design-choices-and-notes" id="toc-design-choices-and-notes"><span class="toc-section-number">7</span> Design choices and
 notes<span></span></a>
@@ -501,14 +531,23 @@ type-aware <code class="sourceCode default">operator delete</code> is a
 type-aware destroying delete<span></span></a></li>
 <li><a href="#design-choice-dropped-support-for-adl" id="toc-design-choice-dropped-support-for-adl"><span class="toc-section-number">7.6</span> Design choice: Dropped support for
 ADL<span></span></a></li>
-<li><a href="#interactions-with-stdallocatort" id="toc-interactions-with-stdallocatort"><span class="toc-section-number">7.7</span> Interactions with
+<li><a href="#design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts" id="toc-design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts"><span class="toc-section-number">7.7</span> Design choice: “normal” global
+type aware allocation function are allowed in consteval
+contexts<span></span></a></li>
+<li><a href="#design-choice-stripping-qualifiers-from-the-type" id="toc-design-choice-stripping-qualifiers-from-the-type"><span class="toc-section-number">7.8</span> Design choice: Stripping
+qualifiers from the type<span></span></a></li>
+<li><a href="#interactions-with-stdallocatort" id="toc-interactions-with-stdallocatort"><span class="toc-section-number">7.9</span> Interactions with
 <code class="sourceCode default">std::allocator&lt;T&gt;</code><span></span></a></li>
-<li><a href="#odr-implications-and-mismatched-operator-new-operator-delete" id="toc-odr-implications-and-mismatched-operator-new-operator-delete"><span class="toc-section-number">7.8</span> ODR implications and mismatched
+<li><a href="#odr-implications-and-mismatched-operator-new-operator-delete" id="toc-odr-implications-and-mismatched-operator-new-operator-delete"><span class="toc-section-number">7.10</span> ODR implications and mismatched
 <code class="sourceCode default">operator new</code> /
 <code class="sourceCode default">operator delete</code><span></span></a></li>
-<li><a href="#impact-on-the-library" id="toc-impact-on-the-library"><span class="toc-section-number">7.9</span> Impact on the
+<li><a href="#impact-on-the-library" id="toc-impact-on-the-library"><span class="toc-section-number">7.11</span> Impact on the
 library<span></span></a></li>
+<li><a href="#interactions-with-coroutines" id="toc-interactions-with-coroutines"><span class="toc-section-number">7.12</span> Interactions with
+coroutines<span></span></a></li>
 </ul></li>
+<li><a href="#acknowledgments" id="toc-acknowledgments"><span class="toc-section-number">8</span>
+Acknowledgments<span></span></a></li>
 </ul>
 </div>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
@@ -695,7 +734,6 @@ found by name lookup for
 <p>If the user writes
 <code class="sourceCode default">new T(...)</code>, the compiler checks
 (in order):</p>
-<!-- # TODO: add aligned lookup of unaligned aligned types -->
 <table>
 <thead>
 <tr class="header">
@@ -852,11 +890,11 @@ the class’s non virtual destructor).</p>
 <span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> SubClass4<span class="op">()</span>;       <span class="co">// calls (6) as the class scoped operator wins</span></span>
 <span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">new</span> <span class="dt">int</span><span class="op">()</span>;             <span class="co">// calls (2) with T=int</span></span>
 <span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<blockquote>
-<p>Note: The above is for illustrative purposes only: it is a bad idea
-to provide a fully unconstrained type-aware
-<code class="sourceCode default">operator new</code>.</p>
-</blockquote>
+<p><span class="note"><span>[ <em>Note:</em> </span>The above is for
+illustrative purposes only: it is a bad idea to provide a fully
+unconstrained type-aware
+<code class="sourceCode default">operator new</code>.<span> — <em>end
+note</em> ]</span></span></p>
 <h2 data-number="5.2" id="in-class-example"><span class="header-section-number">5.2</span> In-class example<a href="#in-class-example" class="self-link"></a></h2>
 <div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// In-class operator</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SubClass1;</span>
@@ -917,86 +955,101 @@ e.g.</p>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="op">...</span></span>
 <span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">// calls the above operator new&lt;int, 5&gt;(std::type_identity&lt;MyArrayType&lt;int, 5&gt;&gt;, ...)</span></span>
 <span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">auto</span> A <span class="op">=</span> <span class="kw">new</span> MyArrayType<span class="op">&lt;</span><span class="dt">int</span>, <span class="dv">5</span><span class="op">&gt;</span>;</span></code></pre></div>
-<!--
-# Wording
-
-To effectively support this proposal, it is necessary to update the definition of a usual deallocation function
-([basic.stc.dynamic.deallocation](https://timsong-cpp.github.io/cppwp/n4950/basic.stc.dynamic.deallocation)) to
-include this new parameter, which requires the following:
-
-* Allow the first parameter to be a specialization of `std::type_identity`, and update to position requirements of later
-  parameters to include that.
-* Allow the function to have template parameters as long as the function is `operator delete` and the
-  only dependent parameter is a `std::type_identity` specialization in the first parameter position.
--->
 <h1 data-number="6" id="proposed-wording"><span class="header-section-number">6</span> Proposed wording<a href="#proposed-wording" class="self-link"></a></h1>
-<h2 data-number="6.1" id="basic.stc.dynamic.allocation"><span class="header-section-number">6.1</span> basic.stc.dynamic.allocation<a href="#basic.stc.dynamic.allocation" class="self-link"></a></h2>
-<p>Updates for <span>6.7.5.5.2
-<a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span>
-<!--
-[*Note For Review* The wording changes here are intended to provide for the existence of a correct `operator new` or `operator new[]` in which the first parameter is a `std::type_identity<T>` tag parameter where previously the first parameter was required to be of type `std::size_t`. The language is intended to further permit this tag parameter to be a dependent type, as long as it is always a specialization of `std::type_identity`, e.g `template <typename T> void *operator new(T, std::size_t)` would always be invalid, even if `T` was `std::type_identity<E>` for some `E`, or similarly `template <template<typename> typename> void *operator new(T<int>, std::size_t)`.]
---></p>
+<h2 data-number="6.1" id="cpp.predefined"><span class="header-section-number">6.1</span> cpp.predefined<a href="#cpp.predefined" class="self-link"></a></h2>
+<p>Update <span><a href="https://wg21.link/tab:cpp.predefined.ft">[tab:cpp.predefined.ft]</a></span>
+to include a feature detection macro
+<code class="sourceCode default">__cpp_typed_allocation</code> with a
+release appropriate value.</p>
+<h2 data-number="6.2" id="basic.stc.dynamic.allocation"><span class="header-section-number">6.2</span> basic.stc.dynamic.allocation<a href="#basic.stc.dynamic.allocation" class="self-link"></a></h2>
+<p>Updates for <span><a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span></p>
+<p><span class="draftnote" data-audience="CWG">The wording changes here
+are intended to provide for the existence of a correct
+<code class="sourceCode default">operator new</code> or
+<code class="sourceCode default">operator new[]</code> in which the
+first parameter is a
+<code class="sourceCode default">std::type_identity&lt;T&gt;</code> tag
+parameter where previously the first parameter was required to be of
+type <code class="sourceCode default">std::size_t</code>. The language
+is intended to further permit this tag parameter to be a dependent type,
+as long as it is always a specialization of
+<code class="sourceCode default">std::type_identity</code>, e.g <code class="sourceCode default">template &lt;typename T&gt; void *operator new(T, std::size_t)</code>
+would always be invalid, even if
+<code class="sourceCode default">T</code> was
+<code class="sourceCode default">std::type_identity&lt;E&gt;</code> for
+some <code class="sourceCode default">E</code>, or similarly <code class="sourceCode default">template &lt;template&lt;typename&gt; typename&gt; void *operator new(T&lt;int&gt;, std::size_t)</code>.</span></p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-An allocation function that is not a class member function shall belong
-to the global scope and not have a name with internal linkage. The
-return type shall be void*. <span class="add" style="color: #006e28"><ins>An allocation function shall have at least
-one parameter. If the first parameter is of type
+An allocation function <span class="add" style="color: #006e28"><ins>or
+allocation function template</ins></span><span class="rm" style="color: #bf0303"><del>that is not a class member
+function</del></span> shall <span class="add" style="color: #006e28"><ins>either</ins></span> belong to the global
+scope and not have a name with internal linkage <span class="add" style="color: #006e28"><ins>or be a class member function</ins></span>.
+The <span class="add" style="color: #006e28"><ins>declared</ins></span>
+return type shall be <span class="add" style="color: #006e28"><ins>the
+non-dependent type</ins></span>
+<code class="sourceCode default">void*</code>. <span class="add" style="color: #006e28"><ins>A non-template allocation function shall
+have at least one parameter, and an allocation function template shall
+have at least two parameters. If the first parameter is of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
 for some type <span><code class="sourceCode default">T</code></span>
 there shall be at least two parameters; the first parameter is called
-the type-identity parameter, the second parameter is called the size
-parameter. Otherwise, the first parameter is called the size
-parameter.</ins></span> The <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter shall have type
-<code class="sourceCode default">std​::​size_t</code> (<span>17.2
-<a href="https://wg21.link/support.types">[support.types]</a></span>).
-<span class="rm" style="color: #bf0303"><del>The first</del></span><span class="add" style="color: #006e28"><ins>Both the type-identity, if
-present, and the size</ins></span> parameters shall not have an
-associated default argument (<span>9.3.4.7
-<a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).
-The value of the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter is interpreted
-as the requested size of the allocation. An allocation function can be a
-function template. Such a template shall declare its return type and
-<span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter as
-specified above<span class="add" style="color: #006e28"><ins>, and the
-type-identity parameter shall be a specialization of
-<span><code class="sourceCode default">std::type_identity</code></span></ins></span>
-(that is, template argument types shall not be used in the return type
-and <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter
-type<span class="add" style="color: #006e28"><ins>, and if present in
-the declaration of the type-identity parameter they only be used in the
-template argument to
-<span><code class="sourceCode default">std::type_identity</code></span></ins></span>).
-Allocation function templates shall have two or more parameters.</p>
+the <em>type-identity parameter</em>, and the second parameter is called
+the <em>size parameter</em>. Otherwise, the first parameter is called
+the <em>size parameter</em>.</ins></span> The <span class="rm" style="color: #bf0303"><del>first</del></span> <span class="add" style="color: #006e28"><ins>size</ins></span> parameter shall have <span class="add" style="color: #006e28"><ins>the non-dependent</ins></span>
+type <code class="sourceCode default">std::size_t</code> (<span><a href="https://wg21.link/support.types">[support.types]</a></span>).
+<span class="rm" style="color: #bf0303"><del>The first parameter shall
+not</del></span> <span class="add" style="color: #006e28"><ins>Neither
+the type-identity parameter, if present, nor the size parameter
+shall</ins></span> have an associated default argument (<span><a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).
+<span class="add" style="color: #006e28"><ins>The type-identity
+parameter represents the type being allocated, such that allocating an
+object or array of type
+<span><code class="sourceCode default">T</code></span>, the
+type-identity parameter shall be of type
+<span><code class="sourceCode default">std::type_identity&lt;U&gt;</code></span>
+where <span><code class="sourceCode default">U</code></span> is the type
+<span><code class="sourceCode default">T</code></span> with qualifiers
+removed.</ins></span> The value of the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>size</ins></span> parameter is interpreted
+as the requested size of the allocation. <span class="rm" style="color: #bf0303"><del>An allocation function can be a function
+template. Such a template shall declare its return type and first
+parameter as specified above (that is, template parameter types shall
+not be used in the return type and first parameter type). Allocation
+function templates shall have two or more parameters.</del></span></p>
 </blockquote>
-<h2 data-number="6.2" id="basic.stc.dynamic.deallocation"><span class="header-section-number">6.2</span>
+<h2 data-number="6.3" id="basic.stc.dynamic.deallocation"><span class="header-section-number">6.3</span>
 basic.stc.dynamic.deallocation<a href="#basic.stc.dynamic.deallocation" class="self-link"></a></h2>
-<p>Updates for <span>6.7.5.5.3
-<a href="https://wg21.link/basic.stc.dynamic.deallocation">[basic.stc.dynamic.deallocation]</a></span></p>
-<blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
-A deallocation function is a destroying operator delete if it has at
-least two parameters and its second parameter is of type
-<code class="sourceCode default">std​::​destroying_delete_t</code>. A
-destroying operator delete shall be a class member function named
-operator delete.</p>
-</blockquote>
+<p>Updates for <span><a href="https://wg21.link/basic.stc.dynamic.deallocation">[basic.stc.dynamic.deallocation]</a></span></p>
+<p><span class="draftnote" data-audience="CWG">As with the changes to
+<span><a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span>
+the intent of this wording is to permit the first parameter to be a
+<code class="sourceCode default">std::type_identity</code>
+specialization as long as we can identify this as a specialization of
+<code class="sourceCode default">std::type_identity</code> prior to any
+template instantiation.</span></p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>Each
-deallocation function shall return void. <span class="add" style="color: #006e28"><ins>A deallocation function shall have at least
-one parameter. If the first parameter is a of type
+deallocation function shall return
+<code class="sourceCode default">void</code>. <span class="add" style="color: #006e28"><ins>A deallocation function shall have at least
+one parameter. If the first parameter is of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
 for some type <span><code class="sourceCode default">T</code></span>,
 there shall be at least two parameters; the first parameter is called
-the type-identity parameter, the second parameter is called the object
-parameter. Otherwise, the first parameter is called the object
-parameter.</ins></span> If the function is a destroying operator delete
-declared in class type C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter shall be
+the <em>type-identity parameter</em>, the second parameter is called the
+<em>address parameter</em>. Otherwise, the first parameter is called the
+<em>address parameter</em>. If the function has a type-identity
+parameter it is not a destroying delete and the third parameter, if
+present, shall not be of type
+<span><code class="sourceCode default">std::destroying_delete_t</code></span>.</ins></span>
+If the function is a destroying operator delete declared in class type
+C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>address</ins></span> parameter shall be
 <code class="sourceCode default">C*</code>; otherwise, the type of its
-<span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter
+<span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>address</ins></span> parameter
 shall be <code class="sourceCode default">void*</code>. A deallocation
-function may have more than one parameter. A usual deallocation function
-is a deallocation function whose parameters after the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object parameter</ins></span> are</p>
+function may have <span class="rm" style="color: #bf0303"><del>more than
+one parameter</del></span><span class="add" style="color: #006e28"><ins>additional parameters beyond the
+type-identity and address parameters</ins></span>. A <em>usual
+deallocation function</em> is a deallocation function whose parameters
+after the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>address parameter</ins></span> are</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span>optionally,
 a parameter of type std​::​destroying_delete_t, then</li>
@@ -1006,22 +1059,37 @@ a parameter of type std​::​size_t, then</li>
 a parameter of type std​::​align_val_t.</li>
 </ul>
 <p>A destroying operator delete shall be a usual deallocation function.
-A deallocation function may be an instance of a function template.
-Neither the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>object</ins></span> parameter nor the return
-type shall depend on a template parameter. A deallocation function
-template shall have two or more function parameters. A template instance
-<span class="rm" style="color: #bf0303"><del>is never a usual
-deallocation function, regardless of its signature.</del></span><span class="add" style="color: #006e28"><ins>is only a usual deallocation
-function if it has at least two parameters, the first parameter is a
-type-identity, and the type-identity is the only dependent parameter
-(i.e. the type-identity parameter may be of type
+A deallocation function may be <span class="rm" style="color: #bf0303"><del>an instance of a function
+template</del></span><span class="add" style="color: #006e28"><ins>templated</ins></span>. Neither the <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>address</ins></span> parameter
+nor the return type shall depend on a template parameter. A deallocation
+function <span class="rm" style="color: #bf0303"><del>template shall
+have two or more function parameters</del></span> <span class="add" style="color: #006e28"><ins>can be a function template. Such a function
+template shall have at least two parameters, and declare its address
+parameter as specified above</ins></span>. A template instance <span class="rm" style="color: #bf0303"><del>is never a usual deallocation
+function, regardless of its signature.</del></span><span class="add" style="color: #006e28"><ins>is only a usual deallocation function if it
+has a type-identity parameter, and the type-identity parameter is a
+dependent type (i.e. the type-identity parameter may be of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
-where <span><code class="sourceCode default">T</code></span> is a
-dependent type).</ins></span></p>
+where <span><code class="sourceCode default">T</code></span> shall be a
+dependent type), and the type-identity is the only dependent
+parameter.</ins></span></p>
 </blockquote>
-<h2 data-number="6.3" id="expr.new"><span class="header-section-number">6.3</span> expr.new<a href="#expr.new" class="self-link"></a></h2>
-<p>Updates to <span>7.6.2.8
-<a href="https://wg21.link/expr.new">[expr.new]</a></span></p>
+<p><span class="draftnote" data-question="CWG">Is this sufficient to
+prevent a case like this from being a usual deallocation function? It
+seems like it might not cover Args being an empty pack?</span></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T, <span class="kw">typename</span><span class="op">...</span> Args<span class="op">&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, Args<span class="op">...)</span>;</span></code></pre></div>
+<h2 data-number="6.4" id="expr.new"><span class="header-section-number">6.4</span> expr.new<a href="#expr.new" class="self-link"></a></h2>
+<p>Updates to <span><a href="https://wg21.link/expr.new">[expr.new]</a></span></p>
+<p><span class="draftnote">We are adding a new implicit tag parameter to
+the head of the argument list, we’re calling this tag parameter the
+type-identity. It is a
+<code class="sourceCode default">std::type_identity&lt;&gt;</code> over
+the qualifier-free allocated type
+<code class="sourceCode default">T</code> for an allocation of the form
+<code class="sourceCode default">new T</code> or
+<code class="sourceCode default">new T[&lt;expr&gt;]</code>. This is the
+method by which the allocated type is exposed to developers.</span></p>
 <div class="rm" style="color: #bf0303">
 
 <blockquote>
@@ -1049,45 +1117,31 @@ the argument list immediately after the first argument;</li>
 </blockquote>
 
 </div>
-<p><span class="note"><span>[ <em>Note:</em> </span>For Reviewers: in
-the existing text the type of the allocated object for both
-<code class="sourceCode default">new T</code> and
-<code class="sourceCode default">new T[expr]</code> is
-<code class="sourceCode default">T</code> based on how class scope is
-determined, this does not seem very clear, and has significant semantic
-difference:
-<code class="sourceCode default">type_identity&lt;T&gt;</code> vs
-<code class="sourceCode default">type_identity&lt;T[]&gt;</code><span> —
-<em>end note</em> ]</span></span></p>
 <div class="add" style="color: #006e28">
 
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">20</a></span> The
-type-identity is a default-initialized object of type
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code>,
-where <code class="sourceCode default">T</code> is the type of the
-allocated object.</p>
+<em>type-identity argument</em> is a value of type
+<code class="sourceCode default">std::type_identity&lt;U&gt;</code>.
+When the allocated type is “array of N T”, or the type
+<code class="sourceCode default">T</code> otherwise,
+<code class="sourceCode default">U</code> is the type
+<code class="sourceCode default">T</code> with qualifiers removed.</p>
 </blockquote>
 
 </div>
-<p><span class="note"><span>[ <em>Note:</em> </span>For Reviewers: The
-following changes attempt to restructure the existing wording to reuse
-the alignment “correction” performed. We are not sure what the
-correcting notation for such changes is.<span> — <em>end note</em>
-]</span></span></p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">20-&gt;21</a></span>
 Overload resolution is performed on a function call by assembling an
 argument list.</p>
 </blockquote>
-<p><span class="note"><span>[ <em>Note:</em> </span>For Reviewers: these
-points exist, but are being inset and numbered/put into a sub-list<span>
-— <em>end note</em> ]</span></span></p>
+<p><span class="draftnote">these points exist, but are being inset and
+numbered/put into a sub-list</span></p>
 <blockquote>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">(+ 21.1)</a></span>
 <span class="add" style="color: #006e28"><ins>The first argument is the
-type-identity, the second</ins></span><span class="rm" style="color: #bf0303"><del>The first</del></span> argument is the
+type-identity argument, the second</ins></span><span class="rm" style="color: #bf0303"><del>The first</del></span> argument is the
 amount of space requested, and has type
 <code class="sourceCode default">std​::​size_t</code>.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">(+ 21.2)</a></span>
@@ -1104,22 +1158,21 @@ argument is removed from the argument list;</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">(20.2 -&gt; 21.2.2)</a></span>
 otherwise, an argument that is the type’s alignment and has type
 <code class="sourceCode default">std​::​align_val_t</code> is added into
-the argument list immediately after the first argument;</p></li>
-</ul></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(+ 21.3)</a></span>
+the argument list immediately after the size argument;</p></li>
+<li><p><span class="marginalizedparent"><a class="marginalized">(+ 21.2.3)</a></span>
 and then overload resolution is performed again.</p></li>
+</ul></li>
 </ul>
 </blockquote>
-<p>[For Reviewers: end the added inset + new sublist]</p>
+<p><span class="draftnote">end the added inset + new sublist</span></p>
 <div class="add" style="color: #006e28">
 
 <blockquote>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(21.4)</a></span> If
-no matching function has been found then paragraphs [21.3]-[21.4] are
-repeated starting from an argument list consisting of a single parameter
-that is the amount of space requested, and has type
-<code class="sourceCode default">std​::​size_t</code>.</li>
+<li><span class="marginalizedparent"><a class="marginalized">(21.3)</a></span> If
+no matching function was found and the type-identity argument was
+present in the argument list, the above overload resolution steps are
+repeated without the type-identity argument`.</li>
 </ul>
 </blockquote>
 
@@ -1128,8 +1181,7 @@ that is the amount of space requested, and has type
 <p><span class="marginalizedparent"><a class="marginalized">29</a></span> A
 declaration of a placement deallocation function matches the declaration
 of a placement allocation function if it has the same number of
-parameters and, after parameter transformations (<span>9.3.4.6
-<a href="https://wg21.link/dcl.fct">[dcl.fct]</a></span>), all parameter
+parameters and, after parameter transformations (<span><a href="https://wg21.link/dcl.fct">[dcl.fct]</a></span>), all parameter
 types except <span class="rm" style="color: #bf0303"><del>the
 first</del></span><span class="add" style="color: #006e28"><ins>the size
 and object</ins></span> are identical.</p>
@@ -1138,72 +1190,59 @@ and object</ins></span> are identical.</p>
 <p><span class="marginalizedparent"><a class="marginalized">30</a></span> If a
 new-expression calls a deallocation function it passes <span class="add" style="color: #006e28"><ins>the type-identity as the first argument if
 it was passed to the allocation function, and</ins></span> the value
-returned from the allocation function call as the <span class="rm" style="color: #bf0303"><del>first argument</del></span><span class="add" style="color: #006e28"><ins>argument for the object
+returned from the allocation function call as the <span class="rm" style="color: #bf0303"><del>first argument</del></span><span class="add" style="color: #006e28"><ins>argument for the address
 parameter</ins></span> of type
 <code class="sourceCode default">void *</code>.</p>
 </blockquote>
-<h2 data-number="6.4" id="expr.delete"><span class="header-section-number">6.4</span> expr.delete<a href="#expr.delete" class="self-link"></a></h2>
+<p><span class="draftnote" data-audience="CWG&amp;EWG">The following
+restriction was not discussed in Wroclaw, but we believe is a useful
+hazard restriction given the lack of any mechanism to otherwise force
+co-definition of new and delete operators</span></p>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">31</a></span> If a
+single matching deallocation is found and either the allocation function
+or the deallocation function has a type-identity parameter, then both
+functions shall belong to the same scope (<span><a href="https://wg21.link/basic.scope.scope">[basic.scope.scope]</a></span>),
+otherwise the program is ill formed.</p>
+</blockquote>
+
+</div>
+<h2 data-number="6.5" id="expr.delete"><span class="header-section-number">6.5</span> expr.delete<a href="#expr.delete" class="self-link"></a></h2>
 <div class="add" style="color: #006e28">
 
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
-The type-identity is an object with an unspecified value of type
-std::type_identity<T> where T is the static type of the operand</p>
+For an delete operator applied to an operand of type
+<code class="sourceCode default">T*</code>, <em>type-identity
+argument</em> is a value of type
+<code class="sourceCode default">std::type_identity&lt;U&gt;</code>
+where <code class="sourceCode default">U</code> is the result of
+removing qualifiers from the type
+<code class="sourceCode default">T</code>.</p>
 </blockquote>
 
 </div>
-<p><span class="note"><span>[ <em>Note:</em> </span>For Review: is this
-sufficient to say that given
-<code class="sourceCode default">X *Obj</code> for
-<code class="sourceCode default">delete Obj</code> and
-<code class="sourceCode default">delete [] Obj</code> will have a
-type-identity of type
-<code class="sourceCode default">std::type_identity&lt;X&gt;</code>?<span>
-— <em>end note</em> ]</span></span></p>
+<p><span class="draftnote">p10 below is trying to update the existing
+overload resolution semantics to say - Perform template argument
+deduction and synthesis - this previously was not performed as it was
+definitionally not possible. - Specify selection of the best viable
+function given that it is now possible for multiple allocation functions
+of the same type to exist.</span></p>
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
-Construct a set of candidate deallocation functions</p>
-<ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(10.1)</a></span> All
-found declarations for which the first parameter is of a pointer type
-<span class="note"><span>[ <em>Note:</em> </span>either
-<code class="sourceCode default">void *</code>, or a
-<code class="sourceCode default">C*</code> if a destroying delete for
-some type <code class="sourceCode default">C</code><span> — <em>end
-note</em> ]</span></span> or the same type as the type-identity are
-added to the set of candidate functions.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span> For
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span> For
 each function template found, function template argument deduction
-(<span>13.10.3
-<a href="https://wg21.link/temp.deduct">[temp.deduct]</a></span>) is
-performed using the type of the type-identity as the first parameter,
+(<span><a href="https://wg21.link/temp.deduct">[temp.deduct]</a></span>)
+is performed using the type of the type-identity as the first parameter,
 and the type of each subsequent parameter in the candidate function
-template. If argument deduction and checking succeeds, the deduced
-template-arguments are used to synthesize the declaration of a single
-function template specialization. If the first parameter of the
-synthesized function is of the same type as the type-identity, it is
-added to the set of candidates.</p></li>
-</ul>
-</blockquote>
-
-</div>
-<p><span class="note"><span>[ <em>Note:</em> </span>For Review: It is
-unclear if this last constraint needs to be stated explicitly as it
-would require a non-standard declaration of std::type_identity which I
-think would be UB?<span> — <em>end note</em> ]</span></span></p>
-<div class="add" style="color: #006e28">
-
-<blockquote>
-<ul>
-<li><span class="marginalizedparent"><a class="marginalized">(10.2)</a></span> If
-multiple candidate functions have the same type, all candidates other
-than the candidate that is the best viable function as described in
-<span>12.2.4
-<a href="https://wg21.link/over.match.best">[over.match.best]</a></span>
-are removed from the set of candidates.</li>
-</ul>
+template. If argument deduction and checking succeeds, and the deduced
+type of the first parameter is the same type as the type identity tag,
+the deduced template-arguments are used to synthesize the declaration of
+a single function template specialization; Otherwise the declaration is
+eliminated from further consideration.</p>
 </blockquote>
 
 </div>
@@ -1223,7 +1262,7 @@ eliminated from further consideration.</li>
 <blockquote>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(11.2)</a></span> If
-any of the deallocation candidates have a first parameter of the same
+any of the deallocation functions have a first parameter of the same
 type as the type-identity, all deallocation functions that do not have a
 first parameter of that type are eliminated from further
 consideration.</li>
@@ -1239,15 +1278,58 @@ type std​::​align_val_t is preferred; otherwise a function without such a
 parameter is preferred. If any preferred functions are found, all
 non-preferred functions are eliminated from further consideration.</li>
 </ul>
+</blockquote>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<ul>
+<li><span class="marginalizedparent"><a class="marginalized">(11.4)</a></span> If
+multiple functions of the same type are found, only the most viable
+functions <span><a href="https://wg21.link/over.match.best">[over.match.best]</a></span>
+are retained, all others are eliminated from further consideration.</li>
+</ul>
+</blockquote>
+
+</div>
+<blockquote>
 <p>…</p>
-<p><span class="marginalizedparent"><a class="marginalized">10-&gt;12</a></span>
-<span class="add" style="color: #006e28"><ins>If the first parameter of
-the selected deallocation function is the same type as the
-type-identity, the type-identity is passed as the first argument to the
-deallocation call.</ins></span> For a single-object delete expression,
-the deleted object is the object A pointed to by the operand if the
-static type of <em>A</em> does not have a virtual destructor, and the
-most-derived object of <em>A</em> otherwise. …</p>
+<p><span class="marginalizedparent"><a class="marginalized">10-&gt;12</a></span> For
+a single-object delete expression, the deleted object is the object A
+pointed to by the operand if the static type of A does not have a
+virtual destructor, and the most-derived object of A otherwise. <span class="note"><span>[ <em>Note:</em> </span>If the deallocation function
+is not a destroying operator delete and the deleted object is not the
+most derived object in the former case, the behavior is undefined, as
+stated above.<span> — <em>end note</em> ]</span></span> <span class="add" style="color: #006e28"><ins>If the selected function is type
+aware, then it will be called with the type-identity argument as the
+first argument to the call</ins></span>. For an array delete expression,
+the deleted object is the array object. When a delete-expression is
+executed, the selected deallocation function shall be called with the
+address of the deleted object in a single-object delete expression, or
+the address of the deleted object suitably adjusted for the array
+allocation overhead (<a href="#expr.new">expr.new</a>) in an array
+delete expression, as <span class="add" style="color: #006e28"><ins>the</ins></span><span class="rm" style="color: #bf0303"><del>its</del></span> first argument <span class="add" style="color: #006e28"><ins>following the type identity
+argument if present</ins></span>.</p>
+</blockquote>
+<h2 data-number="6.6" id="expr.const"><span class="header-section-number">6.6</span> expr.const<a href="#expr.const" class="self-link"></a></h2>
+<p><span class="draftnote" data-audience="EWG">This text is a
+significant change in specification, but not intended behavior vs what
+was presented in Wroclaw.</span></p>
+<p><span class="draftnote" data-audience="CWG">Brian pointed out that
+it’s plausible in the future we might add constexpr new/delete to
+support custom allocators in general, and was wondering how these terms
+would apply in such a case. We believe that such a change would be
+easily accomodated by only apply this rule to declarations that lacked
+the constexpr annotation (we discussed more general solutions in the <a href="#design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts">design
+choices</a>).</span></p>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">(5.18.1)</a></span>
+the selected allocation function is a replaceable global allocation
+function (<span><a href="https://wg21.link/new.delete.single">[new.delete.single]</a></span>,
+<span><a href="https://wg21.link/new.delete.array">[new.delete.array]</a></span>)
+<span class="add" style="color: #006e28"><ins>or an global type aware
+allocation function where, if the the type identity tag is ignored,
+matches a replaceable global allocation function</ins></span> and the
+allocated storage is deallocated within the evaluation of E, or</p>
 </blockquote>
 <h1 data-number="7" id="design-choices-and-notes"><span class="header-section-number">7</span> Design choices and notes<a href="#design-choices-and-notes" class="self-link"></a></h1>
 <h2 data-number="7.1" id="design-choice-stdtype_identityt-vs-raw-template-argument"><span class="header-section-number">7.1</span> Design choice:
@@ -1257,7 +1339,7 @@ most-derived object of <em>A</em> otherwise. …</p>
 (seemingly simpler) mechanism. Instead of using
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code> as a
 tag, the compiler would search as per the following expression:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, args<span class="op">...)</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;(</span><span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, args<span class="op">...)</span></span></code></pre></div>
 <p>The only difference here is that we’re passing the type being
 allocated directly as a template argument instead of using a
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code> tag
@@ -1270,8 +1352,8 @@ declarations.</p>
 <p>For example, a valid
 <code class="sourceCode default">operator new</code> declaration today
 would be:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> <span class="op">...</span>Args<span class="op">&gt;</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, Args<span class="op">...)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> <span class="op">...</span>Args<span class="op">&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, Args<span class="op">...)</span>;</span></code></pre></div>
 <p>Hence, an expression like
 <code class="sourceCode default">new (42) int(3)</code> which would
 result in a call like <code class="sourceCode default">operator new&lt;int&gt;(sizeof(int), 42)</code>
@@ -1313,14 +1395,14 @@ avoided through the use of
 passed<a href="#problems-with-the-value-being-passed" class="self-link"></a></h3>
 <p>The first problem is the value being passed as the tag parameter.
 Given operator signatures of the form</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="op">*</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="op">*</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span> <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>T<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
 <p>Under the hood, the compiler could perform calls like</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T* ptr = new T(...)</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span>;</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">// delete ptr</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, ptr<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T* ptr = new T(...)</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span>;</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">// delete ptr</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">&lt;</span>T<span class="op">&gt;((</span>T<span class="op">*)</span><span class="kw">nullptr</span>, ptr<span class="op">)</span>;</span></code></pre></div>
 <p>A developer could reasonably be assumed to know that the tag
 parameter to <code class="sourceCode default">operator new</code> can’t
 be anything but a null pointer. However, for
@@ -1339,9 +1421,9 @@ types<a href="#silent-conversions-to-base-types" class="self-link"></a></h3>
 <p>A scenario we have discussed is developers wishing to provide custom
 [de]allocation operators for a whole class hierarchy. When using a typed
 pointer as the tag, this would be written as:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span> <span class="op">}</span>;</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>Base<span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>Base<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span> <span class="op">}</span>;</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>Base<span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>Base<span class="op">*</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
 <p>This operator would then also match any derived types of
 <code class="sourceCode default">Base</code>, which may or may not be
 intended. If not intended, the conversion from
@@ -1351,55 +1433,39 @@ and may not be noticed. Furthermore, this would basically defeat the
 purpose of providing type knowledge to the allocator, since only the
 type of the base class would be known. We believe that the correct way
 of implementing an operator for a hierarchy is this:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>; <span class="co">// T is the actual type being allocated</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Base <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>; <span class="co">// T is the actual type being allocated</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span></code></pre></div>
 <p>Or alternatively, in the global namespace:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
-<h3 data-number="7.2.3" id="performance-considerations"><span class="header-section-number">7.2.3</span> Performance considerations<a href="#performance-considerations" class="self-link"></a></h3>
-<p>There is a fundamental difference between
-<code class="sourceCode default">T*</code> and
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code> in
-that <code class="sourceCode default">T*</code> is a type that has an
-actual value and size, whereas
-<code class="sourceCode default">std::type_identity</code> is a zero
-sized record. This difference means that the
-<code class="sourceCode default">T*</code> model results in an
-additional parameter being required in the generated code, whereas the
-zero sized <code class="sourceCode default">type_identity</code>
-parameter does not exist in the majority of calling conventions. In
-principle this difference should be minor for templated operators as
-they are typically inlined and so the calling convention is not
-relevant, but for non-template definitions the implementation can be out
-of line, and so the difference may matter.</p>
-<p>For all of these reasons, we believe that a tag type like
+<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span>std<span class="op">::</span>derived_from<span class="op">&lt;</span>Base<span class="op">&gt;</span> T<span class="op">&gt;</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span>;</span></code></pre></div>
+<p>For these reasons, we believe that a tag type like
 <code class="sourceCode default">std::type_identity</code> is the right
 design choice.</p>
 <h2 data-number="7.3" id="design-choice-location-of-stdtype_identityt"><span class="header-section-number">7.3</span> Design choice: Location of
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code><a href="#design-choice-location-of-stdtype_identityt" class="self-link"></a></h2>
 <p>When writing this paper, we went back and forth of the order of
 arguments. This version of the paper proposes:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span></span></code></pre></div>
-<p>Another approach would be:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<div class="sourceCode" id="cb25"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, placement<span class="op">-</span>args<span class="op">...)</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span></code></pre></div>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*)</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t<span class="op">)</span></span></code></pre></div>
+<p>Another approach would be:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, placement<span class="op">-</span>args<span class="op">...)</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span><span class="dt">void</span><span class="op">*</span>, std<span class="op">::</span><span class="dt">size_t</span>, std<span class="op">::</span>align_val_t, std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;)</span></span></code></pre></div>
 <p>The existing specification allows for the existence of template
 (including variadic template) declarations of operator new and delete,
 and this functionality is used in existing code bases. This leads to
@@ -1409,14 +1475,6 @@ compilation.</p>
 <p>Placing the tag argument first ensures that no existing operator
 definition can match, and so we are guaranteed to be free from
 conflicts.</p>
-<!--
-TODO(Louis): I don't understand this paragraph
-
-An alternative to this would be to require passing an implicit `type_identity` parameter to require the relevant
-parameter in the original function declaration always be a `type_identity<T>` specialization, similar to our
-definition of type-aware allocators in general. This would differ from the behavior with respect to other implicit
-parameters that are permitted to bind to arbitrary template parameters.
--->
 <h2 data-number="7.4" id="design-choice-templated-type-aware-operator-delete-is-a-usual-deallocation-function"><span class="header-section-number">7.4</span> Design choice: Templated
 type-aware <code class="sourceCode default">operator delete</code> is a
 <em>usual deallocation function</em><a href="#design-choice-templated-type-aware-operator-delete-is-a-usual-deallocation-function" class="self-link"></a></h2>
@@ -1453,28 +1511,28 @@ believe it creates a user hazard. At a technical level there is no
 additional complexity in supporting type-aware destroying delete, but
 the resulting semantics seem likely to cause a lot of confusion. For
 example, given this hypothetical declaration:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Foo <span class="op">{</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, Foo<span class="op">*</span>, std<span class="op">::</span>destroying_delete_t<span class="op">)</span>;</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Bar <span class="op">:</span> Foo <span class="op">{</span> <span class="op">}</span>;</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>Foo<span class="op">*</span> foo<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> foo; <span class="co">// calls Foo::operator delete&lt;Foo&gt;</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> g<span class="op">(</span>Bar <span class="op">*</span>bar<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> bar; <span class="co">// calls Foo::operator delete&lt;Bar&gt;</span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Foo <span class="op">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, Foo<span class="op">*</span>, std<span class="op">::</span>destroying_delete_t<span class="op">)</span>;</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>;</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Bar <span class="op">:</span> Foo <span class="op">{</span> <span class="op">}</span>;</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">(</span>Foo<span class="op">*</span> foo<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> foo; <span class="co">// calls Foo::operator delete&lt;Foo&gt;</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> g<span class="op">(</span>Bar <span class="op">*</span>bar<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">delete</span> bar; <span class="co">// calls Foo::operator delete&lt;Bar&gt;</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>To a user this appears to be doing what they expect. However,
 consider the following:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Oops <span class="op">:</span> Bar <span class="op">{</span> <span class="op">}</span>;</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> h<span class="op">(</span>Oops <span class="op">*</span>oops<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  g<span class="op">(</span>oops<span class="op">)</span>; <span class="co">// calls Foo::operator delete&lt;Bar&gt; from within g()</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> Oops <span class="op">:</span> Bar <span class="op">{</span> <span class="op">}</span>;</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> h<span class="op">(</span>Oops <span class="op">*</span>oops<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  g<span class="op">(</span>oops<span class="op">)</span>; <span class="co">// calls Foo::operator delete&lt;Bar&gt; from within g()</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>By design, destroying delete does not perform any polymorphic
 dispatch, and as a result the type being passed to the operator is not
 be the dynamic type of the object being destroyed, but rather its static
@@ -1511,11 +1569,11 @@ which means that developers would have to appropriately constrain their
 type-aware operators anyway. In other words, we believe that a
 declaration like this would never have been a good idea in the first
 place:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> lib <span class="op">{</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// intent: override for all types in this namespace</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> lib <span class="op">{</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">// intent: override for all types in this namespace</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>There are too many ways in which an unconstrained declaration like
 this can break, including an unexpected set of associated namespaces or
 even a mere
@@ -1530,7 +1588,110 @@ special ADL lookup could be done based solely on the dynamic type being
 <p>Since this adds complexity to the proposal and implementation and
 doesn’t provide great value, we are not pursuing it as part of this
 proposal.</p>
-<h2 data-number="7.7" id="interactions-with-stdallocatort"><span class="header-section-number">7.7</span> Interactions with
+<h2 data-number="7.7" id="design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts"><span class="header-section-number">7.7</span> Design choice: “normal” global
+type aware allocation function are allowed in consteval contexts<a href="#design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts" class="self-link"></a></h2>
+<p>In the current specification it is not possible for an author to
+control whether an operator new or delete is selectable in consteval
+contexts, yet the use of <code class="sourceCode default">new</code> and
+<code class="sourceCode default">delete</code> in such contexts requires
+that the resolved operator be a replaceable global allocation function
+<span><a href="https://wg21.link/expr.const">[expr.const]</a></span>.</p>
+<p>This already causes problems for class scoped operators as the
+existence of a correctly named operator in the class scope prevents any
+further lookup in the global scope. However it is possible for code that
+wishes to support consteval and custom operators with code of the
+form:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T<span class="op">&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> example<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>   T<span class="op">*</span> value;</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>   <span class="cf">if</span> <span class="kw">consteval</span> <span class="op">{</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>       value <span class="op">=</span> <span class="op">::</span><span class="kw">new</span> T;</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>       value <span class="op">=</span> <span class="kw">new</span> T;</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>   <span class="co">// Do work</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>   <span class="cf">if</span> <span class="kw">consteval</span> <span class="op">{</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>     <span class="op">::</span><span class="kw">delete</span> value;</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>     <span class="kw">delete</span> value;</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>   <span class="op">}</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>   <span class="cf">return</span> result;</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Which, while distasteful and verbose, does work.</p>
+<p>However this proposal introduces the possibility, and for some use
+cases the probability, of finding matching operators for non-placement
+new in the global scope and so being unusable in consteval contexts. As
+a result we risk putting developers in the unreasonable position of
+having to choose between two different language features, both of which
+are extremely valuable.</p>
+<p>Our solution is to treat type aware global allocators that have no
+placement parameters as if they are replaceable global operators, and as
+such permit them to be assumed to behave in a like manner. In addition
+to permitting general global type aware allocators without breaking
+dynamic allocation in constant evaluation, this also provides a path to
+supporting class specialized allocators without sacrificing usability in
+constant contexts.</p>
+<p>Alternative approaches, that might also be useful for other contexts
+(static analysis, debug tooling, etc) would be:</p>
+<ul>
+<li><p>an attribute that can be applied to allocation functions to
+declare that they can be treated as if they are usual allocation
+functions in constant evaluation (or other?) contexts</p></li>
+<li><p>allow dynamic allocation in constexpr contexts via calls to
+<code class="sourceCode default">::operator new(size_t)</code> and
+<code class="sourceCode default">::operator delete(void*)</code>, and
+then permit use of constexpr operator
+<code class="sourceCode default">new</code> or
+<code class="sourceCode default">delete</code>. This would allow custom
+allocators <em>if</em> they are inline, even when not type aware.
+e.g</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Foo <span class="op">{</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> <span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span><span class="dt">size_t</span> sz, SomeContext Ctx<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">consteval</span> <span class="op">{</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="op">::</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>sz<span class="op">)</span>;</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Do custom allocation work</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ...</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div></li>
+</ul>
+<h2 data-number="7.8" id="design-choice-stripping-qualifiers-from-the-type"><span class="header-section-number">7.8</span> Design choice: Stripping
+qualifiers from the type<a href="#design-choice-stripping-qualifiers-from-the-type" class="self-link"></a></h2>
+<p><span class="draftnote" data-audience="EWG">This is a significant
+semantic change since Wroclaw following feedback from reviewers, however
+it has no change in implementation complexity and - from other feedback
+- seems to be what people had already expected</span></p>
+<p>There is a question as to whether the type-identity should include
+qualifiers. In preceding drafts this was not addressed, and retaining
+the qualifiers was implied. Our belief at the time was that an author
+that wished to strip the qualifiers would always be able to. Since then
+it has been pointed out that this may cause confusion as qualifiers
+currently do not impact allocator selection, and as the common case for
+allocation does not involve qualifiers on the type being allocated may
+lead to foot-guns where an author believes they have defined a type
+aware allocator, but that allocator is then not used in some cases.</p>
+<p>While considering this we realised an additional hazard,
+consider:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> Example;</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="op">*</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>Example<span class="op">&gt;</span>, <span class="dt">size_t</span><span class="op">)</span>;</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>Example<span class="op">&gt;</span>, <span class="dt">void</span> <span class="op">*)</span>;</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> Example <span class="op">{</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">virtual</span> <span class="op">~</span>Example<span class="op">()</span>;</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> f<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> e <span class="op">=</span> <span class="kw">new</span> <span class="kw">const</span> Example;</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">delete</span> e;</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+<p>In this case the type aware
+<code class="sourceCode default">operator new</code> will not be called
+due to the qualifier mismatch, but the type aware
+<code class="sourceCode default">operator delete</code> will be called
+from the virtual destructor. This is clearly not the intended
+behavior.</p>
+<p>This latter case indicates a degree of fragility that comes from not
+removing qualifiers that we have realised that removal of qualifiers is
+the correct course of action.</p>
+<h2 data-number="7.9" id="interactions-with-stdallocatort"><span class="header-section-number">7.9</span> Interactions with
 <code class="sourceCode default">std::allocator&lt;T&gt;</code><a href="#interactions-with-stdallocatort" class="self-link"></a></h2>
 <p>Today, <code class="sourceCode default">std::allocator&lt;T&gt;::allocate</code> is
 specified to call
@@ -1559,8 +1720,8 @@ behavior in this proposal. However, the authors are willing to
 investigate fixing this issue as a separate proposal, which will
 certainly present its own set of challenges (e.g. constant
 evaluation).</p>
-<h2 data-number="7.8" id="odr-implications-and-mismatched-operator-new-operator-delete"><span class="header-section-number">7.8</span> ODR implications and mismatched
-<code class="sourceCode default">operator new</code> /
+<h2 data-number="7.10" id="odr-implications-and-mismatched-operator-new-operator-delete"><span class="header-section-number">7.10</span> ODR implications and
+mismatched <code class="sourceCode default">operator new</code> /
 <code class="sourceCode default">operator delete</code><a href="#odr-implications-and-mismatched-operator-new-operator-delete" class="self-link"></a></h2>
 <p>A concern that was raised in St-Louis was that this proposal would
 increase the likelihood of ODR violation caused by different
@@ -1586,7 +1747,7 @@ compilation error.</p>
 <p>Furthermore, without ADL lookup, the ODR implications of this
 proposal are exactly the same as the existing ODR implications of
 user-defined placement new operators, which can be templates.</p>
-<h2 data-number="7.9" id="impact-on-the-library"><span class="header-section-number">7.9</span> Impact on the library<a href="#impact-on-the-library" class="self-link"></a></h2>
+<h2 data-number="7.11" id="impact-on-the-library"><span class="header-section-number">7.11</span> Impact on the library<a href="#impact-on-the-library" class="self-link"></a></h2>
 <p>This proposal does not have any impact on the library, since this
 only tweaks the search process performed by the compiler when it
 evaluates a new-expression and a delete-expression. In particular, we do
@@ -1594,6 +1755,19 @@ not propose adding new type-aware free function
 <code class="sourceCode default">operator new</code> variants in the
 standard library at this time, althought this could be investigated in
 the future.</p>
+<h2 data-number="7.12" id="interactions-with-coroutines"><span class="header-section-number">7.12</span> Interactions with coroutines<a href="#interactions-with-coroutines" class="self-link"></a></h2>
+<p>Coroutines currently permit user defined allocators, but do not have
+a mechanism to communicate the type being allocated. For P2719 we are
+not adjusting the semantics of coroutine allocations to resolve type
+aware new or delete. The coroutine specification will need to be updated
+in future to determine what type will be passed, and to include that
+type in the allocation function resolution (similar to what is
+achievable through
+<code class="sourceCode default">decltype(lambda)</code>).</p>
+<h1 data-number="8" id="acknowledgments"><span class="header-section-number">8</span> Acknowledgments<a href="#acknowledgments" class="self-link"></a></h1>
+<p>We’d like to acknowledge the time spent by Jens Meurer, Brian Bi,
+Corentin, and Richard Smith to help us develop the wording in this
+proposal.</p>
 </div>
 </div>
 </body>
