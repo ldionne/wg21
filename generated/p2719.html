@@ -412,19 +412,19 @@ code.sourceCode > span { display: inline; }
   <style type="text/css">.draftnote {
 font-style: oblique;
 }
-.draftnote[data-question]:before {
+.draftnote[data-question]::before {
 font-weight: bold;
 color: blue;
 font-family: monospace;
 content: "[Drafting Note - question for " attr(data-question) ": ";
 }
-.draftnote[data-audience]:before {
+.draftnote[data-audience]::before {
 font-weight: bold;
 color: blue;
 font-family: monospace;
 content: "[Drafting Note for " attr(data-audience) ": ";
 }
-.draftnote:before {
+.draftnote::before {
 font-weight: bold;
 color: blue;
 font-family: monospace;
@@ -531,9 +531,8 @@ type-aware <code class="sourceCode default">operator delete</code> is a
 type-aware destroying delete<span></span></a></li>
 <li><a href="#design-choice-dropped-support-for-adl" id="toc-design-choice-dropped-support-for-adl"><span class="toc-section-number">7.6</span> Design choice: Dropped support for
 ADL<span></span></a></li>
-<li><a href="#design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts" id="toc-design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts"><span class="toc-section-number">7.7</span> Design choice: “normal” global
-type aware allocation function are allowed in consteval
-contexts<span></span></a></li>
+<li><a href="#design-choice-allowing-type-aware-allocation-function-in-constant-expressions" id="toc-design-choice-allowing-type-aware-allocation-function-in-constant-expressions"><span class="toc-section-number">7.7</span> Design choice: Allowing type aware
+allocation function in constant expressions<span></span></a></li>
 <li><a href="#design-choice-stripping-qualifiers-from-the-type" id="toc-design-choice-stripping-qualifiers-from-the-type"><span class="toc-section-number">7.8</span> Design choice: Stripping
 qualifiers from the type<span></span></a></li>
 <li><a href="#interactions-with-stdallocatort" id="toc-interactions-with-stdallocatort"><span class="toc-section-number">7.9</span> Interactions with
@@ -605,6 +604,28 @@ consistency</li>
 the first parameter</li>
 <li>Documented design choices and changes based on feedback and
 implementation experience</li>
+</ul></li>
+<li>R2:
+<ul>
+<li>…</li>
+</ul></li>
+<li>R3:
+<ul>
+<li>Added design choice section for constant expression evaluation</li>
+<li>Added design choice section for coroutine promise new/delete</li>
+<li>Update to explicitly discard qualifiers on the type passed</li>
+<li>More comprehensive wording
+<ul>
+<li>Include feature detection macro</li>
+<li>Better explain the content of the type-identity parameter in
+expr.new and expr.delete</li>
+<li>Make it explicit that a type aware operator delete cannot be a
+destroying delete</li>
+<li>update const.expr include language to permit use of type aware
+functions in constant expressions</li>
+</ul></li>
+<li>Incorporated wording feedback from Brian, Corentin, and Richard
+(thanks!)</li>
 </ul></li>
 </ul>
 <h1 data-number="3" id="motivation"><span class="header-section-number">3</span> Motivation<a href="#motivation" class="self-link"></a></h1>
@@ -977,7 +998,7 @@ as long as it is always a specialization of
 would always be invalid, even if
 <code class="sourceCode default">T</code> was
 <code class="sourceCode default">std::type_identity&lt;E&gt;</code> for
-some <code class="sourceCode default">E</code>, or similarly <code class="sourceCode default">template &lt;template&lt;typename&gt; typename&gt; void *operator new(T&lt;int&gt;, std::size_t)</code>.</span></p>
+some <code class="sourceCode default">E</code>, or similarly <code class="sourceCode default">template &lt;template&lt;class&gt; class T&gt; void *operator new(T&lt;int&gt;, std::size_t)</code>.</span></p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 An allocation function <span class="add" style="color: #006e28"><ins>or
@@ -1311,16 +1332,6 @@ delete expression, as <span class="add" style="color: #006e28"><ins>the</ins></s
 argument if present</ins></span>.</p>
 </blockquote>
 <h2 data-number="6.6" id="expr.const"><span class="header-section-number">6.6</span> expr.const<a href="#expr.const" class="self-link"></a></h2>
-<p><span class="draftnote" data-audience="EWG">This text is a
-significant change in specification, but not intended behavior vs what
-was presented in Wroclaw.</span></p>
-<p><span class="draftnote" data-audience="CWG">Brian pointed out that
-it’s plausible in the future we might add constexpr new/delete to
-support custom allocators in general, and was wondering how these terms
-would apply in such a case. We believe that such a change would be
-easily accomodated by only apply this rule to declarations that lacked
-the constexpr annotation (we discussed more general solutions in the <a href="#design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts">design
-choices</a>).</span></p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">(5.18.1)</a></span>
 the selected allocation function is a replaceable global allocation
@@ -1588,19 +1599,20 @@ special ADL lookup could be done based solely on the dynamic type being
 <p>Since this adds complexity to the proposal and implementation and
 doesn’t provide great value, we are not pursuing it as part of this
 proposal.</p>
-<h2 data-number="7.7" id="design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts"><span class="header-section-number">7.7</span> Design choice: “normal” global
-type aware allocation function are allowed in consteval contexts<a href="#design-choice-normal-global-type-aware-allocation-function-are-allowed-in-consteval-contexts" class="self-link"></a></h2>
+<h2 data-number="7.7" id="design-choice-allowing-type-aware-allocation-function-in-constant-expressions"><span class="header-section-number">7.7</span> Design choice: Allowing type
+aware allocation function in constant expressions<a href="#design-choice-allowing-type-aware-allocation-function-in-constant-expressions" class="self-link"></a></h2>
 <p>In the current specification it is not possible for an author to
-control whether an operator new or delete is selectable in consteval
-contexts, yet the use of <code class="sourceCode default">new</code> and
-<code class="sourceCode default">delete</code> in such contexts requires
-that the resolved operator be a replaceable global allocation function
-<span><a href="https://wg21.link/expr.const">[expr.const]</a></span>.</p>
+specify a constexpr <code class="sourceCode default">operator new</code>
+or <code class="sourceCode default">operator delete</code>, and instead
+use of <code class="sourceCode default">new</code> and
+<code class="sourceCode default">delete</code> in constant expressions
+requires that the resolved operator be a replaceable global allocation
+function <span><a href="https://wg21.link/expr.const">[expr.const]</a></span>.</p>
 <p>This already causes problems for class scoped operators as the
 existence of a correctly named operator in the class scope prevents any
 further lookup in the global scope. However it is possible for code that
-wishes to support consteval and custom operators with code of the
-form:</p>
+wishes to support allocation in constant and custom operators with code
+of the form:</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">typename</span> T<span class="op">&gt;</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> example<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>   T<span class="op">*</span> value;</span>
@@ -1639,8 +1651,8 @@ declare that they can be treated as if they are usual allocation
 functions in constant evaluation (or other?) contexts</p></li>
 <li><p>allow dynamic allocation in constexpr contexts via calls to
 <code class="sourceCode default">::operator new(size_t)</code> and
-<code class="sourceCode default">::operator delete(void*)</code>, and
-then permit use of constexpr operator
+<code class="sourceCode default">::operator delete(void*)</code> or some
+similar function, and then permit use of constexpr operator
 <code class="sourceCode default">new</code> or
 <code class="sourceCode default">delete</code>. This would allow custom
 allocators <em>if</em> they are inline, even when not type aware.
@@ -1657,40 +1669,16 @@ e.g</p>
 </ul>
 <h2 data-number="7.8" id="design-choice-stripping-qualifiers-from-the-type"><span class="header-section-number">7.8</span> Design choice: Stripping
 qualifiers from the type<a href="#design-choice-stripping-qualifiers-from-the-type" class="self-link"></a></h2>
-<p><span class="draftnote" data-audience="EWG">This is a significant
-semantic change since Wroclaw following feedback from reviewers, however
-it has no change in implementation complexity and - from other feedback
-- seems to be what people had already expected</span></p>
 <p>There is a question as to whether the type-identity should include
-qualifiers. In preceding drafts this was not addressed, and retaining
-the qualifiers was implied. Our belief at the time was that an author
-that wished to strip the qualifiers would always be able to. Since then
-it has been pointed out that this may cause confusion as qualifiers
-currently do not impact allocator selection, and as the common case for
-allocation does not involve qualifiers on the type being allocated may
-lead to foot-guns where an author believes they have defined a type
-aware allocator, but that allocator is then not used in some cases.</p>
-<p>While considering this we realised an additional hazard,
-consider:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> Example;</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="op">*</span><span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>Example<span class="op">&gt;</span>, <span class="dt">size_t</span><span class="op">)</span>;</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>Example<span class="op">&gt;</span>, <span class="dt">void</span> <span class="op">*)</span>;</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> Example <span class="op">{</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">virtual</span> <span class="op">~</span>Example<span class="op">()</span>;</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> f<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">auto</span> e <span class="op">=</span> <span class="kw">new</span> <span class="kw">const</span> Example;</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">delete</span> e;</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
-<p>In this case the type aware
-<code class="sourceCode default">operator new</code> will not be called
-due to the qualifier mismatch, but the type aware
-<code class="sourceCode default">operator delete</code> will be called
-from the virtual destructor. This is clearly not the intended
-behavior.</p>
-<p>This latter case indicates a degree of fragility that comes from not
-removing qualifiers that we have realised that removal of qualifiers is
-the correct course of action.</p>
+qualifiers. In previous drafts this was not addressed, and retaining the
+qualifiers was implied. After consideration we have realised that this
+would be surprising, is inconsistent with how the type being allocated
+is presented to the developer throughout the process of allocation and
+deallocation, and results in the type-identity trivially diverging
+between such allocation and deallocation e.g.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> T <span class="op">*</span>t <span class="op">=</span> <span class="kw">new</span> T;</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="op">...</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="kw">delete</span> t;</span></code></pre></div>
 <h2 data-number="7.9" id="interactions-with-stdallocatort"><span class="header-section-number">7.9</span> Interactions with
 <code class="sourceCode default">std::allocator&lt;T&gt;</code><a href="#interactions-with-stdallocatort" class="self-link"></a></h2>
 <p>Today, <code class="sourceCode default">std::allocator&lt;T&gt;::allocate</code> is
@@ -1766,7 +1754,7 @@ achievable through
 <code class="sourceCode default">decltype(lambda)</code>).</p>
 <h1 data-number="8" id="acknowledgments"><span class="header-section-number">8</span> Acknowledgments<a href="#acknowledgments" class="self-link"></a></h1>
 <p>We’d like to acknowledge the time spent by Jens Meurer, Brian Bi,
-Corentin, and Richard Smith to help us develop the wording in this
+Corentin Jabot, and Richard Smith to help us develop the wording in this
 proposal.</p>
 </div>
 </div>
