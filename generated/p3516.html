@@ -410,34 +410,6 @@ ol.enumerate { list-style-type: none; background: inherit; }
 
 code.sourceCode > span { display: inline; }
 </style>
-  <style type="text/css">.draftnote {
-font-style: oblique;
-}
-.draftnote[data-question]:before {
-font-weight: bold;
-color: blue;
-font-family: monospace;
-content: "[Drafting Note - question for " attr(data-question) ": ";
-}
-.draftnote[data-audience]:before {
-font-weight: bold;
-color: blue;
-font-family: monospace;
-content: "[Drafting Note for " attr(data-audience) ": ";
-}
-.draftnote:before {
-font-weight: bold;
-color: blue;
-font-family: monospace;
-content: "[Drafting Note: ";
-}
-.draftnote:after {
-font-style: bold;
-color: blue;
-font-family: monospace;
-content: "]";
-}
-</style>
   <link href="data:image/x-icon;base64,AAABAAIAEBAAAAEAIABoBAAAJgAAACAgAAABACAAqBAAAI4EAAAoAAAAEAAAACAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAVoJEAN6CRADegkQAWIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wCCRAAAgkQAAIJEAACCRAAsgkQAvoJEAP+CRAD/gkQA/4JEAP+CRADAgkQALoJEAACCRAAAgkQAAP///wD///8AgkQAAIJEABSCRACSgkQA/IJEAP99PQD/dzMA/3czAP99PQD/gkQA/4JEAPyCRACUgkQAFIJEAAD///8A////AHw+AFiBQwDqgkQA/4BBAP9/PxP/uZd6/9rJtf/bybX/upd7/39AFP+AQQD/gkQA/4FDAOqAQgBc////AP///wDKklv4jlEa/3o7AP+PWC//8+3o///////////////////////z7un/kFox/35AAP+GRwD/mVYA+v///wD///8A0Zpk+NmibP+0d0T/8evj///////+/fv/1sKz/9bCs//9/fr//////+/m2/+NRwL/nloA/5xYAPj///8A////ANKaZPjRmGH/5cKh////////////k149/3UwAP91MQD/lmQ//86rhv+USg3/m1YA/5hSAP+bVgD4////AP///wDSmmT4zpJY/+/bx///////8+TV/8mLT/+TVx//gkIA/5lVAP+VTAD/x6B//7aEVv/JpH7/s39J+P///wD///8A0ppk+M6SWP/u2sf///////Pj1f/Nj1T/2KFs/8mOUv+eWhD/lEsA/8aee/+0glT/x6F7/7J8Rvj///8A////ANKaZPjRmGH/48Cf///////+/v7/2qt//82PVP/OkFX/37KJ/86siv+USg7/mVQA/5hRAP+bVgD4////AP///wDSmmT40ppk/9CVXP/69O////////7+/v/x4M//8d/P//7+/f//////9u7n/6tnJf+XUgD/nFgA+P///wD///8A0ppk+NKaZP/RmWL/1qNy//r07///////////////////////+vXw/9akdP/Wnmn/y5FY/6JfFvj///8A////ANKaZFTSmmTo0ppk/9GYYv/Ql1//5cWm//Hg0P/x4ND/5cWm/9GXYP/RmGH/0ppk/9KaZOjVnmpY////AP///wDSmmQA0ppkEtKaZI7SmmT60ppk/9CWX//OkVb/zpFW/9CWX//SmmT/0ppk/NKaZJDSmmQS0ppkAP///wD///8A0ppkANKaZADSmmQA0ppkKtKaZLrSmmT/0ppk/9KaZP/SmmT/0ppkvNKaZCrSmmQA0ppkANKaZAD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkUtKaZNzSmmTc0ppkVNKaZADSmmQA0ppkANKaZADSmmQA////AP5/AAD4HwAA4AcAAMADAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAMADAADgBwAA+B8AAP5/AAAoAAAAIAAAAEAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAyCRACMgkQA6oJEAOqCRACQgkQAEIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRABigkQA5oJEAP+CRAD/gkQA/4JEAP+CRADqgkQAZoJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAA4gkQAwoJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQAxIJEADyCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAP///wD///8A////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAWgkQAmIJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAJyCRAAYgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAdIJEAPCCRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAPSCRAB4gkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQASoJEANKCRAD/gkQA/4JEAP+CRAD/g0YA/39AAP9zLgD/bSQA/2shAP9rIQD/bSQA/3MuAP9/PwD/g0YA/4JEAP+CRAD/gkQA/4JEAP+CRADUgkQAToJEAACCRAAAgkQAAP///wD///8A////AP///wB+PwAAgkUAIoJEAKiCRAD/gkQA/4JEAP+CRAD/hEcA/4BBAP9sIwD/dTAA/5RfKv+viF7/vp56/76ee/+wiF7/lWAr/3YxAP9sIwD/f0AA/4RHAP+CRAD/gkQA/4JEAP+CRAD/gkQArIJEACaBQwAA////AP///wD///8A////AIBCAEBzNAD6f0EA/4NFAP+CRAD/gkQA/4VIAP92MwD/bSUA/6N1Tv/ezsL/////////////////////////////////38/D/6V3Uv9uJgD/dTEA/4VJAP+CRAD/gkQA/4JEAP+BQwD/fUAA/4FDAEj///8A////AP///wD///8AzJRd5qBlKf91NgD/dDUA/4JEAP+FSQD/cy4A/3YyAP/PuKP//////////////////////////////////////////////////////9K7qP94NQD/ciwA/4VJAP+CRAD/fkEA/35BAP+LSwD/mlYA6v///wD///8A////AP///wDdpnL/4qx3/8KJUv+PUhf/cTMA/3AsAP90LgD/4dK+/////////////////////////////////////////////////////////////////+TYxf91MAD/dTIA/31CAP+GRwD/llQA/6FcAP+gWwD8////AP///wD///8A////ANGZY/LSm2X/4ap3/92mcP+wdT3/byQA/8mwj////////////////////////////////////////////////////////////////////////////+LYxv9zLgP/jUoA/59bAP+hXAD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/RmWL/1p9q/9ubXv/XqXj////////////////////////////7+fD/vZyG/6BxS/+gcUr/vJuE//r37f//////////////////////3MOr/5dQBf+dVQD/nVkA/5xYAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmWP/yohJ//jo2P//////////////////////4NTG/4JDFf9lGAD/bSQA/20kAP9kGAD/fz8S/+Xb0f//////5NG9/6txN/+LOgD/m1QA/51aAP+cWAD/m1cA/5xYAP+cWADy////AP///wD///8A////ANKaZPLSmmT/0ppk/8+TWf/Unmv//v37//////////////////////+TWRr/VwsA/35AAP+ERgD/g0UA/4JGAP9lHgD/kFga/8KXX/+TRwD/jT4A/49CAP+VTQD/n10A/5xYAP+OQQD/lk4A/55cAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/y4tO/92yiP//////////////////////8NnE/8eCQP+rcTT/ez0A/3IyAP98PgD/gEMA/5FSAP+USwD/jj8A/5lUAP+JNwD/yqV2/694Mf+HNQD/jkAA/82rf/+laBj/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/LiUr/4byY///////////////////////gupX/0I5P/+Wuev/Lklz/l1sj/308AP+QSwD/ol0A/59aAP+aVQD/k0oA/8yoh///////+fXv/6pwO//Lp3v///////Pr4f+oay7y////AP///wD///8A////ANKaZPLSmmT/0ppk/8uJSv/hvJj//////////////////////+G7l//Jhkb/0ppk/96nc//fqXX/x4xO/6dkFP+QSQD/llEA/5xXAP+USgD/yaOA///////38uv/qG05/8ijdv//////8efb/6ZpLPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/zIxO/9yxh///////////////////////7dbA/8iEQf/Sm2X/0Zlj/9ScZv/eqHf/2KJv/7yAQf+XTgD/iToA/5lSAP+JNgD/yKFv/611LP+HNQD/jT8A/8qmeP+kZRT/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/Pk1n/1J5q//78+//////////////////+/fv/1aFv/8iEQv/Tm2b/0ppl/9GZY//Wn2z/1pZc/9eldf/Bl2b/kUcA/4w9AP+OQAD/lUwA/59eAP+cWQD/jT8A/5ZOAP+eXADy////AP///wD///8A////ANKaZPLSmmT/0ppk/9KZY//KiEn/8d/P///////////////////////47+f/05tm/8iCP//KiEj/yohJ/8eCP//RmGH//vfy///////n1sP/rXQ7/4k4AP+TTAD/nVoA/5xYAP+cVwD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/0ptl/8uLTf/aq37////////////////////////////+/fz/6c2y/961jv/etY7/6Myx//78+v//////////////////////3MWv/5xXD/+ORAD/mFQA/51ZAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmmT/0ppk/8mFRP/s1b//////////////////////////////////////////////////////////////////////////////+PD/0JFU/7NzMv+WUQD/kUsA/5tXAP+dWQDy////AP///wD///8A////ANKaZP/SmmT/0ppk/9KaZP/Sm2X/z5NZ/8yMT//z5NX/////////////////////////////////////////////////////////////////9Ofa/8yNUP/UmGH/36p5/8yTWv+qaSD/kksA/5ROAPz///8A////AP///wD///8A0ppk5NKaZP/SmmT/0ppk/9KaZP/TnGf/zY9T/82OUv/t1sD//////////////////////////////////////////////////////+7Yw//OkFX/zI5R/9OcZ//SmmP/26V0/9ymdf/BhUf/ol8R6P///wD///8A////AP///wDSmmQ80ppk9tKaZP/SmmT/0ppk/9KaZP/TnGj/zpFW/8qJSv/dson/8uHS//////////////////////////////////Lj0//etIv/y4lL/86QVf/TnGj/0ppk/9KaZP/RmWP/05xn/9ymdfjUnWdC////AP///wD///8A////ANKaZADSmmQc0ppkotKaZP/SmmT/0ppk/9KaZP/Tm2b/0Zli/8qJSf/NjlH/16Z3/+G8mP/myKr/5siq/+G8mP/Xp3f/zY5S/8qISf/RmGH/05tm/9KaZP/SmmT/0ppk/9KaZP/SmmSm0pljINWdaQD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkQtKaZMrSmmT/0ppk/9KaZP/SmmT/0ptl/9GYYf/Nj1P/y4lL/8qISP/KiEj/y4lK/82PU//RmGH/0ptl/9KaZP/SmmT/0ppk/9KaZP/SmmTO0ppkRtKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZGzSmmTu0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmTw0ppkcNKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZBLSmmSQ0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppklNKaZBTSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQy0ppkutKaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppkvtKaZDbSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkXNKaZODSmmT/0ppk/9KaZP/SmmT/0ppk5NKaZGDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkBtKaZIbSmmTo0ppk6tKaZIrSmmQK0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP/8P///+B///+AH//+AAf//AAD//AAAP/AAAA/gAAAHwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA+AAAAfwAAAP/AAAP/8AAP//gAH//+AH///4H////D//" rel="icon" />
   
   <!--[if lt IE 9]>
@@ -486,14 +458,11 @@ relocation</h1>
 <li><a href="#proposal" id="toc-proposal"><span class="toc-section-number">3</span> Proposal<span></span></a></li>
 <li><a href="#usage-examples" id="toc-usage-examples"><span class="toc-section-number">4</span> Usage examples<span></span></a>
 <ul>
-<li><a href="#vectoremplace-vectorinsert" id="toc-vectoremplace-vectorinsert"><span class="toc-section-number">4.1</span>
-<code class="sourceCode default">vector::emplace</code> /
-<code class="sourceCode default">vector::insert</code><span></span></a></li>
-<li><a href="#vectorerase" id="toc-vectorerase"><span class="toc-section-number">4.2</span>
-<code class="sourceCode default">vector::erase</code><span></span></a></li>
-<li><a href="#vectoremplace_back-vectorpush_back" id="toc-vectoremplace_back-vectorpush_back"><span class="toc-section-number">4.3</span>
-<code class="sourceCode default">vector::emplace_back</code> /
-<code class="sourceCode default">vector::push_back</code><span></span></a></li>
+<li><a href="#vectoremplace-vectorinsert" id="toc-vectoremplace-vectorinsert"><span class="toc-section-number">4.1</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace</code> /
+<code class="sourceCode cpp">vector<span class="op">::</span>insert</code><span></span></a></li>
+<li><a href="#vectorerase" id="toc-vectorerase"><span class="toc-section-number">4.2</span> <code class="sourceCode cpp">vector<span class="op">::</span>erase</code><span></span></a></li>
+<li><a href="#vectoremplace_back-vectorpush_back" id="toc-vectoremplace_back-vectorpush_back"><span class="toc-section-number">4.3</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace_back</code>
+/ <code class="sourceCode cpp">vector<span class="op">::</span>push_back</code><span></span></a></li>
 </ul></li>
 <li><a href="#wording" id="toc-wording"><span class="toc-section-number">5</span> Wording<span></span></a></li>
 </ul>
@@ -520,29 +489,28 @@ algorithms and containers written in terms of relocation today would
 benefit from a massive speedup for trivially relocatable types, without
 requiring any change.</p>
 <h1 data-number="3" id="proposal"><span class="header-section-number">3</span> Proposal<a href="#proposal" class="self-link"></a></h1>
-<p>We propose adding algorithms
-<code class="sourceCode default">std::uninitialized_relocate</code>,
-<code class="sourceCode default">std::uninitialized_relocate_n</code>,
-and <code class="sourceCode default">std::uninitialized_relocate_backward</code>.
+<p>We propose adding algorithms <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate</code>,
+<code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate_n</code>,
+and <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate_backward</code>.
 We also add the equivalent
-<code class="sourceCode default">ranges::</code> functions and the
-parallel algorithm overloads. At a high level, these algorithms relocate
-a range of objects from one memory location to another, which is a very
-useful primitive when writing containers and algorithms.</p>
+<code class="sourceCode cpp">ranges<span class="op">::</span></code>
+functions and the parallel algorithm overloads. At a high level, these
+algorithms relocate a range of objects from one memory location to
+another, which is a very useful primitive when writing containers and
+algorithms.</p>
 <p>However, the library interface proposed here is intentionally
 independent of the details of the underlying language feature.</p>
 <p>Design points:</p>
 <ul>
 <li>These functions behave similarly to the other uninitialized
-algorithms like
-<code class="sourceCode default">std::uninitialized_copy</code>, with
-the difference that the new proposed relocation algorithms support
+algorithms like <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_copy</code>,
+with the difference that the new proposed relocation algorithms support
 overlapping input/output ranges like
-<code class="sourceCode default">std::move</code> and
-<code class="sourceCode default">std::move_backward</code>. That is
-necessary in order to support most use cases where one is relocating a
-range a bit “to the right” or a bit “to the left” of its current
-location.</li>
+<code class="sourceCode cpp">std<span class="op">::</span>move</code>
+and <code class="sourceCode cpp">std<span class="op">::</span>move_backward</code>.
+That is necessary in order to support most use cases where one is
+relocating a range a bit “to the right” or a bit “to the left” of its
+current location.</li>
 <li>Unlike P2786 which talks of <em>trivial relocation</em>, these
 algorithms talk of <em>relocation</em> in the general sense. This is
 because it’s generally more useful (and easier!) to write an algorithm
@@ -557,13 +525,12 @@ implementations optimize under the as-if rule.</li>
 exception, the whole source range is destroyed and the whole destination
 range as well. Otherwise, the ranges would contain an unknown number of
 alive objects, making it impossible for the caller to perform a clean
-up. This turns out to work well with what e.g.
-<code class="sourceCode default">std::vector::insert</code> requires in
-order to provide the basic exception safety guarantee (see the examples
-below).</li>
+up. This turns out to work well with what e.g. <code class="sourceCode cpp">std<span class="op">::</span>vector<span class="op">::</span>insert</code>
+requires in order to provide the basic exception safety guarantee (see
+the examples below).</li>
 <li>The algorithms accept
-<code class="sourceCode default">input_iterator</code>s (or
-<code class="sourceCode default">bidirectional_iterator</code>s for the
+<code class="sourceCode cpp">input_iterator</code>s (or
+<code class="sourceCode cpp">bidirectional_iterator</code>s for the
 backward variant) for the input range. This iterator category is
 sufficient to implement these algorithms properly. However, it does mean
 that the range overlap precondition cannot be checked at runtime for
@@ -578,13 +545,12 @@ does not contain any elements after performing the operation.</li>
 </ul>
 <h1 data-number="4" id="usage-examples"><span class="header-section-number">4</span> Usage examples<a href="#usage-examples" class="self-link"></a></h1>
 <p>In these examples, we ignore allocator support for simplicity, and we
-use <code class="sourceCode default">iterator</code> instead of
-<code class="sourceCode default">const_iterator</code> as the parameter
+use <code class="sourceCode cpp">iterator</code> instead of
+<code class="sourceCode cpp">const_iterator</code> as the parameter
 types to lighten the code. The “real” code for implementing these
 functions does not look meaningfully different.</p>
-<h2 data-number="4.1" id="vectoremplace-vectorinsert"><span class="header-section-number">4.1</span>
-<code class="sourceCode default">vector::emplace</code> /
-<code class="sourceCode default">vector::insert</code><a href="#vectoremplace-vectorinsert" class="self-link"></a></h2>
+<h2 data-number="4.1" id="vectoremplace-vectorinsert"><span class="header-section-number">4.1</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace</code> /
+<code class="sourceCode cpp">vector<span class="op">::</span>insert</code><a href="#vectoremplace-vectorinsert" class="self-link"></a></h2>
 <table>
 <thead>
 <tr class="header">
@@ -689,32 +655,29 @@ contain moved-from objects, like in the assignment-based one.</li>
 <li>Both implementations provide the basic exception safety guarantee,
 but they provide it differently. After an exception, the
 assignment-based implementation will contain the same number of elements
-as before calling <code class="sourceCode default">emplace</code>, but
+as before calling <code class="sourceCode cpp">emplace</code>, but
 unknown elements in the vector will be in a moved-from state. The
 relocation-based implementation instead ends up with the elements in
-<code class="sourceCode default">[position, end())</code> being erased
-from the vector. It’s unclear whether one behavior is really superior
-over the other, but both are conforming.</li>
+<code class="sourceCode cpp"><span class="op">[</span>position, end<span class="op">())</span></code>
+being erased from the vector. It’s unclear whether one behavior is
+really superior over the other, but both are conforming.</li>
 <li>There is no mention of trivial relocation in the implementation. We
 relocate elements even when that is not equivalent to
-<code class="sourceCode default">std::memcpy</code> (or whatever the
-language definition is).</li>
+<code class="sourceCode cpp">std<span class="op">::</span>memcpy</code>
+(or whatever the language definition is).</li>
 <li>An implementation that considers the usage of move-assignment to be
 part of the function’s API may want to preserve that behavior, in which
 case the relocating code path may be guarded by something like P2786’s
-<code class="sourceCode default">is_replaceable_v&lt;T&gt;</code> (and
-otherwise fallback to move-assignment). In the absence of
-<code class="sourceCode default">is_replaceable</code>, a conservative
-implementation could use
-<code class="sourceCode default">std::is_trivially_copyable</code> as a
-guard.</li>
+<code class="sourceCode cpp">is_replaceable_v<span class="op">&lt;</span>T<span class="op">&gt;</span></code>
+(and otherwise fallback to move-assignment). In the absence of
+<code class="sourceCode cpp">is_replaceable</code>, a conservative
+implementation could use <code class="sourceCode cpp">std<span class="op">::</span>is_trivially_copyable</code>
+as a guard.</li>
 </ul>
-<p>Inserting in the middle of a
-<code class="sourceCode default">std::vector&lt;std::string&gt;</code>
+<p>Inserting in the middle of a <code class="sourceCode cpp">std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>string<span class="op">&gt;</span></code>
 is roughly TODOx times faster with relocation than with assignments.</p>
 <!-- TODO: Measure and provide a link to the benchmarks -->
-<h2 data-number="4.2" id="vectorerase"><span class="header-section-number">4.2</span>
-<code class="sourceCode default">vector::erase</code><a href="#vectorerase" class="self-link"></a></h2>
+<h2 data-number="4.2" id="vectorerase"><span class="header-section-number">4.2</span> <code class="sourceCode cpp">vector<span class="op">::</span>erase</code><a href="#vectorerase" class="self-link"></a></h2>
 <table>
 <thead>
 <tr class="header">
@@ -770,37 +733,36 @@ is roughly TODOx times faster with relocation than with assignments.</p>
 </table>
 <p>Things worth noting:</p>
 <ul>
-<li>In the case of
-<code class="sourceCode default">vector::erase</code>, we cannot
-unconditionally use relocation when it is potentially throwing. This is
-because <code class="sourceCode default">vector::erase</code> is
+<li>In the case of <code class="sourceCode cpp">vector<span class="op">::</span>erase</code>, we
+cannot unconditionally use relocation when it is potentially throwing.
+This is because <code class="sourceCode cpp">vector<span class="op">::</span>erase</code> is
 required not to throw an exception unless
-<code class="sourceCode default">T</code>’s move-assignment operator
-throws. We view this as an overspecification in the Standard that could
-be relaxed – this is probably an artifact of the fact that
-implementations were assumed to use assignment.</li>
+<code class="sourceCode cpp">T</code>’s move-assignment operator throws.
+We view this as an overspecification in the Standard that could be
+relaxed – this is probably an artifact of the fact that implementations
+were assumed to use assignment.</li>
 <li>There is no mention of trivial relocation above. However, if the
 language offered one, and if
-<code class="sourceCode default">is_trivially_relocatable</code> were
-independent from <code class="sourceCode default">std::is_nothrow_move_constructible</code>, we
-could generalize the <code class="sourceCode default">if</code>
-statement above by also performing relocation when it is trivial, even
-if the move constructor is potentially throwing.</li>
-<li>Like for <code class="sourceCode default">vector::emplace</code>, an
-implementation that considers the usage of move-assignment to be part of
-the function’s API may want to preserve that behavior by further
+<code class="sourceCode cpp">is_trivially_relocatable</code> were
+independent from <code class="sourceCode cpp">std<span class="op">::</span>is_nothrow_move_constructible</code>,
+we could generalize the
+<code class="sourceCode cpp"><span class="cf">if</span></code> statement
+above by also performing relocation when it is trivial, even if the move
+constructor is potentially throwing.</li>
+<li>Like for <code class="sourceCode cpp">vector<span class="op">::</span>emplace</code>,
+an implementation that considers the usage of move-assignment to be part
+of the function’s API may want to preserve that behavior by further
 constraining the usage of relocation.</li>
 </ul>
-<p>Erasing in the middle of a
-<code class="sourceCode default">std::vector&lt;std::string&gt;</code>
+<p>Erasing in the middle of a <code class="sourceCode cpp">std<span class="op">::</span>vector<span class="op">&lt;</span>std<span class="op">::</span>string<span class="op">&gt;</span></code>
 is roughly TODOx times faster with relocation than with assignments.</p>
 <!-- TODO: Perf numbers -->
-<h2 data-number="4.3" id="vectoremplace_back-vectorpush_back"><span class="header-section-number">4.3</span>
-<code class="sourceCode default">vector::emplace_back</code> /
-<code class="sourceCode default">vector::push_back</code><a href="#vectoremplace_back-vectorpush_back" class="self-link"></a></h2>
+<h2 data-number="4.3" id="vectoremplace_back-vectorpush_back"><span class="header-section-number">4.3</span> <code class="sourceCode cpp">vector<span class="op">::</span>emplace_back</code>
+/ <code class="sourceCode cpp">vector<span class="op">::</span>push_back</code><a href="#vectoremplace_back-vectorpush_back" class="self-link"></a></h2>
 <p>Note that the vector growth policy presented here is more naive than
-what <code class="sourceCode default">std::vector</code> typically
-does.</p>
+what
+<code class="sourceCode cpp">std<span class="op">::</span>vector</code>
+typically does.</p>
 <table>
 <thead>
 <tr class="header">
@@ -892,31 +854,30 @@ as shown:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
 an algorithm’s template parameter is named
-<code class="sourceCode default">InputIterator</code>,
-<code class="sourceCode default">InputIterator1</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
-<code class="sourceCode default">InputIterator2</code>, <span class="add" style="color: #006e28"><ins>or
+<code class="sourceCode cpp">InputIterator</code>,
+<code class="sourceCode cpp">InputIterator1</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
+<code class="sourceCode cpp">InputIterator2</code>, <span class="add" style="color: #006e28"><ins>or
 <span><code class="sourceCode default">NoThrowInputIterator</code></span>,</ins></span>
 the template argument shall meet the <em>Cpp17InputIterator</em>
 requirements ([input.iterators]).</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
 an algorithm’s template parameter is named
-<code class="sourceCode default">OutputIterator</code>,
-<code class="sourceCode default">OutputIterator1</code>, or
-<code class="sourceCode default">OutputIterator2</code>, the template
+<code class="sourceCode cpp">OutputIterator</code>,
+<code class="sourceCode cpp">OutputIterator1</code>, or
+<code class="sourceCode cpp">OutputIterator2</code>, the template
 argument shall meet the <em>Cpp17OutputIterator</em> requirements
 ([output.iterators]).</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
 an algorithm’s template parameter is named
-<code class="sourceCode default">ForwardIterator</code>,
-<code class="sourceCode default">ForwardIterator1</code>,
-<code class="sourceCode default">ForwardIterator2</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
-<code class="sourceCode default">NoThrowForwardIterator</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">NoThrowForwardIterator1</code></span>,
+<code class="sourceCode cpp">ForwardIterator</code>,
+<code class="sourceCode cpp">ForwardIterator1</code>,
+<code class="sourceCode cpp">ForwardIterator2</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
+<code class="sourceCode cpp">NoThrowForwardIterator</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">NoThrowForwardIterator1</code></span>,
 or
 <span><code class="sourceCode default">NoThrowForwardIterator2</code></span>,</ins></span>
 the template argument shall meet the <em>Cpp17ForwardIterator</em>
 requirements ([forward.iterators]) if it is required to be a mutable
-iterator, or model
-<code class="sourceCode default">forward_iterator</code>
+iterator, or model <code class="sourceCode cpp">forward_iterator</code>
 ([iterator.concept.forward]) otherwise.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span>
 <span class="rm" style="color: #bf0303"><del>If an algorithm’s template
@@ -927,25 +888,24 @@ exceptions are thrown from increment, assignment, or comparison of, or
 indirection through, valid iterators.</del></span></li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
 an algorithm’s template parameter is named
-<code class="sourceCode default">BidirectionalIterator</code>,
-<code class="sourceCode default">BidirectionalIterator1</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
-<code class="sourceCode default">BidirectionalIterator2</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">NoThrowBidirectionalIterator1</code></span>,
+<code class="sourceCode cpp">BidirectionalIterator</code>,
+<code class="sourceCode cpp">BidirectionalIterator1</code>, <span class="rm" style="color: #bf0303"><del>or</del></span>
+<code class="sourceCode cpp">BidirectionalIterator2</code>, <span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">NoThrowBidirectionalIterator1</code></span>,
 or
 <span><code class="sourceCode default">NoThrowBidirectionalIterator2</code></span>,</ins></span>
 the template argument shall meet the <em>Cpp17BidirectionalIterator</em>
 requirements ([bidirectional.iterators]) if it is required to be a
 mutable iterator, or model
-<code class="sourceCode default">bidirectional_iterator</code>
+<code class="sourceCode cpp">bidirectional_iterator</code>
 ([iterator.concept.bidir]) otherwise.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span> If
 an algorithm’s template parameter is named
-<code class="sourceCode default">RandomAccessIterator</code>,
-<code class="sourceCode default">RandomAccessIterator1</code>, or
-<code class="sourceCode default">RandomAccessIterator2</code>, the
-template argument shall meet the <em>Cpp17RandomAccessIterator</em>
-requirements ([random.access.iterators]) if it is required to be a
-mutable iterator, or model
-<code class="sourceCode default">random_access_iterator</code>
+<code class="sourceCode cpp">RandomAccessIterator</code>,
+<code class="sourceCode cpp">RandomAccessIterator1</code>, or
+<code class="sourceCode cpp">RandomAccessIterator2</code>, the template
+argument shall meet the <em>Cpp17RandomAccessIterator</em> requirements
+([random.access.iterators]) if it is required to be a mutable iterator,
+or model <code class="sourceCode cpp">random_access_iterator</code>
 ([iterator.concept.random.access]) otherwise.</li>
 <li><span class="marginalizedparent"><a class="marginalized">(4.?)</a></span>
 <span class="add" style="color: #006e28"><ins>If an algorithm’s template
@@ -1002,7 +962,7 @@ TODO: should it return dest?
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">?</a></span>
 [<em>Note</em> ?: This concept allows some
-<code class="sourceCode default">bidirectional_iterator</code>
+<code class="sourceCode cpp">bidirectional_iterator</code>
 ([iterator.concept.bidir]) operations to throw exceptions. — <em>end
 note</em>]</li>
 </ul>
@@ -1027,9 +987,8 @@ template<class S, class D>
 <hr />
 <p>In <span>20.2.2
 <a href="https://wg21.link/memory.syn">[memory.syn]</a></span>, add to
-the <code class="sourceCode default">&lt;memory&gt;</code> header
-synopsis (before
-<code class="sourceCode default">[unique_ptr]</code>):</p>
+the <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
+header synopsis (before <code class="sourceCode cpp"><span class="op">[</span>unique_ptr<span class="op">]</span></code>):</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowInputIterator first,    <span class="co">// freestanding</span></span>
@@ -1109,7 +1068,7 @@ synopsis (before
 <p>Append to <span>26.11
 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>
 a new subclause,
-<code class="sourceCode default">uninitialized_relocate</code>
+<code class="sourceCode cpp">uninitialized_relocate</code>
 [special.relocate], with these contents:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span></span>
@@ -1118,9 +1077,8 @@ a new subclause,
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator result<span class="op">)</span>;</span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
-<em>Preconditions</em>: <code class="sourceCode default">result</code>
-is not in the range
-<code class="sourceCode default">[first, last)</code>.</p></li>
+<em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
@@ -1150,9 +1108,8 @@ is not in the range
 <span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
-<em>Preconditions</em>: <code class="sourceCode default">ofirst</code>
-is not in the range
-<code class="sourceCode default">[ifirst, olast)</code>.</p></li>
+<em>Preconditions</em>: <code class="sourceCode cpp">ofirst</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>ifirst, olast<span class="op">)</span></code>.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
@@ -1173,9 +1130,8 @@ is not in the range
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator result<span class="op">)</span>;</span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
-<em>Preconditions</em>: <code class="sourceCode default">result</code>
-is not in the range
-<code class="sourceCode default">[first, first + n)</code>.</p></li>
+<em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>first, first <span class="op">+</span> n<span class="op">)</span></code>.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
@@ -1200,9 +1156,8 @@ is not in the range
 <span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
-<em>Preconditions</em>: <code class="sourceCode default">ofirst</code>
-is not in the range
-<code class="sourceCode default">[ifirst, ifirst + n)</code>.</p></li>
+<em>Preconditions</em>: <code class="sourceCode cpp">ofirst</code> is
+not in the range <code class="sourceCode cpp"><span class="op">[</span>ifirst, ifirst <span class="op">+</span> n<span class="op">)</span></code>.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
@@ -1218,9 +1173,8 @@ is not in the range
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
-<em>Preconditions</em>: <code class="sourceCode default">result</code>
-is not in the range
-<code class="sourceCode default">(first, last]</code>.</p></li>
+<em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
+not in the range <code class="sourceCode cpp"><span class="op">(</span>first, last<span class="op">]</span></code>.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
@@ -1250,8 +1204,8 @@ is not in the range
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
-<em>Preconditions</em>: <code class="sourceCode default">olast</code> is
-not in the range (ifirst, ilast]`.</p></li>
+<em>Preconditions</em>: <code class="sourceCode cpp">olast</code> is not
+in the range (ifirst, ilast]`.</p></li>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
