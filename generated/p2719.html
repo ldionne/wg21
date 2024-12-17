@@ -1065,16 +1065,27 @@ being an empty pack? ]</span></p>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span>, Args<span class="op">...)</span>;</span></code></pre></div>
 <h2 data-number="6.4" id="expr.new"><span class="header-section-number">6.4</span> expr.new<a href="#expr.new" class="self-link"></a></h2>
 <p>Updates to <span><a href="https://wg21.link/expr.new">[expr.new]</a></span></p>
-<p><span class="draftnote" style="color: #0000ff">[ Drafting note: We
-are adding a new implicit tag parameter to the head of the argument
-list, we’re calling this tag parameter the type-identity. It is a
+<div class="draftnote" style="color: #0000ff">
+<p>[ Drafting note: We are adding a new implicit tag parameter to the
+head of the argument list, we’re calling this tag parameter the
+type-identity. It is a
 <code class="sourceCode default">std::type_identity&lt;&gt;</code> over
 the qualifier-free allocated type
 <code class="sourceCode default">T</code> for an allocation of the form
 <code class="sourceCode default">new T</code> or
 <code class="sourceCode default">new T[&lt;expr&gt;]</code>. This is the
-method by which the allocated type is exposed to developers.
-]</span></p>
+method by which the allocated type is exposed to developers.</p>
+<p>We are extending the overload resolution steps to include this new
+parameter. The intent is for the type aware overloads to get priority
+over any other “matching” option. e.g a type aware operator new without
+<code class="sourceCode default">align_val_t</code> will still get
+priority over a viable
+<code class="sourceCode default">align_val_t</code> candidate (on the
+principle that the allocator can query the allocated type alignment
+directly). This requires indenting and adding paragraph numbers to steps
+in paragraph 20. The below removal is the section of text that is being
+inset and separated into steps below. ]</p>
+</div>
 <div class="rm" style="color: #bf0303">
 
 <blockquote>
@@ -1209,13 +1220,20 @@ removing qualifiers from the type
 </blockquote>
 
 </div>
-<p><span class="draftnote" style="color: #0000ff">[ Drafting note: p10
-below is trying to update the existing overload resolution semantics to
-say - Perform template argument deduction and synthesis - this
-previously was not performed as it was definitionally not possible. -
-Specify selection of the best viable function given that it is now
-possible for multiple allocation functions of the same type to exist.
-]</span></p>
+<div class="draftnote" style="color: #0000ff">
+<p>[ Drafting note: p10 below is trying to update the existing overload
+resolution semantics to say</p>
+<ul>
+<li><p>Perform template argument deduction and synthesis - this
+previously was not performed as it was definitionally not
+possible.</p></li>
+<li><p>Specify selection of the best viable function given that it is
+now possible for multiple allocation functions of the same type to
+exist.</p></li>
+</ul>
+]
+
+</div>
 <div class="add" style="color: #006e28">
 
 <blockquote>
