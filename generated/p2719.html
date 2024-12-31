@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-22" />
+  <meta name="dcterms.date" content="2024-12-30" />
   <title>Type-aware allocation and deallocation functions</title>
   <style>
       code{white-space: pre-wrap;}
@@ -81,6 +81,19 @@
       code.diff {color: #898887}
       code.diff span.va {color: #006e28}
       code.diff span.st {color: #bf0303}
+
+      .marginalized[data-old]::before {
+        text-decoration-line: line-through;
+        color: #bf0303;
+        content: attr(data-old);
+      }
+      .marginalized[data-old] {
+        color: #006e28;
+      }
+      .add .marginalized {
+        color: #006e28;
+      }
+
   </style>
   <style type="text/css">
 body {
@@ -424,11 +437,11 @@ deallocation functions</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>D2719R2</td>
+    <td>P2719R3</td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-22</td>
+    <td>2024-12-30</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -437,7 +450,7 @@ deallocation functions</h1>
   <tr>
     <td style="vertical-align:top">Audience:</td>
     <td>
-      Evolution<br>
+      Evolution and Core<br>
     </td>
   </tr>
   <tr>
@@ -1144,7 +1157,7 @@ When the allocated type is “array of N T”, or the type
 
 </div>
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">21</a></span>
+<p><span class="marginalizedparent"><a class="marginalized" data-old="20">21</a></span>
 Overload resolution is performed on a function call by assembling an
 argument list.</p>
 </blockquote>
@@ -1153,25 +1166,25 @@ points exist, but are being inset and numbered/put into a sub-list
 ]</span></p>
 <blockquote>
 <ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(21.1)</a></span>
+<li><p><span class="marginalizedparent"><a class="marginalized" data-old>(21.1)</a></span>
 <span class="add" style="color: #006e28"><ins>The first argument is the
 type-identity argument, the second</ins></span><span class="rm" style="color: #bf0303"><del>The first</del></span> argument is the
 amount of space requested, and has type <code class="sourceCode cpp">std<span class="op">::</span><span class="dt">size_t</span></code>.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(21.2)</a></span> If
-the type of the allocated object has new-extended alignment, the next
+<li><p><span class="marginalizedparent"><a class="marginalized" data-old>(21.2)</a></span>
+If the type of the allocated object has new-extended alignment, the next
 argument is the type’s alignment, and has type <code class="sourceCode cpp">std<span class="op">::</span>align_val_t</code>.
 If the new-placement syntax is used, the initializer-clauses in its
 expression-list are the succeeding arguments. If no matching function is
 found then</p>
 <ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(21.2.1)</a></span>
+<li><p><span class="marginalizedparent"><a class="marginalized" data-old="(20.1)">(21.2.1)</a></span>
 if the allocated object type has new-extended alignment, the alignment
 argument is removed from the argument list;</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(21.2.2)</a></span>
+<li><p><span class="marginalizedparent"><a class="marginalized" data-old="(20.2)">(21.2.2)</a></span>
 otherwise, an argument that is the type’s alignment and has type <code class="sourceCode cpp">std<span class="op">::</span>align_val_t</code>
 is added into the argument list immediately after the size
 argument;</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(21.2.3)</a></span>
+<li><p><span class="marginalizedparent"><a class="marginalized" data-old>(21.2.3)</a></span>
 and then overload resolution is performed again.</p></li>
 </ul></li>
 </ul>
@@ -1256,9 +1269,9 @@ eliminated from further consideration.</p>
 deallocation function to be called is selected <span class="add" style="color: #006e28"><ins>from the candidate set</ins></span> as
 follows:</p>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(11.1)</a></span> If
-any of the deallocation functions is a destroying operator delete, all
-deallocation functions that are not destroying operator deletes are
+<li><span class="marginalizedparent"><a class="marginalized" data-old="(9.1)">(11.1)</a></span>
+If any of the deallocation functions is a destroying operator delete,
+all deallocation functions that are not destroying operator deletes are
 eliminated from further consideration.</li>
 </ul>
 </blockquote>
@@ -1277,9 +1290,9 @@ consideration.</li>
 </div>
 <blockquote>
 <ul>
-<li><span class="marginalizedparent"><a class="marginalized">(11.3)</a></span> If
-the type has new-extended alignment, a function with a parameter of type
-std::align_val_t is preferred; otherwise a function without such a
+<li><span class="marginalizedparent"><a class="marginalized" data-old="(9.2)">(11.3)</a></span>
+If the type has new-extended alignment, a function with a parameter of
+type std::align_val_t is preferred; otherwise a function without such a
 parameter is preferred. If any preferred functions are found, all
 non-preferred functions are eliminated from further consideration.</li>
 </ul>
@@ -1298,9 +1311,9 @@ are retained, all others are eliminated from further consideration.</li>
 </div>
 <blockquote>
 <p>…</p>
-<p><span class="marginalizedparent"><a class="marginalized">12</a></span> For a
-single-object delete expression, the deleted object is the object A
-pointed to by the operand if the static type of A does not have a
+<p><span class="marginalizedparent"><a class="marginalized" data-old="10">12</a></span>
+For a single-object delete expression, the deleted object is the object
+A pointed to by the operand if the static type of A does not have a
 virtual destructor, and the most-derived object of A otherwise. <span class="note"><span>[ <em>Note:</em> </span>If the deallocation function
 is not a destroying operator delete and the deleted object is not the
 most derived object in the former case, the behavior is undefined, as
@@ -1315,8 +1328,6 @@ allocation overhead ([expr.new]) in an array delete expression, as <span class="
 argument if present</ins></span>.</p>
 </blockquote>
 <h2 data-number="6.6" id="expr.const"><span class="header-section-number">6.6</span> <span><a href="https://wg21.link/expr.const">[expr.const]</a></span><a href="#expr.const" class="self-link"></a></h2>
-<h4 data-number="6.6.0.1" id="todo-address-hanas-feeback"><span class="header-section-number">6.6.0.1</span> TODO address Hana’s
-feeback<a href="#todo-address-hanas-feeback" class="self-link"></a></h4>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">(10.18.1)</a></span>
 the selected allocation function is a replaceable global allocation
