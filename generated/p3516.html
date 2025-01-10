@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-11-27" />
+  <meta name="dcterms.date" content="2025-01-10" />
   <title>Uninitialized algorithms for relocation</title>
   <style>
       code{white-space: pre-wrap;}
@@ -81,6 +81,19 @@
       code.diff {color: #898887}
       code.diff span.va {color: #006e28}
       code.diff span.st {color: #bf0303}
+
+      .marginalized[data-old]::before {
+        text-decoration-line: line-through;
+        color: #bf0303;
+        content: attr(data-old);
+      }
+      .marginalized[data-old] {
+        color: #006e28;
+      }
+      .add .marginalized {
+        color: #006e28;
+      }
+
   </style>
   <style type="text/css">
 body {
@@ -424,11 +437,15 @@ relocation</h1>
 <table style="border:none;float:right">
   <tr>
     <td>Document #:</td>
-    <td>P3516R0</td>
+    <td>
+      P3516R0
+      [<a href="https://wg21.link/P3516">Latest</a>]
+      [<a href="https://wg21.link/P3516/status">Status</a>]
+    </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-11-27</td>
+    <td>2025-01-10</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -981,9 +998,9 @@ It should probably be something like
 
 template<class S, class D>
   concept relocatable-from = // exposition only
-  
+
     same_as<S, D> &&         // can't relocate between different types. Or do we want to? Should relocate-at have different parameters? That sounds like a generalization that no one needs right now.
-    
+
     move_constructible<D>;   // with TR, this could be OR'd with trivially_relocatable<D>
 -->
 <hr />
@@ -1005,7 +1022,7 @@ header synopsis (before <code class="sourceCode cpp"><span class="op">[</span>un
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowInputIterator, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator<span class="op">&gt;</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span>  </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowInputIterator, NoThrowForwardIterator<span class="op">&gt;</span></span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowInputIterator first,    <span class="co">// freestanding</span></span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator result<span class="op">)</span>;</span>
