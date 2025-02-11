@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-02-10" />
+  <meta name="dcterms.date" content="2025-02-11" />
   <title>Uninitialized algorithms for relocation</title>
   <style>
       code{white-space: pre-wrap;}
@@ -445,7 +445,7 @@ relocation</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-02-10</td>
+    <td>2025-02-11</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -486,14 +486,16 @@ relocation</h1>
 proposals<span></span></a></li>
 <li><a href="#wording" id="toc-wording"><span class="toc-section-number">7</span> Wording<span></span></a>
 <ul>
-<li><a href="#algorithms.requirements" id="toc-algorithms.requirements"><span class="toc-section-number">7.1</span>
+<li><a href="#version.syn" id="toc-version.syn"><span class="toc-section-number">7.1</span>
+[version.syn]<span></span></a></li>
+<li><a href="#algorithms.requirements" id="toc-algorithms.requirements"><span class="toc-section-number">7.2</span>
 [algorithms.requirements]<span></span></a></li>
-<li><a href="#specialized.algorithms.general" id="toc-specialized.algorithms.general"><span class="toc-section-number">7.2</span>
+<li><a href="#specialized.algorithms.general" id="toc-specialized.algorithms.general"><span class="toc-section-number">7.3</span>
 [specialized.algorithms.general]<span></span></a></li>
-<li><a href="#special.mem.concepts" id="toc-special.mem.concepts"><span class="toc-section-number">7.3</span>
+<li><a href="#special.mem.concepts" id="toc-special.mem.concepts"><span class="toc-section-number">7.4</span>
 [special.mem.concepts]<span></span></a></li>
-<li><a href="#memory.syn" id="toc-memory.syn"><span class="toc-section-number">7.4</span> [memory.syn]<span></span></a></li>
-<li><a href="#specialized.algorithms" id="toc-specialized.algorithms"><span class="toc-section-number">7.5</span>
+<li><a href="#memory.syn" id="toc-memory.syn"><span class="toc-section-number">7.5</span> [memory.syn]<span></span></a></li>
+<li><a href="#specialized.algorithms" id="toc-specialized.algorithms"><span class="toc-section-number">7.6</span>
 [specialized.algorithms]<span></span></a></li>
 </ul></li>
 <li><a href="#acknowledgements" id="toc-acknowledgements"><span class="toc-section-number">8</span>
@@ -1007,7 +1009,15 @@ of the proposed design.</p>
 <h1 data-number="7" id="wording"><span class="header-section-number">7</span> Wording<a href="#wording" class="self-link"></a></h1>
 <p><strong>Note</strong>: the following wording assumes that P2786R11
 (as approved by LEWG, see above) has already been merged.</p>
-<h2 data-number="7.1" id="algorithms.requirements"><span class="header-section-number">7.1</span> [algorithms.requirements]<a href="#algorithms.requirements" class="self-link"></a></h2>
+<h2 data-number="7.1" id="version.syn"><span class="header-section-number">7.1</span> [version.syn]<a href="#version.syn" class="self-link"></a></h2>
+<p>Modify the feature-testing macro for
+<code class="sourceCode cpp">__cpp_lib_raw_memory_algorithms</code> to
+match the date of adoption of the present proposal:</p>
+<div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="st">-#define __cpp_lib_raw_memory_algorithms             202411L // also in &lt;memory&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="va">+#define __cpp_lib_raw_memory_algorithms             ??????L // also in &lt;memory&gt;</span></span></code></pre></div>
+</div>
+<h2 data-number="7.2" id="algorithms.requirements"><span class="header-section-number">7.2</span> [algorithms.requirements]<a href="#algorithms.requirements" class="self-link"></a></h2>
 <p>Modify <span>26.2
 <a href="https://wg21.link/algorithms.requirements">[algorithms.requirements]</a></span>
 as shown:</p>
@@ -1079,7 +1089,7 @@ the template argument is also required to have the property that no
 exceptions are thrown from increment, assignment, or comparison of, or
 indirection through, valid iterators.</ins></span></li>
 </ul>
-<h2 data-number="7.2" id="specialized.algorithms.general"><span class="header-section-number">7.2</span>
+<h2 data-number="7.3" id="specialized.algorithms.general"><span class="header-section-number">7.3</span>
 [specialized.algorithms.general]<a href="#specialized.algorithms.general" class="self-link"></a></h2>
 <p>Modify <span>26.11.1
 <a href="https://wg21.link/specialized.algorithms.general">[specialized.algorithms.general]</a></span>
@@ -1104,40 +1114,40 @@ algorithms specified in [specialized.algorithms] make use of the <span class="rm
 entities</ins></span>:</li>
 </ul>
 <div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T&gt;</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  constexpr void* <em>voidify</em>(T&amp; obj) noexcept {</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    return addressof(obj);</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class Source, class Dest&gt;</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ concept <em>relocatable-from</em> =</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   same_as&lt;Source, Dest&gt; &amp;&amp;</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="va">+   (move_constructible&lt;Dest&gt; || is_trivially_relocatable_v&lt;Dest&gt;);</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class T&gt;</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="va">+ requires move_constructible&lt;T&gt;</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  constexpr T* <em>relocate-via-move-and-destroy</em>(T* dest, T* source) {</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    struct guard { T *t; ~guard() { destroy_at(t); } } g(source);</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="va">+    return ::new (<em>voidify</em>(*dest)) T(std::move(*source));</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="va">+  }</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class T&gt;</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="va">+ requires <em>relocatable-from</em>&lt;T, T&gt;</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="va">+  constexpr T* <em>relocate-at</em>(T* dest, T* source)</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="va">+    noexcept(is_nothrow_relocatable_v&lt;T&gt;)</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="va">+  {</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="va">+    if constexpr (is_trivially_relocatable_v&lt;T&gt; &amp;&amp; is_move_constructible_v&lt;T&gt;) {</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="va">+      if consteval {</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="va">+        return <em>relocate-via-move-and-destroy</em>(dest, source);</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="va">+      } else {</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="va">+        return trivially_relocate(source, source + 1, dest);</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="va">+      }</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="va">+    } else if constexpr (is_trivially_relocatable_v&lt;T&gt;) {</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="va">+      return trivially_relocate(source, source + 1, dest);</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="va">+    } else {</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="va">+      return <em>relocate-via-move-and-destroy</em>(dest, source);</span></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="va">+    }</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="va">+  }</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>template&lt;class T&gt;</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  constexpr void* <em>voidify</em>(T&amp; obj) noexcept {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    return addressof(obj);</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class Source, class Dest&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ concept <em>relocatable-from</em> =</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="va">+   same_as&lt;Source, Dest&gt; &amp;&amp;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="va">+   (move_constructible&lt;Dest&gt; || is_trivially_relocatable_v&lt;Dest&gt;);</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class T&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="va">+ requires move_constructible&lt;T&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  constexpr T* <em>relocate-via-move-and-destroy</em>(T* dest, T* source) {</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    struct guard { T *t; ~guard() { destroy_at(t); } } g(source);</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="va">+    return ::new (<em>voidify</em>(*dest)) T(std::move(*source));</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="va">+  }</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="va">+</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class T&gt;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="va">+ requires <em>relocatable-from</em>&lt;T, T&gt;</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="va">+  constexpr T* <em>relocate-at</em>(T* dest, T* source)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="va">+    noexcept(is_nothrow_relocatable_v&lt;T&gt;)</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="va">+  {</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="va">+    if constexpr (is_trivially_relocatable_v&lt;T&gt; &amp;&amp; is_move_constructible_v&lt;T&gt;) {</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="va">+      if consteval {</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="va">+        return <em>relocate-via-move-and-destroy</em>(dest, source);</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="va">+      } else {</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="va">+        return trivially_relocate(source, source + 1, dest);</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="va">+      }</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="va">+    } else if constexpr (is_trivially_relocatable_v&lt;T&gt;) {</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="va">+      return trivially_relocate(source, source + 1, dest);</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="va">+    } else {</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="va">+      return <em>relocate-via-move-and-destroy</em>(dest, source);</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="va">+    }</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="va">+  }</span></span></code></pre></div>
 </div>
 <!--
 TODO
@@ -1147,14 +1157,14 @@ Design questions for relocatable-from:
 - Should it unconditionally destroy the source? For the single element relocate, there's a recovery option.
 -->
 <hr />
-<h2 data-number="7.3" id="special.mem.concepts"><span class="header-section-number">7.3</span> [special.mem.concepts]<a href="#special.mem.concepts" class="self-link"></a></h2>
+<h2 data-number="7.4" id="special.mem.concepts"><span class="header-section-number">7.4</span> [special.mem.concepts]<a href="#special.mem.concepts" class="self-link"></a></h2>
 <p>Add at the end of <span>26.11.2
 <a href="https://wg21.link/special.mem.concepts">[special.mem.concepts]</a></span>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-bidirectional-iterator</em> <span class="op">=</span> <span class="co">// exposition only</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em><span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  bidirectional_iterator<span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I, I<span class="op">&gt;</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I<span class="op">&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-bidirectional-iterator</em> <span class="op">=</span> <span class="co">// exposition only</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-iterator</em><span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  bidirectional_iterator<span class="op">&lt;</span>I<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I, I<span class="op">&gt;</span>;</span></code></pre></div>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">?</a></span>
 [<em>Note</em>: This concept allows some
@@ -1162,104 +1172,104 @@ Design questions for relocatable-from:
 ([iterator.concept.bidir]) operations to throw exceptions. — <em>end
 note</em>]</li>
 </ul>
-<div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-bidirectional-range</em> <span class="op">=</span> <span class="co">// exposition only</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-range</em><span class="op">&lt;</span>R<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em><span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span>;</span></code></pre></div>
-<h2 data-number="7.4" id="memory.syn"><span class="header-section-number">7.4</span> [memory.syn]<a href="#memory.syn" class="self-link"></a></h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> R<span class="op">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">concept</span> <em>nothrow-bidirectional-range</em> <span class="op">=</span> <span class="co">// exposition only</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-forward-range</em><span class="op">&lt;</span>R<span class="op">&gt;</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <em>nothrow-bidirectional-iterator</em><span class="op">&lt;</span>iterator_t<span class="op">&lt;</span>R<span class="op">&gt;&gt;</span>;</span></code></pre></div>
+<h2 data-number="7.5" id="memory.syn"><span class="header-section-number">7.5</span> [memory.syn]<a href="#memory.syn" class="self-link"></a></h2>
 <p>In <span>20.2.2
 <a href="https://wg21.link/memory.syn">[memory.syn]</a></span>, add to
 the <code class="sourceCode cpp"><span class="op">&lt;</span>memory<span class="op">&gt;</span></code>
 header synopsis (before <code class="sourceCode cpp"><span class="op">[</span>unique<span class="op">.</span>ptr<span class="op">]</span></code>):</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowForwardIterator1 first,    <span class="co">// freestanding</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,    <span class="co">// see [algorithms.parallel.overloads]</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 first,</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowForwardIterator1 first,    <span class="co">// freestanding</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,    <span class="co">// see [algorithms.parallel.overloads]</span></span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator1 first,</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,    <span class="co">// freestanding</span></span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec, <span class="co">// see [algorithms.parallel.overloads]</span></span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 first,</span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
-<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
-<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-range</em> IR, <em>nothrow-forward_range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
-<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_n_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I,</span>
-<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
-<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
-<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_backward_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-bidirectional-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
-<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-range</em> IR, <em>nothrow-bidirectional-range</em> OR<span class="op">&gt;</span></span>
-<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;    <span class="co">// freestanding</span></span>
-<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h2 data-number="7.5" id="specialized.algorithms"><span class="header-section-number">7.5</span> [specialized.algorithms]<a href="#specialized.algorithms" class="self-link"></a></h2>
-<h3 data-number="7.5.1" id="uninitialized.relocate"><span class="header-section-number">7.5.1</span> [uninitialized.relocate]<a href="#uninitialized.relocate" class="self-link"></a></h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowForwardIterator1 first,    <span class="co">// freestanding</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,    <span class="co">// see [algorithms.parallel.overloads]</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 first,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowForwardIterator1 first,    <span class="co">// freestanding</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec,    <span class="co">// see [algorithms.parallel.overloads]</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator1 first,</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,    <span class="co">// freestanding</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> ExecutionPolicy, <span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>ExecutionPolicy<span class="op">&amp;&amp;</span> exec, <span class="co">// see [algorithms.parallel.overloads]</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 first,</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-range</em> IR, <em>nothrow-forward_range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_n_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I,</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> I, <span class="kw">class</span> O<span class="op">&gt;</span></span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> uninitialized_relocate_backward_result <span class="op">=</span> in_out_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-bidirectional-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-range</em> IR, <em>nothrow-bidirectional-range</em> OR<span class="op">&gt;</span></span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;    <span class="co">// freestanding</span></span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 data-number="7.6" id="specialized.algorithms"><span class="header-section-number">7.6</span> [specialized.algorithms]<a href="#specialized.algorithms" class="self-link"></a></h2>
+<h3 data-number="7.6.1" id="uninitialized.relocate"><span class="header-section-number">7.6.1</span> [uninitialized.relocate]<a href="#uninitialized.relocate" class="self-link"></a></h3>
 <p>Append to <span>26.11
 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>
 a new subclause,
 <code class="sourceCode cpp">uninitialized_relocate</code>
 [uninitialized.relocate], with these contents:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowForwardIterator1 first,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowForwardIterator1 first,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
@@ -1267,32 +1277,32 @@ not in the range <code class="sourceCode cpp"><span class="op">[</span>first, la
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
-<div class="sourceCode" id="cb13"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>NoThrowForwardIterator2 first_result <span class="op">=</span> result;</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>first <span class="op">!=</span> last<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>first;</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>result;</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(++</span>first, last<span class="op">)</span>;</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, result<span class="op">)</span>;</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result;</span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, O2 olast<span class="op">)</span>;</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-range</em> IR, <em>nothrow-forward_range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>NoThrowForwardIterator2 first_result <span class="op">=</span> result;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>first <span class="op">!=</span> last<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>first;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>result;</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(++</span>first, last<span class="op">)</span>;</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, result<span class="op">)</span>;</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result;</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, O2 olast<span class="op">)</span>;</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-range</em> IR, <em>nothrow-forward_range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">ofirst</code> is
@@ -1300,36 +1310,36 @@ not in the range <code class="sourceCode cpp"><span class="op">[</span>ifirst, i
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
-<div class="sourceCode" id="cb15"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>O first_result <span class="op">=</span> ofirst;</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>ofirst<span class="op">)</span>, addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, ofirst<span class="op">)</span>;</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>ifirst;</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
-<h3 data-number="7.5.2" id="uninitialized.relocate_n"><span class="header-section-number">7.5.2</span> [uninitialized.relocate_n]<a href="#uninitialized.relocate_n" class="self-link"></a></h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>O first_result <span class="op">=</span> ofirst;</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>ofirst<span class="op">)</span>, addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, ofirst<span class="op">)</span>;</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>ifirst;</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ifirst <span class="op">!=</span> ilast <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
+<h3 data-number="7.6.2" id="uninitialized.relocate_n"><span class="header-section-number">7.6.2</span> [uninitialized.relocate_n]<a href="#uninitialized.relocate_n" class="self-link"></a></h3>
 <p>Append to <span>26.11
 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>
 a new subclause,
 <code class="sourceCode cpp">uninitialized_relocate_n</code>
 [uninitialized.relocate_n], with these contents:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowForwardIterator1 first,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowForwardIterator1 first,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
@@ -1337,28 +1347,28 @@ not in the range <code class="sourceCode cpp"><span class="op">[</span>first, fi
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
-<div class="sourceCode" id="cb17"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>NoThrowForwardIterator2 first_result <span class="op">=</span> result;</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>n <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>first;</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>result;</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>n;</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  destroy_n<span class="op">(++</span>first, <span class="op">--</span>n<span class="op">)</span>;</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, result<span class="op">)</span>;</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>NoThrowForwardIterator2 first_result <span class="op">=</span> result;</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>n <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>first<span class="op">))</span>;</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>first;</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>result;</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>n;</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  destroy_n<span class="op">(++</span>first, <span class="op">--</span>n<span class="op">)</span>;</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, result<span class="op">)</span>;</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>first, result<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S<span class="op">&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_n_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_n<span class="op">(</span>I ifirst, iter_difference_t<span class="op">&lt;</span>I<span class="op">&gt;</span> n, O ofirst, S olast<span class="op">)</span>;</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">ofirst</code> is
@@ -1366,40 +1376,40 @@ not in the range <code class="sourceCode cpp"><span class="op">[</span>ifirst, i
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
-<div class="sourceCode" id="cb19"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>O first_result <span class="op">=</span> ofirst;</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>n <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>ofirst<span class="op">)</span>, addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>n;</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, ofirst<span class="op">)</span>;</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>ifirst;</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">--</span>n;</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>n <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>n;</span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
-<h3 data-number="7.5.3" id="uninitialized.relocate_backward"><span class="header-section-number">7.5.3</span>
+<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>O first_result <span class="op">=</span> ofirst;</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>n <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>ofirst<span class="op">)</span>, addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>n;</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first_result, ofirst<span class="op">)</span>;</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>ifirst;</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">--</span>n;</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>n <span class="op">&gt;</span> <span class="dv">0</span> <span class="op">&amp;&amp;</span> ofirst <span class="op">!=</span> olast<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>ifirst<span class="op">))</span>;</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ifirst;</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">++</span>ofirst;</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>n;</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>std<span class="op">::</span>move<span class="op">(</span>ifirst<span class="op">)</span>, ofirst<span class="op">}</span>;</span></code></pre></div>
+<h3 data-number="7.6.3" id="uninitialized.relocate_backward"><span class="header-section-number">7.6.3</span>
 [uninitialized.relocate_backward]<a href="#uninitialized.relocate_backward" class="self-link"></a></h3>
 <p>Append to <span>26.11
 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a></span>
 a new subclause,
 <code class="sourceCode cpp">uninitialized_relocate_backward</code>
 [uninitialized.relocate_backward], with these contents:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">result</code> is
@@ -1407,32 +1417,32 @@ not in the range <code class="sourceCode cpp"><span class="op">(</span>first, la
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
-<div class="sourceCode" id="cb21"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>NoThrowBidirectionalIterator2 result_last <span class="op">=</span> result;</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>last <span class="op">!=</span> first<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>last;</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>result;</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>last<span class="op">))</span>;</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first, last<span class="op">)</span>;</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(++</span>result, result_last<span class="op">)</span>;</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>last, result<span class="op">}</span>;</span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-bidirectional-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-range</em> IR, <em>nothrow-bidirectional-range</em> OR<span class="op">&gt;</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>NoThrowBidirectionalIterator2 result_last <span class="op">=</span> result;</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>last <span class="op">!=</span> first<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>last;</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>result;</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>result<span class="op">)</span>, addressof<span class="op">(*</span>last<span class="op">))</span>;</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(</span>first, last<span class="op">)</span>;</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(++</span>result, result_last<span class="op">)</span>;</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>last, result<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-bidirectional-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>I ifirst, S1 ilast, O ofirst, S2 olast<span class="op">)</span>;</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-bidirectional-range</em> IR, <em>nothrow-bidirectional-range</em> OR<span class="op">&gt;</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_backward_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate_backward<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Preconditions</em>: <code class="sourceCode cpp">olast</code> is not
@@ -1440,25 +1450,25 @@ in the range <code class="sourceCode cpp"><span class="op">(</span>ifirst, ilast
 <li><p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Equivalent to:</p></li>
 </ul>
-<div class="sourceCode" id="cb23"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>O result_last <span class="op">=</span> olast;</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ilast <span class="op">!=</span> ifirst <span class="op">&amp;&amp;</span> olast <span class="op">!=</span> ofirst<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>ilast;</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>olast;</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>olast<span class="op">)</span>, addressof<span class="op">(*</span>ilast<span class="op">))</span>;</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(++</span>olast, result_last<span class="op">)</span>;</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">--</span>ilast;</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ilast <span class="op">!=</span> ifirst <span class="op">&amp;&amp;</span> olast <span class="op">!=</span> ofirst<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>ilast;</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>olast;</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>ilast<span class="op">))</span>;</span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
-<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>ilast, olast<span class="op">}</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>O result_last <span class="op">=</span> olast;</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ilast <span class="op">!=</span> ifirst <span class="op">&amp;&amp;</span> olast <span class="op">!=</span> ofirst<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>ilast;</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>olast;</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <em>relocate-at</em><span class="op">(</span>addressof<span class="op">(*</span>olast<span class="op">)</span>, addressof<span class="op">(*</span>ilast<span class="op">))</span>;</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">catch</span> <span class="op">(...)</span> <span class="op">{</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  destroy<span class="op">(++</span>olast, result_last<span class="op">)</span>;</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="op">--</span>ilast;</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="op">(</span>ilast <span class="op">!=</span> ifirst <span class="op">&amp;&amp;</span> olast <span class="op">!=</span> ofirst<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>ilast;</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">--</span>olast;</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    destroy_at<span class="op">(</span>addressof<span class="op">(*</span>ilast<span class="op">))</span>;</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">throw</span>;</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="op">{</span>ilast, olast<span class="op">}</span>;</span></code></pre></div>
 <h1 data-number="8" id="acknowledgements"><span class="header-section-number">8</span> Acknowledgements<a href="#acknowledgements" class="self-link"></a></h1>
 <p>Thanks to the authors of <a href="https://wg21.link/P2786">P2786</a>
 and <a href="https://wg21.link/P1144">P1144</a> for pushing for trivial
