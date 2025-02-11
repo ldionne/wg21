@@ -916,20 +916,21 @@ exception safety guarantee here.</p>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// enough vector.</span></span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span>T<span class="op">&gt;</span> tmp;</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  tmp<span class="op">.</span>reserve<span class="op">((</span>size<span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">*</span> <span class="dv">2</span><span class="op">)</span>;</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>construct_at<span class="op">(</span>tmp<span class="op">.</span>begin_ <span class="op">+</span> size<span class="op">()</span>, std<span class="op">::</span>forward<span class="op">&lt;</span>Args<span class="op">&gt;(</span>args<span class="op">)...)</span>;</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// guard destruction in case of exception</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="kw">auto</span><span class="op">&amp;</span> element <span class="op">:</span> <span class="op">*</span><span class="kw">this</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">assume</span><span class="op">(</span><span class="at">tmp</span><span class="op">.</span><span class="at">size</span><span class="op">()</span><span class="at"> </span><span class="op">&lt;</span><span class="at"> tmp</span><span class="op">.</span><span class="at">capacity</span><span class="op">())]]</span>;</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    tmp<span class="op">.</span>emplace_back<span class="op">(</span>std<span class="op">::</span>move_if_noexcept<span class="op">(</span>element<span class="op">))</span>;</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// disengage guard</span></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>tmp<span class="op">.</span>end_;</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>  swap<span class="op">(</span>tmp<span class="op">)</span>;</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> back<span class="op">()</span>;</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>construct_at<span class="op">(</span>tmp<span class="op">.</span>begin_ <span class="op">+</span> size<span class="op">()</span>,</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                    std<span class="op">::</span>forward<span class="op">&lt;</span>Args<span class="op">&gt;(</span>args<span class="op">)...)</span>;</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// guard destruction in case of exception</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> <span class="op">(</span><span class="kw">auto</span><span class="op">&amp;</span> element <span class="op">:</span> <span class="op">*</span><span class="kw">this</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">[[</span><span class="at">assume</span><span class="op">(</span><span class="at">tmp</span><span class="op">.</span><span class="at">size</span><span class="op">()</span><span class="at"> </span><span class="op">&lt;</span><span class="at"> tmp</span><span class="op">.</span><span class="at">capacity</span><span class="op">())]]</span>;</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    tmp<span class="op">.</span>emplace_back<span class="op">(</span>std<span class="op">::</span>move_if_noexcept<span class="op">(</span>element<span class="op">))</span>;</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">// disengage guard</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>tmp<span class="op">.</span>end_;</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>  swap<span class="op">(</span>tmp<span class="op">)</span>;</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> back<span class="op">()</span>;</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 <td><div>
@@ -948,25 +949,27 @@ exception safety guarantee here.</p>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="co">// or copy if moving might throw.</span></span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span>T<span class="op">&gt;</span> tmp;</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  tmp<span class="op">.</span>reserve<span class="op">((</span>size<span class="op">()</span> <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">*</span> <span class="dv">2</span><span class="op">)</span>;</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>construct_at<span class="op">(</span>tmp<span class="op">.</span>begin_ <span class="op">+</span> size<span class="op">()</span>, std<span class="op">::</span>forward<span class="op">&lt;</span>Args<span class="op">&gt;(</span>args<span class="op">)...)</span>;</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// guard destruction in case of exception</span></span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span>is_nothrow_relocatable_v<span class="op">&lt;</span>T<span class="op">&gt;)</span> <span class="op">{</span> <span class="co">// from P2786</span></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    tmp<span class="op">.</span>end_ <span class="op">=</span> std<span class="op">::</span>uninitialized_relocate<span class="op">(</span>begin<span class="op">()</span>, end<span class="op">()</span>, tmp<span class="op">.</span>begin_<span class="op">)</span>;</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    end_ <span class="op">=</span> begin_;</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="kw">auto</span><span class="op">&amp;</span> element <span class="op">:</span> <span class="op">*</span><span class="kw">this</span><span class="op">)</span> <span class="op">{</span></span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">[[</span><span class="at">assume</span><span class="op">(</span><span class="at">tmp</span><span class="op">.</span><span class="at">size</span><span class="op">()</span><span class="at"> </span><span class="op">&lt;</span><span class="at"> tmp</span><span class="op">.</span><span class="at">capacity</span><span class="op">())]]</span>;</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>      tmp<span class="op">.</span>emplace_back<span class="op">(</span>std<span class="op">::</span>move_if_noexcept<span class="op">(</span>element<span class="op">))</span>;</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">// disengage guard</span></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>tmp<span class="op">.</span>end_;</span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  swap<span class="op">(</span>tmp<span class="op">)</span>;</span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> back<span class="op">()</span>;</span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  std<span class="op">::</span>construct_at<span class="op">(</span>tmp<span class="op">.</span>begin_ <span class="op">+</span> size<span class="op">()</span>,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>                    std<span class="op">::</span>forward<span class="op">&lt;</span>Args<span class="op">&gt;(</span>args<span class="op">)...)</span>;</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// guard destruction in case of exception</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> <span class="kw">constexpr</span> <span class="op">(</span>is_nothrow_relocatable_v<span class="op">&lt;</span>T<span class="op">&gt;)</span> <span class="op">{</span> <span class="co">// from P2786</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    tmp<span class="op">.</span>end_ <span class="op">=</span> std<span class="op">::</span>uninitialized_relocate<span class="op">(</span>begin<span class="op">()</span>, end<span class="op">()</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>                                           tmp<span class="op">.</span>begin_<span class="op">)</span>;</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    end_ <span class="op">=</span> begin_;</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="kw">auto</span><span class="op">&amp;</span> element <span class="op">:</span> <span class="op">*</span><span class="kw">this</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>      <span class="op">[[</span><span class="at">assume</span><span class="op">(</span><span class="at">tmp</span><span class="op">.</span><span class="at">size</span><span class="op">()</span><span class="at"> </span><span class="op">&lt;</span><span class="at"> tmp</span><span class="op">.</span><span class="at">capacity</span><span class="op">())]]</span>;</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>      tmp<span class="op">.</span>emplace_back<span class="op">(</span>std<span class="op">::</span>move_if_noexcept<span class="op">(</span>element<span class="op">))</span>;</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">// disengage guard</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="op">++</span>tmp<span class="op">.</span>end_;</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  swap<span class="op">(</span>tmp<span class="op">)</span>;</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> back<span class="op">()</span>;</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 
 </div></td>
 </tr>
