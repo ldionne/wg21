@@ -594,15 +594,15 @@ up. This turns out to work well with what e.g. <code class="sourceCode cpp">std<
 requires in order to provide the basic exception safety guarantee (see
 the examples below).</li>
 <li>The algorithms accept
-<code class="sourceCode cpp">input_iterator</code>s (or
+<code class="sourceCode cpp">forward_iterator</code>s (or
 <code class="sourceCode cpp">bidirectional_iterator</code>s for the
 backward variant) for the input range. This iterator category is
-sufficient to implement these algorithms properly. However, it does mean
-that the range overlap precondition cannot be checked at runtime for
-some iterator categories. In practice, we would expect an implementation
-that wishes to check this precondition to do so whenever the input range
-is at least random access, which should be the vast majority of use
-cases.</li>
+sufficient and necessary to implement these algorithms properly,
+including the exception cleanup. However, it does mean that the range
+overlap precondition cannot be checked at runtime for some iterator
+categories. In practice, we would expect an implementation that wishes
+to check this precondition to do so whenever the input range is at least
+random access, which should be the vast majority of use cases.</li>
 <li>The algorithms accept
 <code class="sourceCode cpp">forward_iterator</code>s for the output
 range, which is necessary to perform cleanup if an exception is
@@ -1352,13 +1352,13 @@ not in the range <code class="sourceCode cpp"><span class="op">[</span>first, la
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> result;</span></code></pre></div>
 <div class="sourceCode" id="cb18"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-iterator</em> I, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>I<span class="op">&gt;</span> S1,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>           <em>nothrow-forward-iterator</em> O, <em>nothrow-sentinel-for</em><span class="op">&lt;</span>O<span class="op">&gt;</span> S2<span class="op">&gt;</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>iter_value_t<span class="op">&lt;</span>I<span class="op">&gt;</span>, iter_value_t<span class="op">&lt;</span>O<span class="op">&gt;&gt;</span></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>I, O<span class="op">&gt;</span></span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>I ifirst, S1 ilast, O ofirst, O2 olast<span class="op">)</span>;</span>
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-input-range</em> IR, <em>nothrow-forward-range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">template</span><span class="op">&lt;</span><em>nothrow-forward-range</em> IR, <em>nothrow-forward-range</em><span class="op">&lt;</span>I<span class="op">&gt;</span> OR<span class="op">&gt;</span>,</span>
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>range_value_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, range_value_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">constexpr</span> uninitialized_relocate_result<span class="op">&lt;</span>borrowed_iterator_t<span class="op">&lt;</span>IR<span class="op">&gt;</span>, borrowed_iterator_t<span class="op">&lt;</span>OR<span class="op">&gt;&gt;</span></span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        uninitialized_relocate<span class="op">(</span>IR<span class="op">&amp;&amp;</span> in_range, OR<span class="op">&amp;&amp;</span> out_range<span class="op">)</span>;</span>
