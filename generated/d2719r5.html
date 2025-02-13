@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2025-02-13" />
   <title>Type-aware allocation and deallocation functions</title>
   <style>
       code{white-space: pre-wrap;}
@@ -444,7 +445,7 @@ deallocation functions</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td></td>
+    <td>2025-02-13</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -567,9 +568,9 @@ in constant expressions</li>
 <li>Added design choice for EWG review on <a href="#design-choice-all-implicit-parameters-are-mandatory">mandatory
 implicit parameters</a></li>
 </ul></li>
-<li>R5 (Post EWG review):
+<li>R5 (CWG in Hagenberg):
 <ul>
-<li>Post EWG approval updates to wording:
+<li>Updated wording to reflect EWG guidance on Monday:
 <ul>
 <li>Strip qualifiers from types when constructing type-identity
 type</li>
@@ -1586,7 +1587,6 @@ the evaluation of E, or</li>
 <h1 data-number="7" id="design-choices-and-notes"><span class="header-section-number">7</span> Design choices and notes<a href="#design-choices-and-notes" class="self-link"></a></h1>
 <h2 data-number="7.1" id="design-choice-allowing-type-aware-allocation-functions-in-constant-expressions"><span class="header-section-number">7.1</span> Design choice: Allowing type
 aware allocation functions in constant expressions<a href="#design-choice-allowing-type-aware-allocation-functions-in-constant-expressions" class="self-link"></a></h2>
-<p><strong>New since Wroclaw</strong></p>
 <p>In the current specification it is not possible for an author to
 specify a constexpr <code class="sourceCode cpp"><span class="kw">operator</span> <span class="kw">new</span></code>
 or <code class="sourceCode cpp"><span class="kw">operator</span> <span class="kw">delete</span></code>.
@@ -1615,7 +1615,6 @@ in order to fully support type aware allocators where existing global
 allocators are supported.</p>
 <h2 data-number="7.2" id="design-choice-stripping-qualifiers-from-the-type"><span class="header-section-number">7.2</span> Design choice: Stripping
 qualifiers from the type<a href="#design-choice-stripping-qualifiers-from-the-type" class="self-link"></a></h2>
-<p><strong>New since Wroclaw</strong></p>
 <p>There is a question as to whether the type-identity should include
 qualifiers. In previous drafts this was not addressed, and retaining the
 qualifiers was implied. After consideration we have realised that this
@@ -1628,7 +1627,6 @@ between such allocation and deallocation e.g.</p>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="kw">delete</span> t;</span></code></pre></div>
 <h2 data-number="7.3" id="design-choice-safety-restriction-on-mismatched-declaration-scopes"><span class="header-section-number">7.3</span> Design choice: Safety
 restriction on mismatched declaration scopes<a href="#design-choice-safety-restriction-on-mismatched-declaration-scopes" class="self-link"></a></h2>
-<p><strong>New since Wroclaw</strong></p>
 <p>There is currently no language mechanism to enforce that <code class="sourceCode cpp"><span class="kw">operator</span> <span class="kw">new</span></code>
 and <code class="sourceCode cpp"><span class="kw">operator</span> <span class="kw">delete</span></code>
 are defined as a pair. That is a potential source of confusion and bugs.
@@ -1654,7 +1652,6 @@ otherwise the program is ill-formed.</p>
 </div>
 <h2 data-number="7.4" id="design-choice-all-implicit-parameters-are-mandatory"><span class="header-section-number">7.4</span> Design choice: All implicit
 parameters are mandatory<a href="#design-choice-all-implicit-parameters-are-mandatory" class="self-link"></a></h2>
-<p><strong>New since Wroclaw</strong></p>
 <p>The proposal currently continues to consider optional implicit
 parameters to be optional. During edge case testing we found that the
 non-universality of sized deallocation creates a hazard where a less
