@@ -926,8 +926,8 @@ e.g.</p>
 <p><span class="draftnote" style="color: #0000ff">[ Drafting note: The
 wording changes here permit the specification of a “type aware”
 operators new and delete in which a “type identity” parameter of type
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code> for
-an allocated type <code class="sourceCode default">T</code>. In this
+<code class="sourceCode default">std::type_identity&lt;U&gt;</code> for
+an allocated type <code class="sourceCode default">U</code>. In this
 proposal we are updating the specification of allocation and dealloc
 methods to permit type aware allocators. For a type aware allocator or
 deallocator function all currently implicit optional parameters become
@@ -952,22 +952,6 @@ release appropriate value.</p>
 </div>
 <h2 data-number="6.2" id="basic.stc.dynamic.allocation"><span class="header-section-number">6.2</span> <span><a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span><a href="#basic.stc.dynamic.allocation" class="self-link"></a></h2>
 <p>Updates for <span><a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span></p>
-<p><span class="draftnote" style="color: #0000ff">[ Drafting note: The
-wording changes here are intended to provide for the existence of a
-correct <code class="sourceCode default">operator new</code> or
-<code class="sourceCode default">operator new[]</code> in which the
-first parameter is a
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code> tag
-parameter where previously the first parameter was required to be of
-type <code class="sourceCode default">std::size_t</code>. The language
-is intended to further permit this tag parameter to be a dependent type,
-as long as it is always a specialization of
-<code class="sourceCode default">std::type_identity</code>, e.g <code class="sourceCode default">template &lt;typename T&gt; void *operator new(T, std::size_t)</code>
-would always be invalid, even if
-<code class="sourceCode default">T</code> was
-<code class="sourceCode default">std::type_identity&lt;E&gt;</code> for
-some <code class="sourceCode default">E</code>, or similarly <code class="sourceCode default">template &lt;template&lt;class&gt; class T&gt; void *operator new(T&lt;int&gt;, std::size_t)</code>.
-]</span></p>
 <div class="rm" style="color: #bf0303">
 
 <blockquote>
@@ -990,95 +974,76 @@ parameters.</p>
 
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
-An allocation function or allocation function template may be <em>type
-aware</em>, or <em>type oblivious</em>. All allocation functions or
-allocation function templates have at least one parameter, and have a
-return type specified as the non-depedent type
-<code class="sourceCode default">void *</code>. An allocation function
-or function template that is not a class member function shall belong to
+An allocation function or function template shall have at least one
+parameter, and shall have a return type specified as the non-dependent
+type <code class="sourceCode default">void *</code>. An allocation
+function or function template that is not a class member shall belong to
 the global scope. An allocation function shall not have a name with
 internal linkage. An allocation function template shall have at least
 two parameters.</p>
-</blockquote>
-
-</div>
-<p><span class="draftnote" style="color: #0000ff">[ Drafting note: The
-existing language appears to ban names with internal linkage for
-allocation function templates as the text does not explicitly
-distinguish them. Is this correct/intended? as the new text is more
-explicit in its treatment of function templates should it explicitly
-state linkage rules with respect to allocation function templates? This
-note also applies to <span><a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span>
-]</span></p>
-<div class="add" style="color: #006e28">
-
-<blockquote>
-<ul>
-<li><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span> A
-type aware allocation function or function template has at least three
-parameters. The first parameter is a specialization of the non-dependent
-template <code class="sourceCode default">std::type_identity</code>
+<p><span class="marginalizedparent"><a class="marginalized">(1.1)</a></span> If
+the first parameter of an allocation function or function template is of
+type <code class="sourceCode default">std::type_identity&lt;U&gt;</code>
 (<span><a href="https://wg21.link/meta.trans.other">[meta.trans.other]</a></span>)
-such that the parameter has type
-<code class="sourceCode default">std::type_identity&lt;T&gt;</code> for
-some (possibly dependent) type
-<code class="sourceCode default">T</code>. This parameter is the
-<em>type-identity parameter</em>. The second parameter is of the
+for some possibly dependent type
+<code class="sourceCode default">U</code> it is termed <em>type
+aware</em>. A type aware allocation function or function template shall
+have at least three parameters. The first parameter is termed the
+<em>type-identity</em>. The second parameter shall be of the
 non-dependent type <code class="sourceCode default">std::size_t</code>
 (<span><a href="https://wg21.link/support.types">[support.types]</a></span>) and
-is called the <em>size parameter</em>. The third parameter is of the
+is termed the <em>size parameter</em>. The third parameter is of the
 non-dependent type
 <code class="sourceCode default">std::align_val_t</code> (<span><a href="https://wg21.link/support.types">[support.types]</a></span>) and
-is called the <em>alignment parameter</em>. None of these first three
+is termed the <em>alignment parameter</em>. None of these first three
 parameters may be specified with default arguments (<span><a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).
-If a type aware allocation function is declared in a scope, a type aware
-deallocation function with an equivalent array or non-array name
-accepting a type-identity parameter of the same type shall also be
+If a type aware allocation function is declared in a non-global scope, a
+type aware deallocation function with an equivalent array or non-array
+name accepting a type-identity parameter of the same type shall also be
 declared in the same scope. If the type-identity parameter is a
 dependent type it is ill-formed with no diagnostic required if there is
-no matching type aware deallocation function.</li>
-</ul>
+no matching type aware deallocation function.</p>
 </blockquote>
 
 </div>
 <div class="draftnote" style="color: #0000ff">
 <p>[ Drafting note: This language, coupled with complimentary language
-in [basic.stc.dynamic.deallocation] is intended to make it ill formed
-for a developer to specify type aware allocation and deallocation
-functions that do not match. If the type identity parameter is not
-dependent, we want it to be a reported error if the declarations do not
-match, but if the type-identity parameter is dependent proving
-equivalence of template constraints is not solvable in the general case
-so we do not want to require diagnostics in that case, but we also do
-not want to prohibit such diagnostics. IFNDR seems to be correct for the
-dependent case, but we’d like to confirm that, and to confirm this
-language does not permit non-diagnosis in the case that the
+in <span><a href="https://wg21.link/basic.stc.dynamic.deallocation">[basic.stc.dynamic.deallocation]</a></span>
+is intended to make it ill formed for a developer to specify type aware
+allocation and deallocation functions that do not match. If the type
+identity parameter is not dependent, we want it to be a reported error
+if the declarations do not match, but if the type-identity parameter is
+dependent proving equivalence of template constraints is not solvable in
+the general case so we do not want to require diagnostics in that case,
+but we also do not want to prohibit such diagnostics. IFNDR seems to be
+correct for the dependent case, but we’d like to confirm that, and to
+confirm this language does not permit non-diagnosis in the case that the
 type-identity parameters are not dependent. ]</p>
 </div>
 <div class="add" style="color: #006e28">
 
 <blockquote>
-<ul>
-<li><p><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span> If
+<p><span class="marginalizedparent"><a class="marginalized">(1.2)</a></span> If
 the first parameter of an allocation function or allocation function
-template is not a specialization of
-<code class="sourceCode default">std::type_identity</code>, the
-allocation function is type oblivious, and has no type-identity
+template is not of type
+<code class="sourceCode default">std::type_identity&lt;U&gt;</code>
+(<span><a href="https://wg21.link/meta.trans.other">[meta.trans.other]</a></span>)
+for some type <code class="sourceCode default">U</code>, the allocation
+function is <em>type oblivious</em>, and has no specified type-identity
 parameter. The first parameter shall have the non-dependent type
 <code class="sourceCode default">std​::​size_t</code> (<span><a href="https://wg21.link/support.types">[support.types]</a></span>) and
-is called the <em>size parameter</em>. The first parameter shall not
+is termed the <em>size parameter</em>. The first parameter shall not
 have an associated default argument (<span><a href="https://wg21.link/dcl.fct.default">[dcl.fct.default]</a></span>).
 If the second parameter of an allocation function is of type
 <code class="sourceCode default">std::align_val_t</code> (<span><a href="https://wg21.link/support.types">[support.types]</a></span>) this
-parameter is called the <em>alignment parameter</em>.</p></li>
-<li><p><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span> In
-type aware allocation functions and function templates the
+parameter is termed the <em>alignment parameter</em>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(1.3)</a></span> For
+an allocation function or function template the size parameter is
+interpreted as the requested size of the allocation. In type aware
+allocation functions and function templates the static
 <code class="sourceCode default">type</code> member of the type-identity
 parameter type is interpreted as the type the allocation is being
-requested for. For all allocation functions and function templates the
-size parameter is interpreted as the requested size of the
-allocation.</p></li>
-</ul>
+requested for.</p>
 </blockquote>
 
 </div>
@@ -1091,7 +1056,7 @@ the pointer returned on a successful call shall represent the address of
 storage that is aligned as follows:</p>
 <ul>
 <li><span class="marginalizedparent"><a class="marginalized">(3.1)</a></span> If
-the allocation function <span class="rm" style="color: #bf0303"><del>takes an argument of type
+the allocation function or allocation <span class="rm" style="color: #bf0303"><del>takes an argument of type
 std​::​align_val_t</del></span> <span class="add" style="color: #006e28"><ins>has an alignment parameter</ins></span>, the
 storage will have the alignment specified by the value of <span class="rm" style="color: #bf0303"><del>this</del></span><span class="add" style="color: #006e28"><ins>that</ins></span> argument.</li>
 </ul>
@@ -1106,28 +1071,23 @@ specialization as long as we can identify this as a specialization of
 <code class="sourceCode default">std::type_identity</code> prior to any
 template instantiation. ]</span></p>
 <blockquote>
-<p><span class="marginalizedparent"><a class="marginalized">3</a></span>Each
-deallocation function shall return
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+A deallocation function or function template shall return
 <code class="sourceCode cpp"><span class="dt">void</span></code>. <span class="add" style="color: #006e28"><ins>A deallocation function shall
-have at least one parameter. If the first parameter is a specialization
-of the non-dependent template
-<span><code class="sourceCode default">std::type_identity</code></span>
+have at least one parameter. If the first parameter is of type
+<span><code class="sourceCode default">std::type_identity&lt;U&gt;</code></span>
 (<span><a href="https://wg21.link/meta.trans.other">[meta.trans.other]</a></span>)
-such that the parameter has type
-<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
-for some (possibly dependent) type
-<span><code class="sourceCode default">T</code></span> the deallocation
-function is <em>type aware</em>, and there shall be at least four
-parameters; the first parameter is called the <em>type-identity
-parameter</em>, the second parameter is called the <em>address
-parameter</em>, the third parameter has the non-dependent type
-<span><code class="sourceCode default">std::size_t</code></span>, and
-the fourth has the non-dependent type
+the deallocation function is <em>type aware</em>, and there shall be at
+least four parameters; the first parameter is termed the
+<em>type-identity parameter</em>, the second parameter is termed the
+<em>address parameter</em>, the third parameter has the non-dependent
+type <span><code class="sourceCode default">std::size_t</code></span>,
+and the fourth has the non-dependent type
 <span><code class="sourceCode default">std::align_val_t</code></span>.
 Otherwise, the deallocation function is <em>type oblivious</em> and the
-first parameter is called the <em>address parameter</em>.</ins></span>
+first parameter is termed the <em>address parameter</em>.</ins></span>.
 If the function is a destroying operator delete declared in class type
-C, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>address</ins></span> parameter shall be
+<code class="sourceCode cpp">C</code>, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span><span class="add" style="color: #006e28"><ins>address</ins></span> parameter shall be
 <code class="sourceCode cpp">C<span class="op">*</span></code>;
 otherwise, the type of its <span class="rm" style="color: #bf0303"><del>first</del></span> <span class="add" style="color: #006e28"><ins>address</ins></span> parameter shall be
 <code class="sourceCode cpp"><span class="dt">void</span><span class="op">*</span></code>.
@@ -1151,27 +1111,27 @@ template</del></span><span class="add" style="color: #006e28"><ins>templated</in
 nor the return type shall depend on a template parameter. A deallocation
 function <span class="rm" style="color: #bf0303"><del>template shall
 have two or more function parameters</del></span> <span class="add" style="color: #006e28"><ins>can be a function template. Such a function
-template shall have at least two parameters, and declare its address
-parameter as specified above</ins></span>. A template instance <span class="rm" style="color: #bf0303"><del>is never a usual deallocation
-function, regardless of its signature.</del></span><span class="add" style="color: #006e28"><ins>is only a usual deallocation function if it
-has a type-identity parameter, and the type-identity parameter is a
-dependent type (i.e. the type-identity parameter is of type
-<span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
-where <span><code class="sourceCode default">T</code></span> shall be a
+template shall have at least two parameters</ins></span>. A template
+instance <span class="rm" style="color: #bf0303"><del>is never a usual
+deallocation function, regardless of its signature.</del></span><span class="add" style="color: #006e28"><ins>is only a usual deallocation
+function if it is type aware, the type-identity parameter is a dependent
+type (i.e. the type-identity parameter is of type
+<span><code class="sourceCode default">std::type_identity&lt;U&gt;</code></span>
+where <span><code class="sourceCode default">U</code></span> shall be a
 dependent type), and the type-identity parameter is the only dependent
 parameter.</ins></span> If a type aware deallocation function is
-declared in a scope, a type aware allocation function accepting a
-type-identity parameter of the same type shall also be declared in the
-same scope. If the type-identity parameter is a dependent type it is
-ill-formed with no diagnostic required if there is no matching type
-aware deallocation function.</p>
+declared in a non-global scope, a type aware allocation function
+accepting a type-identity parameter of the same type shall also be
+declared in the same scope. If the type-identity parameter is a
+dependent type it is ill-formed with no diagnostic required if there is
+no matching type aware deallocation function.</p>
 </blockquote>
 <div class="draftnote" style="color: #0000ff">
-<p>[ Drafting note: Is this sufficient to prevent a case like this from
-being a usual deallocation function? It seems like it might not cover
-Args being an empty pack?</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>template &lt;typename T, typename... Args&gt;</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>void operator delete(type_identity&lt;T&gt;, void*, std::size_t, std::align_val_t, Args...);</span></code></pre></div>
+<p>[ Drafting note: Is this sufficient to prevent a case like this
+example from being a usual deallocation function? It seems like the
+wording might permit the below if Args is an empty pack?</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>template &lt;typename U, typename... Args&gt;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>void operator delete(type_identity&lt;U&gt;, void*, std::size_t, std::align_val_t, Args...);</span></code></pre></div>
 ]
 
 </div>
