@@ -1692,11 +1692,12 @@ paragraph 29 is modified:</p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">29</a></span> <span class="add" style="color: #006e28"><ins>A declaration of a type aware
 placement deallocation function matches the declaration of a type aware
-placement deallocation function if the types of each parameter after the
-mandatory parameters are the same.</ins></span> Otherwise, a declaration
-of a placement deallocation function matches the declaration of a
-placement allocation function if it has the same number of parameters
-and, after parameter transformations ([dcl.fct]). … <span class="marginalizedparent"><a class="marginalized">30</a></span> If a
+placement deallocation function if the types of the type-identity
+parameter, and each parameter after the mandatory parameters are the
+same.</ins></span> Otherwise, a declaration of a placement deallocation
+function matches the declaration of a placement allocation function if
+it has the same number of parameters and, after parameter
+transformations ([dcl.fct]). … <span class="marginalizedparent"><a class="marginalized">30</a></span> If a
 new-expression calls a deallocation function, it passes the value
 returned from the allocation function call as the argument of type <code class="sourceCode cpp"><span class="dt">void</span><span class="op">*</span></code>
 <span class="add" style="color: #006e28"><ins>as the address
