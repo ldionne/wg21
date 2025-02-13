@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-02-11" />
   <title>Type-aware allocation and deallocation functions</title>
   <style>
       code{white-space: pre-wrap;}
@@ -445,7 +444,7 @@ deallocation functions</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-02-11</td>
+    <td></td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -973,15 +972,15 @@ some <code class="sourceCode default">E</code>, or similarly <code class="source
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 An allocation function that is not a class member function shall belong
-to the globa scope and not have a name with internal linkage. The return
-type shall be void*. The first parameter shall have type std​::​size_t
-([support.types]). The first parameter shall not have an associated
-default argument ([dcl.fct.default]). The value of the first parameter
-is interpreted as the requested size of the allocation. An allocation
-function can be a function template. Such a template shall declare its
-return type and first parameter as specified above (that is, template
-parameter types shall not be used in the return type and first parameter
-type). Allocation function templates shall have two or more
+to the global scope and not have a name with internal linkage. The
+return type shall be void*. The first parameter shall have type
+std​::​size_t ([support.types]). The first parameter shall not have an
+associated default argument ([dcl.fct.default]). The value of the first
+parameter is interpreted as the requested size of the allocation. An
+allocation function can be a function template. Such a template shall
+declare its return type and first parameter as specified above (that is,
+template parameter types shall not be used in the return type and first
+parameter type). Allocation function templates shall have two or more
 parameters.</p>
 </blockquote>
 
@@ -1022,7 +1021,7 @@ template <code class="sourceCode default">std::type_identity</code>
 such that the parameter has type
 <code class="sourceCode default">std::type_identity&lt;T&gt;</code> for
 some (possibly dependent) type
-<code class="sourceCode default">T</code>. This parameter is class the
+<code class="sourceCode default">T</code>. This parameter is the
 <em>type-identity parameter</em>. The second parameter is of the
 non-dependent type <code class="sourceCode default">std::size_t</code>
 (<span><a href="https://wg21.link/support.types">[support.types]</a></span>) and
@@ -1155,7 +1154,7 @@ template shall have at least two parameters, and declare its address
 parameter as specified above</ins></span>. A template instance <span class="rm" style="color: #bf0303"><del>is never a usual deallocation
 function, regardless of its signature.</del></span><span class="add" style="color: #006e28"><ins>is only a usual deallocation function if it
 has a type-identity parameter, and the type-identity parameter is a
-dependent type (i.e. the type-identity parameter may be of type
+dependent type (i.e. the type-identity parameter is of type
 <span><code class="sourceCode default">std::type_identity&lt;T&gt;</code></span>
 where <span><code class="sourceCode default">T</code></span> shall be a
 dependent type), and the type-identity parameter is the only dependent
@@ -1444,8 +1443,8 @@ useful? ]</p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">32</a></span> If a
 single matching deallocation function is found and either the allocation
-function or th deallocation function has a type-identity parameter, then
-both functions shall belong to the same scope (<span><a href="https://wg21.link/basic.scope.scope">[basic.scope.scope]</a></span>),
+function or the deallocation function has a type-identity parameter,
+then both functions shall belong to the same scope (<span><a href="https://wg21.link/basic.scope.scope">[basic.scope.scope]</a></span>),
 otherwise the program is ill-formed.</p>
 </blockquote>
 
@@ -1455,10 +1454,10 @@ otherwise the program is ill-formed.</p>
 as the language in <span><a href="https://wg21.link/basic.stc.dynamic.allocation">[basic.stc.dynamic.allocation]</a></span>
 and <span><a href="https://wg21.link/basic.stc.dynamic.deallocation">[basic.stc.dynamic.deallocation]</a></span>
 should make this impossible, but we feel that keeping this wording
-ensures that even though the the language controlling definition of
-allocation and deallocation requires permits an IFNDR response to
-mismatching operators new and delete, p31 makes it explicit that it is
-never permissible for the cleanup delete to be resolved from a different
+ensures that even though the language controlling definition of
+allocation and deallocation permits an IFNDR response to mismatching
+operators new and delete, p31 makes it explicit that it is never
+permissible for the cleanup delete to be resolved from a different
 scope. ]</p>
 </div>
 <h2 data-number="6.5" id="expr.delete"><span class="header-section-number">6.5</span> <span><a href="https://wg21.link/expr.delete">[expr.delete]</a></span><a href="#expr.delete" class="self-link"></a></h2>
