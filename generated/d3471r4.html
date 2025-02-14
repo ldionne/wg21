@@ -805,21 +805,23 @@ at this time to include more than basic hardening of <code class="sourceCode cpp
 in this paper. We would prefer to leave a thorough exploration of
 <code class="sourceCode cpp">valarray</code> to a dedicated paper.</p>
 <h1 data-number="10" id="proposed-wording"><span class="header-section-number">10</span> Proposed wording<a href="#proposed-wording" class="self-link"></a></h1>
+<p>The proposed wording changes are relative to the C++26 working draft
+<a href="https://wg21.link/N5001">N5001</a> with <a href="https://wg21.link/P2900R14">P2900R14</a> already applied.</p>
 <h2 data-number="10.1" id="introduce-hardened-preconditions"><span class="header-section-number">10.1</span> Introduce hardened
 preconditions<a href="#introduce-hardened-preconditions" class="self-link"></a></h2>
-<!-- Change in 7.5.4.1 [expr.prim.id.unqual] paragraph 2: -->
 <p>Add a new paragraph to <span>4.1
 <a href="https://wg21.link/intro.compliance">[intro.compliance]</a></span>
 after paragraph 7 as indicated:</p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
-Two kinds of implementations are defined: a <em>hosted
-implementation</em> and a <em>freestanding implementation.</em> A
-freestanding implementation is one in which execution may take place
-without the benefit of an operating system. A hosted implementation
-supports all the facilities described in this document, while a
-freestanding implementation supports the entire C++ language described
-in <code class="sourceCode cpp"><span class="op">[</span>lex<span class="op">]</span></code>
+<span class="rm" style="color: #bf0303"><del>Two kinds of
+implementations are defined:</del></span><span class="add" style="color: #006e28"><ins>An implementation may be</ins></span> a
+<em>hosted implementation</em> <span class="rm" style="color: #bf0303"><del>and</del></span><span class="add" style="color: #006e28"><ins>or</ins></span> a <em>freestanding
+implementation.</em> A freestanding implementation is one in which
+execution may take place without the benefit of an operating system. A
+hosted implementation supports all the facilities described in this
+document, while a freestanding implementation supports the entire C++
+language described in <code class="sourceCode cpp"><span class="op">[</span>lex<span class="op">]</span></code>
 through <code class="sourceCode cpp"><span class="op">[</span>cpp<span class="op">]</span></code>
 and the subset of the library facilities described in <code class="sourceCode cpp"><span class="op">[</span>compliance<span class="op">]</span></code>.</p>
 </blockquote>
@@ -829,7 +831,8 @@ and the subset of the library facilities described in <code class="sourceCode cp
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 Additionally, an implementation can be a <em>hardened
 implementation</em>. A hardened implementation is one in which violating
-a <em>hardened precondition</em> is a contract violation.</p>
+a <em>hardened precondition</em> results in a contract violation
+<code class="sourceCode default">[structure.specifications]</code>.</p>
 </blockquote>
 
 </div>
