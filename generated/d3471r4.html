@@ -1091,11 +1091,11 @@ is a valid range.</p>
 </div>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
-<em>Hardened preconditions</em>:</p>
-<p><span class="marginalizedparent"><a class="marginalized">(5.1)</a></span> If
+<em>Hardened preconditions</em>: If
 <code class="sourceCode default">extent</code> is not equal to
-<code class="sourceCode default">dynamic_extent</code>,
-<code class="sourceCode default">count == extent</code>.</p>
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">count == extent</code> is
+<code class="sourceCode default">true</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
@@ -1131,11 +1131,11 @@ is a valid range.</p>
 <code class="sourceCode cpp">End</code> models <code class="sourceCode cpp">sized_sentinel_for<span class="op">&lt;</span>It<span class="op">&gt;</span></code>.</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
-<em>Hardened preconditions</em>:</p>
-<p><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span> If
+<em>Hardened preconditions</em>: If
 <code class="sourceCode default">extent</code> is not equal to
-<code class="sourceCode default">dynamic_extent</code>,
-<code class="sourceCode default">(last - first) == extent</code>.</p>
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">(last - first) == extent</code> is
+<code class="sourceCode default">true</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
@@ -1171,11 +1171,11 @@ is <code class="sourceCode cpp"><span class="kw">false</span></code>,
 <code class="sourceCode cpp">R</code> models <code class="sourceCode cpp">ranges<span class="op">::</span>borrowed_range</code>.</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">16</a></span>
-<em>Hardened preconditions</em>:</p>
-<p><span class="marginalizedparent"><a class="marginalized">(16.1)</a></span> If
+<em>Hardened preconditions</em>: If
 <code class="sourceCode default">extent</code> is not equal to
-<code class="sourceCode default">dynamic_extent</code>,
-<code class="sourceCode default">ranges::size(r) == extent</code>.</p>
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">ranges::size(r) == extent</code> is
+<code class="sourceCode default">true</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Initializes data_ with <code class="sourceCode cpp">ranges<span class="op">::</span>data<span class="op">(</span>r<span class="op">)</span></code>
@@ -1197,8 +1197,11 @@ is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
 If <code class="sourceCode cpp">extent</code> is not equal to
-<code class="sourceCode cpp">dynamic_extent</code>, then <code class="sourceCode cpp">il<span class="op">.</span>size<span class="op">()</span></code>
-is equal to <code class="sourceCode cpp">extent</code>.</p>
+<code class="sourceCode cpp">dynamic_extent</code>, then <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">il.size()</code></span>
+is equal to
+<span><code class="sourceCode default">extent</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">il.size() == extent</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">20</a></span>
 <em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
 with <code class="sourceCode cpp">il<span class="op">.</span>begin<span class="op">()</span></code>
@@ -1228,8 +1231,11 @@ note</em>]</p>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
 If <code class="sourceCode cpp">extent</code> is not equal to
-<code class="sourceCode cpp">dynamic_extent</code>, then <code class="sourceCode cpp">s<span class="op">.</span>size<span class="op">()</span></code>
-is equal to <code class="sourceCode cpp">extent</code>.</p>
+<code class="sourceCode cpp">dynamic_extent</code>, then <span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">s.size()</code></span>
+is equal to
+<span><code class="sourceCode default">extent</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">s.size() == extent</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">24</a></span>
 <em>Effects</em>: Constructs a <code class="sourceCode cpp">span</code>
 that is a view over the range <code class="sourceCode cpp"><span class="op">[</span>s<span class="op">.</span>data<span class="op">()</span>, s<span class="op">.</span>data<span class="op">()</span> <span class="op">+</span> s<span class="op">.</span>size<span class="op">())</span></code>.</p>
@@ -1245,19 +1251,25 @@ paragraph 1 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">pos <span class="op">&lt;</span> size<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">pos <span class="op">&lt;</span> size<span class="op">()</span></code>
+<span class="add" style="color: #006e28"><ins>is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
+<p><span class="add" style="color: #006e28"><ins><span class="marginalizedparent"><a class="marginalized">4</a></span>
+[<em>Note 1</em>: This precondition is stronger than the one on
+<span><code class="sourceCode default">basic_string::operator[]</code></span>.
+—
+<span><code class="sourceCode default">end note</code></span>]</ins></span></p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span>pos<span class="op">]</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em>Throws</em>: Nothing.</p>
-<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
-[<em>Note 1</em>: Unlike <code class="sourceCode cpp">basic_string<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code>,
-<code class="sourceCode cpp">basic_string_view<span class="op">::</span><span class="kw">operator</span><span class="op">[](</span>size<span class="op">())</span></code>
-<span class="rm" style="color: #bf0303"><del>has undefined
-behavior</del></span><span class="add" style="color: #006e28"><ins>violates a hardened
-precondition</ins></span> instead of returning
-<code class="sourceCode cpp">charT<span class="op">()</span></code>. —
-<code class="sourceCode cpp">end note</code>]</p>
+<p><span class="rm" style="color: #bf0303"><del><span class="marginalizedparent"><a class="marginalized">4</a></span>
+[<em>Note 1</em>: Unlike
+<span><code class="sourceCode default">basic_string::operator[]</code></span>,
+<span><code class="sourceCode default">basic_string_view::operator[](size())</code></span>
+has undefined behavior instead of returning
+<span><code class="sourceCode default">charT()</code></span>. —
+<span><code class="sourceCode default">end note</code></span>]</del></span></p>
 </blockquote>
 <h3 data-number="10.3.2" id="basic_string_viewfront"><span class="header-section-number">10.3.2</span> <code class="sourceCode cpp">basic_string_view<span class="op">::</span>front</code><a href="#basic_string_viewfront" class="self-link"></a></h3>
 <p>Modify <span>27.3.3.6
@@ -1268,7 +1280,8 @@ paragraph 7 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
@@ -1283,7 +1296,8 @@ paragraph 10 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">11</a></span>
 <em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">]</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">12</a></span>
@@ -1298,7 +1312,8 @@ paragraph 1 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp">data_ <span class="op">+=</span> n; size_ <span class="op">-=</span> n;</code></p>
 </blockquote>
@@ -1311,7 +1326,8 @@ paragraph 3 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">3</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:
 <code class="sourceCode cpp">size_ <span class="op">-=</span> n;</code></p>
@@ -1330,7 +1346,8 @@ around paragraph 69 as indicated:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">70</a></span>
 <em>Hardened preconditions</em>:
-<code class="sourceCode default">!a.empty()</code>.</p>
+<code class="sourceCode default">a.empty()</code> is
+<code class="sourceCode default">false</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">71</a></span>
 <em>Returns</em>: <code class="sourceCode cpp"><span class="op">*</span>a<span class="op">.</span>begin<span class="op">()</span></code></p>
@@ -1357,7 +1374,8 @@ around paragraph 72 as indicated:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">73</a></span>
 <em>Hardened preconditions</em>:
-<code class="sourceCode default">!a.empty()</code>.</p>
+<code class="sourceCode default">a.empty()</code> is
+<code class="sourceCode default">false</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">74</a></span>
 <em>Effects</em>: Equivalent to:</p>
@@ -1434,7 +1452,8 @@ around paragraph 117 as indicated:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">118</a></span>
 <em>Hardened preconditions</em>:
-<code class="sourceCode default">n &lt; a.size()</code>.</p>
+<code class="sourceCode default">n &lt; a.size()</code> is
+<code class="sourceCode default">true</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">119</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="op">*(</span>a<span class="op">.</span>begin<span class="op">()</span> <span class="op">+</span> n<span class="op">)</span>;</code></p>
@@ -1458,7 +1477,8 @@ paragraph 1 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">pos <span class="op">&lt;=</span> size<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">pos <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Returns</em>: <code class="sourceCode cpp"><span class="op">*(</span>begin<span class="op">()</span> <span class="op">+</span> pos<span class="op">)</span></code>
 if <code class="sourceCode cpp">pos <span class="op">&lt;</span> size<span class="op">()</span></code>.
@@ -1483,7 +1503,8 @@ paragraph 7 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="kw">operator</span><span class="op">[](</span><span class="dv">0</span><span class="op">)</span>;</code></p>
 </blockquote>
@@ -1497,7 +1518,8 @@ paragraph 9 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="kw">operator</span><span class="op">[](</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span>;</code></p>
 </blockquote>
@@ -1510,7 +1532,8 @@ paragraph 12 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">12</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">13</a></span>
 <em>Effects</em>: Equivalent to <code class="sourceCode cpp">erase<span class="op">(</span>end<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">14</a></span>
@@ -1585,7 +1608,10 @@ paragraph 30 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">30</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">pos</code> is valid.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">pos</code></span>
+is valid</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">pos &lt; size()</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">31</a></span>
 <em>Returns</em>:
 <code class="sourceCode cpp"><span class="kw">true</span></code> if the
@@ -1603,7 +1629,10 @@ paragraph 33 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">33</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">pos</code> is valid.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">pos</code></span>
+is valid</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">pos &lt; size()</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">34</a></span>
 <em>Returns</em>: An object of type <code class="sourceCode cpp">bitset<span class="op">::</span>reference</code>
 such that <code class="sourceCode cpp"><span class="op">(*</span><span class="kw">this</span><span class="op">)[</span>pos<span class="op">]</span> <span class="op">==</span> <span class="kw">this</span><span class="op">-&gt;</span>test<span class="op">(</span>pos<span class="op">)</span></code>,
@@ -1642,8 +1671,10 @@ paragraph 1 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">1</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
-contains a value.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">*this</code></span>
+contains a value</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">has_value()</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Returns</em>:
 <code class="sourceCode cpp"><span class="op">*</span>val</code>.</p>
@@ -1662,8 +1693,10 @@ paragraph 4 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
-contains a value.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">*this</code></span>
+contains a value</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">has_value()</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Returns</em>:
 <code class="sourceCode cpp"><span class="op">*</span>val</code>.</p>
@@ -1681,8 +1714,10 @@ paragraph 7 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
-contains a value.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">*this</code></span>
+contains a value</del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">has_value()</code></span>
+is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> std<span class="op">::</span>move<span class="op">(*</span>val<span class="op">)</span>;</code></p>
 </blockquote>
@@ -1810,32 +1845,59 @@ the feature-test macros. The proposed wording adds a macro for each
 class that would now contain hardened preconditions, but we are very
 open to suggestions on how these macros may be combined or split
 further, as well as naming)</p>
-<p>Modify <span>17.3.2
-<a href="https://wg21.link/version.syn">[version.syn]</a></span> as
-indicated:</p>
-<div>
-<div class="sourceCode" id="cb22"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_generator                         202207L // also in &lt;generator&gt;</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_generic_associative_lookup        201304L // also in &lt;map&gt;, &lt;set&gt;</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_generic_unordered_lookup          201811L // also in &lt;unordered_map&gt;, &lt;unordered_set&gt;</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_array                    20????L // also in &lt;array&gt;</span></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_basic_string             20????L // also in &lt;string&gt;</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_basic_string_view        20????L // also in &lt;string_view&gt;</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_bitset                   20????L // also in &lt;bitset&gt;</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_deque                    20????L // also in &lt;deque&gt;</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_expected                 20????L // also in &lt;expected&gt;</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_forward_list             20????L // also in &lt;forward_list&gt;</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_inplace_vector           20????L // also in &lt;inplace_vector&gt;</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_list                     20????L // also in &lt;list&gt;</span></span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_mdspan                   20????L // also in &lt;mdspan&gt;</span></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_optional                 20????L // also in &lt;optional&gt;</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_span                     20????L // also in &lt;span&gt;</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_valarray                 20????L // also in &lt;valarray&gt;</span></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_vector                   20????L // also in &lt;vector&gt;</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_hardware_interference_size        201703L // freestanding, also in &lt;new&gt;</span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_has_unique_object_representations 201606L // freestanding, also in &lt;type_traits&gt;</span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_hazard_pointer                    202306L // also in &lt;hazard_pointer&gt;</span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_hypot                             201603L // also in &lt;cmath&gt;</span></code></pre></div>
+<p>Add a new paragraph to <span>17.3.2
+<a href="https://wg21.link/version.syn">[version.syn]</a></span> after
+paragraph 2 as indicated:</p>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+Additionally, each of the following macros are defined in a hardened
+implementation:</p>
+</blockquote>
+
 </div>
+<div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_array                    20????L // also in &lt;array&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_basic_string             20????L // also in &lt;string&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_basic_string_view        20????L // also in &lt;string_view&gt;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_bitset                   20????L // also in &lt;bitset&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_deque                    20????L // also in &lt;deque&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_expected                 20????L // also in &lt;expected&gt;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_forward_list             20????L // also in &lt;forward_list&gt;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_inplace_vector           20????L // also in &lt;inplace_vector&gt;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_list                     20????L // also in &lt;list&gt;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_mdspan                   20????L // also in &lt;mdspan&gt;</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_optional                 20????L // also in &lt;optional&gt;</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_span                     20????L // also in &lt;span&gt;</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_valarray                 20????L // also in &lt;valarray&gt;</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_vector                   20????L // also in &lt;vector&gt;</span></span></code></pre></div>
+</div>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+The macro
+<code class="sourceCode cpp">__cpp_lib_freestanding_operator_new</code>
+is defined to the integer literal <code class="sourceCode cpp"><span class="dv">202306</span><span class="bu">L</span></code>
+if all the default versions of the replaceable global allocation
+functions meet the requirements of a hosted implementation, and to the
+integer literal
+<code class="sourceCode cpp"><span class="dv">0</span></code> otherwise
+([new.delete]).</p>
+</blockquote>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Recommended practice</em>: Freestanding implementations should only
+define a macro from <code class="sourceCode cpp"><span class="op">&lt;</span>version<span class="op">&gt;</span></code>
+if the implementation provides the corresponding facility in its
+entirety.</p>
+</blockquote>
+<blockquote>
+<p><span class="add" style="color: #006e28"><ins><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Recommended practice</em>: A non-hardened implementation should not
+define macros from
+<span><code class="sourceCode default">&lt;version&gt;</code></span>
+required for hardened implementations.</ins></span></p>
+</blockquote>
 </div>
 </div>
 </body>
