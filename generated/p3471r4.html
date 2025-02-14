@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2024-12-14" />
+  <meta name="dcterms.date" content="2025-02-14" />
   <title>Standard library hardening</title>
   <style>
       code{white-space: pre-wrap;}
@@ -438,14 +438,14 @@ hardening</h1>
   <tr>
     <td>Document #:</td>
     <td>
-      D3471R4
+      P3471R4
       [<a href="https://wg21.link/P3471">Latest</a>]
       [<a href="https://wg21.link/P3471/status">Status</a>]
     </td>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2024-12-14</td>
+    <td>2025-02-14</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -475,7 +475,11 @@ This proposal is based on our experience implementing <a href="https://libcxx.ll
 and deploying it widely.</p>
 <h1 data-number="2" id="revision-history"><span class="header-section-number">2</span> Revision history<a href="#revision-history" class="self-link"></a></h1>
 <ul>
-<li>R4 (LWG in Hagenberg): …</li>
+<li>R4 (LWG, CWG in Hagenberg):
+<ul>
+<li>Make precise how a contract violation is triggered</li>
+<li>Library wording consistency fixes when expressing preconditions</li>
+</ul></li>
 <li>R3 (seen by LEWG in Hagenberg): Added the specialization of
 <code class="sourceCode cpp">expected</code> for
 <code class="sourceCode cpp"><span class="dt">void</span></code> types
@@ -815,7 +819,7 @@ after paragraph 7 as indicated:</p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <span class="rm" style="color: #bf0303"><del>Two kinds of
-implementations are defined:</del></span><span class="add" style="color: #006e28"><ins>An implementation may be</ins></span> a
+implementations are defined:</del></span><span class="add" style="color: #006e28"><ins>An implementation is either</ins></span> a
 <em>hosted implementation</em> <span class="rm" style="color: #bf0303"><del>and</del></span><span class="add" style="color: #006e28"><ins>or</ins></span> a <em>freestanding
 implementation.</em> A freestanding implementation is one in which
 execution may take place without the benefit of an operating system. A
@@ -829,9 +833,9 @@ and the subset of the library facilities described in <code class="sourceCode cp
 
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
-Additionally, an implementation can be a <em>hardened
-implementation</em>. A hardened implementation is one in which violating
-a <em>hardened precondition</em> results in a contract violation
+It is implementation-defined whether the implementation is a
+<em>hardened implementation</em>. If it is a hardened implementation,
+violating a hardened precondition results in a contract violation
 <code class="sourceCode default">([structure.specifications])</code>.</p>
 </blockquote>
 
