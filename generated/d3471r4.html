@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="mpark/wg21" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2024-12-14" />
+  <title>Standard library hardening</title>
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+      div.csl-block{margin-left: 1.5em;}
+      ul.task-list{list-style: none;}
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      .sourceCode { overflow: visible; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+          color: #aaaaaa;
+        }
+      pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+      div.sourceCode
+        {  background-color: #f6f8fa; }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+      code span { } /* Normal */
+      code span.al { color: #ff0000; } /* Alert */
+      code span.an { } /* Annotation */
+      code span.at { } /* Attribute */
+      code span.bn { color: #9f6807; } /* BaseN */
+      code span.bu { color: #9f6807; } /* BuiltIn */
+      code span.cf { color: #00607c; } /* ControlFlow */
+      code span.ch { color: #9f6807; } /* Char */
+      code span.cn { } /* Constant */
+      code span.co { color: #008000; font-style: italic; } /* Comment */
+      code span.cv { color: #008000; font-style: italic; } /* CommentVar */
+      code span.do { color: #008000; } /* Documentation */
+      code span.dt { color: #00607c; } /* DataType */
+      code span.dv { color: #9f6807; } /* DecVal */
+      code span.er { color: #ff0000; font-weight: bold; } /* Error */
+      code span.ex { } /* Extension */
+      code span.fl { color: #9f6807; } /* Float */
+      code span.fu { } /* Function */
+      code span.im { } /* Import */
+      code span.in { color: #008000; } /* Information */
+      code span.kw { color: #00607c; } /* Keyword */
+      code span.op { color: #af1915; } /* Operator */
+      code span.ot { } /* Other */
+      code span.pp { color: #6f4e37; } /* Preprocessor */
+      code span.re { } /* RegionMarker */
+      code span.sc { color: #9f6807; } /* SpecialChar */
+      code span.ss { color: #9f6807; } /* SpecialString */
+      code span.st { color: #9f6807; } /* String */
+      code span.va { } /* Variable */
+      code span.vs { color: #9f6807; } /* VerbatimString */
+      code span.wa { color: #008000; font-weight: bold; } /* Warning */
+      code.diff {color: #898887}
+      code.diff span.va {color: #006e28}
+      code.diff span.st {color: #bf0303}
+
+      .marginalized[data-old]::before {
+        text-decoration-line: line-through;
+        color: #bf0303;
+        content: attr(data-old);
+      }
+      .marginalized[data-old] {
+        color: #006e28;
+      }
+      .add .marginalized {
+        color: #006e28;
+      }
+
+  </style>
+  <style type="text/css">
+body {
+margin: 5em;
+font-family: serif;
+
+hyphens: auto;
+line-height: 1.35;
+text-align: justify;
+}
+@media screen and (max-width: 30em) {
+body {
+margin: 1.5em;
+}
+}
+div.wrapper {
+max-width: 60em;
+margin: auto;
+}
+ul {
+list-style-type: none;
+padding-left: 2em;
+margin-top: -0.2em;
+margin-bottom: -0.2em;
+}
+a {
+text-decoration: none;
+color: #4183C4;
+}
+a.hidden_link {
+text-decoration: none;
+color: inherit;
+}
+li {
+margin-top: 0.6em;
+margin-bottom: 0.6em;
+}
+h1, h2, h3, h4 {
+position: relative;
+line-height: 1;
+}
+a.self-link {
+position: absolute;
+top: 0;
+left: calc(-1 * (3.5rem - 26px));
+width: calc(3.5rem - 26px);
+height: 2em;
+text-align: center;
+border: none;
+transition: opacity .2s;
+opacity: .5;
+font-family: sans-serif;
+font-weight: normal;
+font-size: 83%;
+}
+a.self-link:hover { opacity: 1; }
+a.self-link::before { content: "§"; }
+ul > li:before {
+content: "\2014";
+position: absolute;
+margin-left: -1.5em;
+}
+:target { background-color: #C9FBC9; }
+:target .codeblock { background-color: #C9FBC9; }
+:target ul { background-color: #C9FBC9; }
+.abbr_ref { float: right; }
+.folded_abbr_ref { float: right; }
+:target .folded_abbr_ref { display: none; }
+:target .unfolded_abbr_ref { float: right; display: inherit; }
+.unfolded_abbr_ref { display: none; }
+.secnum { display: inline-block; min-width: 35pt; }
+.header-section-number { display: inline-block; min-width: 35pt; }
+.annexnum { display: block; }
+div.sourceLinkParent {
+float: right;
+}
+a.sourceLink {
+position: absolute;
+opacity: 0;
+margin-left: 10pt;
+}
+a.sourceLink:hover {
+opacity: 1;
+}
+a.itemDeclLink {
+position: absolute;
+font-size: 75%;
+text-align: right;
+width: 5em;
+opacity: 0;
+}
+a.itemDeclLink:hover { opacity: 1; }
+span.marginalizedparent {
+position: relative;
+left: -5em;
+}
+li span.marginalizedparent { left: -7em; }
+li ul > li span.marginalizedparent { left: -9em; }
+li ul > li ul > li span.marginalizedparent { left: -11em; }
+li ul > li ul > li ul > li span.marginalizedparent { left: -13em; }
+div.footnoteNumberParent {
+position: relative;
+left: -4.7em;
+}
+a.marginalized {
+position: absolute;
+font-size: 75%;
+text-align: right;
+width: 5em;
+}
+a.enumerated_item_num {
+position: relative;
+left: -3.5em;
+display: inline-block;
+margin-right: -3em;
+text-align: right;
+width: 3em;
+}
+div.para { margin-bottom: 0.6em; margin-top: 0.6em; text-align: justify; }
+div.section { text-align: justify; }
+div.sentence { display: inline; }
+span.indexparent {
+display: inline;
+position: relative;
+float: right;
+right: -1em;
+}
+a.index {
+position: absolute;
+display: none;
+}
+a.index:before { content: "⟵"; }
+
+a.index:target {
+display: inline;
+}
+.indexitems {
+margin-left: 2em;
+text-indent: -2em;
+}
+div.itemdescr {
+margin-left: 3em;
+}
+.bnf {
+font-family: serif;
+margin-left: 40pt;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+}
+.ncbnf {
+font-family: serif;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+margin-left: 40pt;
+}
+.ncsimplebnf {
+font-family: serif;
+font-style: italic;
+margin-top: 0.5em;
+margin-bottom: 0.5em;
+margin-left: 40pt;
+background: inherit; 
+}
+span.textnormal {
+font-style: normal;
+font-family: serif;
+white-space: normal;
+display: inline-block;
+}
+span.rlap {
+display: inline-block;
+width: 0px;
+}
+span.descr { font-style: normal; font-family: serif; }
+span.grammarterm { font-style: italic; }
+span.term { font-style: italic; }
+span.terminal { font-family: monospace; font-style: normal; }
+span.nonterminal { font-style: italic; }
+span.tcode { font-family: monospace; font-style: normal; }
+span.textbf { font-weight: bold; }
+span.textsc { font-variant: small-caps; }
+a.nontermdef { font-style: italic; font-family: serif; }
+span.emph { font-style: italic; }
+span.techterm { font-style: italic; }
+span.mathit { font-style: italic; }
+span.mathsf { font-family: sans-serif; }
+span.mathrm { font-family: serif; font-style: normal; }
+span.textrm { font-family: serif; }
+span.textsl { font-style: italic; }
+span.mathtt { font-family: monospace; font-style: normal; }
+span.mbox { font-family: serif; font-style: normal; }
+span.ungap { display: inline-block; width: 2pt; }
+span.textit { font-style: italic; }
+span.texttt { font-family: monospace; }
+span.tcode_in_codeblock { font-family: monospace; font-style: normal; }
+span.phantom { color: white; }
+
+span.math { font-style: normal; }
+span.mathblock {
+display: block;
+margin-left: auto;
+margin-right: auto;
+margin-top: 1.2em;
+margin-bottom: 1.2em;
+text-align: center;
+}
+span.mathalpha {
+font-style: italic;
+}
+span.synopsis {
+font-weight: bold;
+margin-top: 0.5em;
+display: block;
+}
+span.definition {
+font-weight: bold;
+display: block;
+}
+.codeblock {
+margin-left: 1.2em;
+line-height: 127%;
+}
+.outputblock {
+margin-left: 1.2em;
+line-height: 127%;
+}
+div.itemdecl {
+margin-top: 2ex;
+}
+code.itemdeclcode {
+white-space: pre;
+display: block;
+}
+span.textsuperscript {
+vertical-align: super;
+font-size: smaller;
+line-height: 0;
+}
+.footnotenum { vertical-align: super; font-size: smaller; line-height: 0; }
+.footnote {
+font-size: small;
+margin-left: 2em;
+margin-right: 2em;
+margin-top: 0.6em;
+margin-bottom: 0.6em;
+}
+div.minipage {
+display: inline-block;
+margin-right: 3em;
+}
+div.numberedTable {
+text-align: center;
+margin: 2em;
+}
+div.figure {
+text-align: center;
+margin: 2em;
+}
+table {
+border: 1px solid black;
+border-collapse: collapse;
+margin-left: auto;
+margin-right: auto;
+margin-top: 0.8em;
+text-align: left;
+hyphens: none; 
+}
+td, th {
+padding-left: 1em;
+padding-right: 1em;
+vertical-align: top;
+}
+td.empty {
+padding: 0px;
+padding-left: 1px;
+}
+td.left {
+text-align: left;
+}
+td.right {
+text-align: right;
+}
+td.center {
+text-align: center;
+}
+td.justify {
+text-align: justify;
+}
+td.border {
+border-left: 1px solid black;
+}
+tr.rowsep, td.cline {
+border-top: 1px solid black;
+}
+tr.even, tr.odd {
+border-bottom: 1px solid black;
+}
+tr.capsep {
+border-top: 3px solid black;
+border-top-style: double;
+}
+tr.header {
+border-bottom: 3px solid black;
+border-bottom-style: double;
+}
+th {
+border-bottom: 1px solid black;
+}
+span.centry {
+font-weight: bold;
+}
+div.table {
+display: block;
+margin-left: auto;
+margin-right: auto;
+text-align: center;
+width: 90%;
+}
+span.indented {
+display: block;
+margin-left: 2em;
+margin-bottom: 1em;
+margin-top: 1em;
+}
+ol.enumeratea { list-style-type: none; background: inherit; }
+ol.enumerate { list-style-type: none; background: inherit; }
+
+code.sourceCode > span { display: inline; }
+</style>
+  <link href="data:image/x-icon;base64,AAABAAIAEBAAAAEAIABoBAAAJgAAACAgAAABACAAqBAAAI4EAAAoAAAAEAAAACAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAVoJEAN6CRADegkQAWIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wCCRAAAgkQAAIJEAACCRAAsgkQAvoJEAP+CRAD/gkQA/4JEAP+CRADAgkQALoJEAACCRAAAgkQAAP///wD///8AgkQAAIJEABSCRACSgkQA/IJEAP99PQD/dzMA/3czAP99PQD/gkQA/4JEAPyCRACUgkQAFIJEAAD///8A////AHw+AFiBQwDqgkQA/4BBAP9/PxP/uZd6/9rJtf/bybX/upd7/39AFP+AQQD/gkQA/4FDAOqAQgBc////AP///wDKklv4jlEa/3o7AP+PWC//8+3o///////////////////////z7un/kFox/35AAP+GRwD/mVYA+v///wD///8A0Zpk+NmibP+0d0T/8evj///////+/fv/1sKz/9bCs//9/fr//////+/m2/+NRwL/nloA/5xYAPj///8A////ANKaZPjRmGH/5cKh////////////k149/3UwAP91MQD/lmQ//86rhv+USg3/m1YA/5hSAP+bVgD4////AP///wDSmmT4zpJY/+/bx///////8+TV/8mLT/+TVx//gkIA/5lVAP+VTAD/x6B//7aEVv/JpH7/s39J+P///wD///8A0ppk+M6SWP/u2sf///////Pj1f/Nj1T/2KFs/8mOUv+eWhD/lEsA/8aee/+0glT/x6F7/7J8Rvj///8A////ANKaZPjRmGH/48Cf///////+/v7/2qt//82PVP/OkFX/37KJ/86siv+USg7/mVQA/5hRAP+bVgD4////AP///wDSmmT40ppk/9CVXP/69O////////7+/v/x4M//8d/P//7+/f//////9u7n/6tnJf+XUgD/nFgA+P///wD///8A0ppk+NKaZP/RmWL/1qNy//r07///////////////////////+vXw/9akdP/Wnmn/y5FY/6JfFvj///8A////ANKaZFTSmmTo0ppk/9GYYv/Ql1//5cWm//Hg0P/x4ND/5cWm/9GXYP/RmGH/0ppk/9KaZOjVnmpY////AP///wDSmmQA0ppkEtKaZI7SmmT60ppk/9CWX//OkVb/zpFW/9CWX//SmmT/0ppk/NKaZJDSmmQS0ppkAP///wD///8A0ppkANKaZADSmmQA0ppkKtKaZLrSmmT/0ppk/9KaZP/SmmT/0ppkvNKaZCrSmmQA0ppkANKaZAD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkUtKaZNzSmmTc0ppkVNKaZADSmmQA0ppkANKaZADSmmQA////AP5/AAD4HwAA4AcAAMADAACAAQAAgAEAAIABAACAAQAAgAEAAIABAACAAQAAgAEAAMADAADgBwAA+B8AAP5/AAAoAAAAIAAAAEAAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAyCRACMgkQA6oJEAOqCRACQgkQAEIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRABigkQA5oJEAP+CRAD/gkQA/4JEAP+CRADqgkQAZoJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAA4gkQAwoJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQAxIJEADyCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAAgkQAAP///wD///8A////AP///wCCRAAAgkQAAIJEAACCRAAAgkQAAIJEAACCRAAWgkQAmIJEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAJyCRAAYgkQAAIJEAACCRAAAgkQAAIJEAACCRAAA////AP///wD///8A////AIJEAACCRAAAgkQAAIJEAACCRAAAgkQAdIJEAPCCRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAP+CRAD/gkQA/4JEAPSCRAB4gkQAAIJEAACCRAAAgkQAAIJEAAD///8A////AP///wD///8AgkQAAIJEAACCRAAAgkQASoJEANKCRAD/gkQA/4JEAP+CRAD/g0YA/39AAP9zLgD/bSQA/2shAP9rIQD/bSQA/3MuAP9/PwD/g0YA/4JEAP+CRAD/gkQA/4JEAP+CRADUgkQAToJEAACCRAAAgkQAAP///wD///8A////AP///wB+PwAAgkUAIoJEAKiCRAD/gkQA/4JEAP+CRAD/hEcA/4BBAP9sIwD/dTAA/5RfKv+viF7/vp56/76ee/+wiF7/lWAr/3YxAP9sIwD/f0AA/4RHAP+CRAD/gkQA/4JEAP+CRAD/gkQArIJEACaBQwAA////AP///wD///8A////AIBCAEBzNAD6f0EA/4NFAP+CRAD/gkQA/4VIAP92MwD/bSUA/6N1Tv/ezsL/////////////////////////////////38/D/6V3Uv9uJgD/dTEA/4VJAP+CRAD/gkQA/4JEAP+BQwD/fUAA/4FDAEj///8A////AP///wD///8AzJRd5qBlKf91NgD/dDUA/4JEAP+FSQD/cy4A/3YyAP/PuKP//////////////////////////////////////////////////////9K7qP94NQD/ciwA/4VJAP+CRAD/fkEA/35BAP+LSwD/mlYA6v///wD///8A////AP///wDdpnL/4qx3/8KJUv+PUhf/cTMA/3AsAP90LgD/4dK+/////////////////////////////////////////////////////////////////+TYxf91MAD/dTIA/31CAP+GRwD/llQA/6FcAP+gWwD8////AP///wD///8A////ANGZY/LSm2X/4ap3/92mcP+wdT3/byQA/8mwj////////////////////////////////////////////////////////////////////////////+LYxv9zLgP/jUoA/59bAP+hXAD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/RmWL/1p9q/9ubXv/XqXj////////////////////////////7+fD/vZyG/6BxS/+gcUr/vJuE//r37f//////////////////////3MOr/5dQBf+dVQD/nVkA/5xYAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmWP/yohJ//jo2P//////////////////////4NTG/4JDFf9lGAD/bSQA/20kAP9kGAD/fz8S/+Xb0f//////5NG9/6txN/+LOgD/m1QA/51aAP+cWAD/m1cA/5xYAP+cWADy////AP///wD///8A////ANKaZPLSmmT/0ppk/8+TWf/Unmv//v37//////////////////////+TWRr/VwsA/35AAP+ERgD/g0UA/4JGAP9lHgD/kFga/8KXX/+TRwD/jT4A/49CAP+VTQD/n10A/5xYAP+OQQD/lk4A/55cAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/y4tO/92yiP//////////////////////8NnE/8eCQP+rcTT/ez0A/3IyAP98PgD/gEMA/5FSAP+USwD/jj8A/5lUAP+JNwD/yqV2/694Mf+HNQD/jkAA/82rf/+laBj/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/LiUr/4byY///////////////////////gupX/0I5P/+Wuev/Lklz/l1sj/308AP+QSwD/ol0A/59aAP+aVQD/k0oA/8yoh///////+fXv/6pwO//Lp3v///////Pr4f+oay7y////AP///wD///8A////ANKaZPLSmmT/0ppk/8uJSv/hvJj//////////////////////+G7l//Jhkb/0ppk/96nc//fqXX/x4xO/6dkFP+QSQD/llEA/5xXAP+USgD/yaOA///////38uv/qG05/8ijdv//////8efb/6ZpLPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/zIxO/9yxh///////////////////////7dbA/8iEQf/Sm2X/0Zlj/9ScZv/eqHf/2KJv/7yAQf+XTgD/iToA/5lSAP+JNgD/yKFv/611LP+HNQD/jT8A/8qmeP+kZRT/jT4A8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/Pk1n/1J5q//78+//////////////////+/fv/1aFv/8iEQv/Tm2b/0ppl/9GZY//Wn2z/1pZc/9eldf/Bl2b/kUcA/4w9AP+OQAD/lUwA/59eAP+cWQD/jT8A/5ZOAP+eXADy////AP///wD///8A////ANKaZPLSmmT/0ppk/9KZY//KiEn/8d/P///////////////////////47+f/05tm/8iCP//KiEj/yohJ/8eCP//RmGH//vfy///////n1sP/rXQ7/4k4AP+TTAD/nVoA/5xYAP+cVwD/nFgA/5xYAPL///8A////AP///wD///8A0ppk8tKaZP/SmmT/0ptl/8uLTf/aq37////////////////////////////+/fz/6c2y/961jv/etY7/6Myx//78+v//////////////////////3MWv/5xXD/+ORAD/mFQA/51ZAP+cWAD/nFgA8v///wD///8A////AP///wDSmmTy0ppk/9KaZP/SmmT/0ppk/8mFRP/s1b//////////////////////////////////////////////////////////////////////////////+PD/0JFU/7NzMv+WUQD/kUsA/5tXAP+dWQDy////AP///wD///8A////ANKaZP/SmmT/0ppk/9KaZP/Sm2X/z5NZ/8yMT//z5NX/////////////////////////////////////////////////////////////////9Ofa/8yNUP/UmGH/36p5/8yTWv+qaSD/kksA/5ROAPz///8A////AP///wD///8A0ppk5NKaZP/SmmT/0ppk/9KaZP/TnGf/zY9T/82OUv/t1sD//////////////////////////////////////////////////////+7Yw//OkFX/zI5R/9OcZ//SmmP/26V0/9ymdf/BhUf/ol8R6P///wD///8A////AP///wDSmmQ80ppk9tKaZP/SmmT/0ppk/9KaZP/TnGj/zpFW/8qJSv/dson/8uHS//////////////////////////////////Lj0//etIv/y4lL/86QVf/TnGj/0ppk/9KaZP/RmWP/05xn/9ymdfjUnWdC////AP///wD///8A////ANKaZADSmmQc0ppkotKaZP/SmmT/0ppk/9KaZP/Tm2b/0Zli/8qJSf/NjlH/16Z3/+G8mP/myKr/5siq/+G8mP/Xp3f/zY5S/8qISf/RmGH/05tm/9KaZP/SmmT/0ppk/9KaZP/SmmSm0pljINWdaQD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkQtKaZMrSmmT/0ppk/9KaZP/SmmT/0ptl/9GYYf/Nj1P/y4lL/8qISP/KiEj/y4lK/82PU//RmGH/0ptl/9KaZP/SmmT/0ppk/9KaZP/SmmTO0ppkRtKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZGzSmmTu0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmTw0ppkcNKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZBLSmmSQ0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppklNKaZBTSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP///wD///8A0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQy0ppkutKaZP/SmmT/0ppk/9KaZP/SmmT/0ppk/9KaZP/SmmT/0ppkvtKaZDbSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkAP///wD///8A////AP///wDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkXNKaZODSmmT/0ppk/9KaZP/SmmT/0ppk5NKaZGDSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA////AP///wD///8A////ANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkBtKaZIbSmmTo0ppk6tKaZIrSmmQK0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZADSmmQA0ppkANKaZAD///8A////AP/8P///+B///+AH//+AAf//AAD//AAAP/AAAA/gAAAHwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA+AAAAfwAAAP/AAAP/8AAP//gAH//+AH///4H////D//" rel="icon" />
+  
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<div class="wrapper">
+<header id="title-block-header">
+<h1 class="title" style="text-align:center">Standard library
+hardening</h1>
+<table style="border:none;float:right">
+  <tr>
+    <td>Document #:</td>
+    <td>
+      D3471R4
+      [<a href="https://wg21.link/P3471">Latest</a>]
+      [<a href="https://wg21.link/P3471/status">Status</a>]
+    </td>
+  </tr>
+  <tr>
+    <td>Date:</td>
+    <td>2024-12-14</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Project:</td>
+    <td>Programming Language C++</td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Audience:</td>
+    <td>
+      LWG<br>
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align:top">Reply-to:</td>
+    <td>
+      Konstantin Varlamov<br>&lt;<a href="mailto:varconst@apple.com" class="email">varconst@apple.com</a>&gt;<br>
+      Louis Dionne<br>&lt;<a href="mailto:ldionne@apple.com" class="email">ldionne@apple.com</a>&gt;<br>
+    </td>
+  </tr>
+</table>
+</header>
+<div style="clear:both">
+<h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
+<p>This paper proposes introducing <em>standard library hardening</em>
+into the C++ Standard. Hardening allows turning some instances of
+undefined behavior in the standard library into a contract violation.
+This proposal is based on our experience implementing <a href="https://libcxx.llvm.org/Hardening.html">hardening in libc++</a>
+and deploying it widely.</p>
+<h1 data-number="2" id="revision-history"><span class="header-section-number">2</span> Revision history<a href="#revision-history" class="self-link"></a></h1>
+<ul>
+<li>R4 (LWG in Hagenberg): …</li>
+<li>R3 (seen by LEWG in Hagenberg): Added the specialization of
+<code class="sourceCode cpp">expected</code> for
+<code class="sourceCode cpp"><span class="dt">void</span></code> types
+to the wording.</li>
+<li>R2: Added full wording and an FAQ section.</li>
+<li>R1: Revision rebased on top of contract violations.</li>
+<li>R0: Initial proposal based on “terminating in an
+implementation-defined way”.</li>
+</ul>
+<h1 data-number="3" id="motivation"><span class="header-section-number">3</span> Motivation<a href="#motivation" class="self-link"></a></h1>
+<p>There has been significantly increased attention to safety and
+security in C++ over the last few years, as exemplified by the
+well-known <a href="https://www.whitehouse.gov/wp-content/uploads/2024/02/Final-ONCD-Technical-Report.pdf">White
+House report</a> and numerous recent security-related proposals.</p>
+<p>While it is important to explore ways to make <em>new</em> code
+safer, we believe that the highest priority to deliver immediate
+real-world value should be to make <em>existing</em> code safer with
+minimal or no effort on behalf of users. Indeed, the amount of existing
+security-critical C++ code is so large that rewriting it or modifying it
+is both economically unviable and dangerous given the risk of
+introducing new issues.</p>
+<p>There have been a few proposals accepted recently that eliminate some
+cases of undefined behavior in the core language. The standard library
+also contains many instances of undefined behavior, some of which is a
+direct source of security vulnerabilities; addressing those is often
+trivial, can be done with low overhead and almost no work on behalf of
+users.</p>
+<p>In fact, at the moment all three major library implementations have
+some notion of a hardened or debug mode. This clearly shows interest,
+both from users and from implementers, in having a safer mode for the
+standard library. However, we believe these efforts would be vastly more
+useful if they were standardized and provided portable, cross-platform
+guarantees to users; as it stands, implementations differ in levels of
+coverage, performance guarantees and ways to enable the safer mode.</p>
+<p>Finally, leaving security of the library to be a pure vendor
+extension fails to position ISO C++ as providing a credible solution for
+code bases with formal security requirements. We believe that formally
+requiring the basic safety guarantees that most implementations already
+provide in one way or another could make a significant difference from
+the point of view of anyone writing or following safety and security
+coding standards and guidelines.</p>
+<h1 data-number="4" id="deployment-experience"><span class="header-section-number">4</span> Deployment experience<a href="#deployment-experience" class="self-link"></a></h1>
+<p>All three major implementations provide vendor-specific ways of
+enabling library assertions as proposed in this paper, today.</p>
+<ul>
+<li>We have experience deploying hardening on Apple platforms in several
+existing codebases.</li>
+<li>Google recently published <a href="https://security.googleblog.com/2024/11/retrofitting-spatial-safety-to-hundreds.html">an
+article</a> where they describe their experience with deploying this
+very technology to hundreds of millions of lines of code. They reported
+a performance impact as low as 0.3% and finding over 1000 bugs,
+including security-critical ones.</li>
+<li>Google Andromeda published <a href="https://bughunters.google.com/blog/6368559657254912/llvm-s-rfc-c-buffer-hardening-at-google">an
+article</a> ~1 year ago about their successful experience enabling
+hardening.</li>
+<li>The libc++ maintainers have received numerous informal reports of
+hardening being turned on and helping find bugs in codebases.</li>
+</ul>
+<p>Overall, standard library hardening has been a huge success, in fact
+we never expected so much success. The reception has been overwhelmingly
+positive and while the quality of implementation will never be perfect,
+we are working hard to expand the scope of hardening in libc++, to
+improve its performance and the user experience.</p>
+<h1 data-number="5" id="design-overview"><span class="header-section-number">5</span> Design overview<a href="#design-overview" class="self-link"></a></h1>
+<p>At a high level, this proposal consists of two parts:</p>
+<ul>
+<li>Annotate <em>some</em> existing library preconditions as
+<em>hardened</em>.</li>
+<li>Define the notion of a <em>hardened implementation</em>. In a
+hardened implementation, <em>hardened preconditions</em> are checked at
+runtime and violating them is a contract violation.</li>
+</ul>
+<p>There are a few important aspects to the proposed design:</p>
+<ul>
+<li>In a <em>hardened implementation</em>, it is not possible to “turn
+off” these precondition checks by using the
+<code class="sourceCode cpp">ignore</code> semantic. Since we specify
+that violating a <em>hardened precondition</em> is a contract violation,
+we are already past the point where
+<code class="sourceCode cpp">ignore</code> could bypass the check.</li>
+<li>We only propose to formally check (some of the) existing function
+preconditions, not to add any new preconditions. As a drive-by, we also
+make a few existing preconditions more explicit in the specification
+(e.g. <code class="sourceCode cpp">vector<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code>
+only has implicit preconditions via iterator validity).</li>
+<li>Hardening deals exclusively with preconditions that must be checked
+at runtime. Thus, performance overhead is an important constraint.</li>
+<li>Hardening is intended to avoid requiring changes to an
+implementation’s ABI. In particular, the intent is to make it possible
+for implementations to allow mixing hardened and unhardened code in the
+same program, if they wish to do so.</li>
+<li>Hardening needs to be lightweight enough to be used in production
+environments. In our experience, a debug-only approach is not sufficient
+to really move the needle security-wise. Thus, the goal is to identify
+the minimal set of checks that would deliver the most value to users
+while requiring minimal overhead, with a particular focus on memory
+safety as a major source of security vulnerabilities. Checking
+<em>all</em> preconditions in the library is an explicit non-goal, and
+would be impossible for many semantic requirements anyway.</li>
+</ul>
+<p>To reiterate the last point, an important design principle is that
+hardening needs to be lightweight enough for production use by a wide
+variety of real-world programs. In our experience in libc++, a small set
+of checks that is widely used delivers far more value than a more
+extensive set of checks that is only enabled by select few users.
+Thankfully, many of the most valuable checks, such as checking for
+out-of-bounds access in standard containers, also happen to be
+relatively cheap.</p>
+<h1 data-number="6" id="hardened-preconditions"><span class="header-section-number">6</span> Hardened preconditions<a href="#hardened-preconditions" class="self-link"></a></h1>
+<p>To specify hardening in the Standard, this proposal introduces the
+notion of a <em>hardened precondition</em>. A <em>hardened
+precondition</em> is a precondition that results in a contract violation
+in a <em>hardened implementation</em>. Adding hardening to the library
+largely consists of turning some of the existing preconditions into
+<em>hardened preconditions</em> in the specification. For example:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(23.7.2.2.6)</a></span>
+<strong>Element access</strong> <code class="sourceCode cpp"><span class="op">[</span>span<span class="op">.</span>elem<span class="op">]</span></code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> reference <span class="kw">operator</span><span class="op">[](</span>size_type idx<span class="op">)</span> <span class="kw">const</span>;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions:
+<code class="sourceCode cpp">idx <span class="op">&lt;</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p>In the initial proposal, we decide to focus on hardened preconditions
+that prevent out-of-bounds memory access, i.e., compromise the memory
+safety of the program. These are some of the most valuable for the user
+since they help prevent potential security vulnerabilities; many of them
+are also relatively cheap to implement. More hardened preconditions can
+potentially be added in the future, but the intent is for their number
+to be limited to keep hardening viable for production use. Specifically,
+the proposal is to add hardened preconditions to:</p>
+<ul>
+<li>Accessors of sequence containers,
+<code class="sourceCode cpp">std<span class="op">::</span>span</code>,
+<code class="sourceCode cpp">std<span class="op">::</span>mdspan</code>,
+<code class="sourceCode cpp">std<span class="op">::</span>string</code>,
+<code class="sourceCode cpp">std<span class="op">::</span>string_view</code>
+and other similar classes that might attempt to access non-existent
+elements
+(e.g. <code class="sourceCode cpp">back<span class="op">()</span></code>
+on an empty container or <code class="sourceCode cpp"><span class="kw">operator</span><span class="op">[]</span></code>
+with an invalid index).</li>
+<li>Modifiers of sequence containers and string classes that assume the
+container to be non-empty
+(e.g. <code class="sourceCode cpp">pop_back<span class="op">()</span></code>).</li>
+<li>Accessors of <code class="sourceCode cpp">optional</code> and
+<code class="sourceCode cpp">expected</code> that expect the object to
+be non-empty.</li>
+</ul>
+<p>In our experience, hardening all of these operations is trivial to
+implement and provides significant security value.</p>
+<h1 data-number="7" id="enabling-hardening"><span class="header-section-number">7</span> Enabling hardening<a href="#enabling-hardening" class="self-link"></a></h1>
+<p>Much like a freestanding implementation, the way to request a
+<em>hardened</em> implementation is left for the implementation to
+define. For example, similarly to <code class="sourceCode cpp"><span class="op">-</span>ffreestanding</code>, we
+expect that most toolchains would provide a compiler flag like
+<code class="sourceCode cpp"><span class="op">-</span>fhardened</code>,
+but other alternatives like a <code class="sourceCode cpp"><span class="op">-</span>D_LIBCPP_HARDENING_MODE<span class="op">=&lt;</span>mode<span class="op">&gt;</span></code>
+macro would also be conforming. If this proposal gets accepted, we
+expect implementations to converge on a portable mechanism. Other
+details like whether hardened implementations and non-hardened
+implementations can be mixed in different translation units are
+intentionally left unspecified, to avoid overconstraining the
+implementations.</p>
+<h1 data-number="8" id="relationship-to-contracts-profiles-and-erroneous-behavior"><span class="header-section-number">8</span> Relationship to Contracts,
+Profiles, and Erroneous Behavior<a href="#relationship-to-contracts-profiles-and-erroneous-behavior" class="self-link"></a></h1>
+<h2 data-number="8.1" id="contracts"><span class="header-section-number">8.1</span> Contracts<a href="#contracts" class="self-link"></a></h2>
+<p>Contracts is a new (in-progress) language feature that allows
+expressing preconditions and much more, with a lot of flexibility on
+what happens when an assertion is not satisfied. In the latest revision
+of this paper, we decided to base <em>hardened preconditions</em> on
+contract violations for several reasons:</p>
+<ul>
+<li>It provides a unifying framework for specifying what should be done
+when “something goes wrong” both at the language and the library level.
+A unified mechanism is something that our current hardening clients have
+been repeatedly requesting.</li>
+<li>It provides flexibility for handling contract violations in a way
+that best suits the user. In particular, our deployment experience has
+made it clear that different users have different requirements, and that
+e.g. the weaker <code class="sourceCode cpp">observe</code> semantics
+can be extremely useful to allow deploying this at scale.</li>
+</ul>
+<p>It is useful to note that we don’t require implementations to
+actually implement these checks as contract assertions. Implementations
+are free to implement precondition checking however they see fit (e.g. a
+macro), however they are required to employ the contract violation
+handling mechanism when a precondition is not satisfied.</p>
+<p>Note that if Contracts were to not be pursued anymore, this feature
+could easily be reworded in terms of a guaranteed termination in an
+implementation-defined way, or using Erroneous Behavior. We are not
+strongly attached to the exact mechanism used to implement this, but we
+find that Contracts is a nearly perfect fit.</p>
+<h2 data-number="8.2" id="profiles"><span class="header-section-number">8.2</span> Profiles<a href="#profiles" class="self-link"></a></h2>
+<p>The various Profiles proposals introduce a framework to specify sets
+of safety guarantees (such as a type safety profile or an invalidation
+profile). If profiles become a part of the Standard in the future,
+hardening can most likely be formulated as an additional profile; this
+would formalize how hardening is turned on and off.</p>
+<p>However, we feel strongly that a hardening mode as specified in this
+paper standardizes existing practice and delivers value today without
+waiting for a larger and still experimental language feature.</p>
+<h2 data-number="8.3" id="erroneous-behavior"><span class="header-section-number">8.3</span> Erroneous Behavior<a href="#erroneous-behavior" class="self-link"></a></h2>
+<p>While Erroneous Behavior is a way to clearly mark some code as
+incorrect in the specification, it does not clearly specify
+<em>what</em> should happen in case of EB. For example, a conforming
+behavior for <code class="sourceCode cpp">vector<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code>
+being called out-of-bounds under EB would be to return the last element
+of the vector instead. While that is well-defined behavior, we feel that
+it is not especially useful behavior and that is certainly not what our
+users are looking for. In contrast, the Contracts facilities provide a
+well-defined and flexible framework to handle this.</p>
+<!---
+# Summary of proposed changes
+
+Functions with preconditions that will be hardened are listed in the tables
+below. A dash `-` indicates that the class does not have the corresponding
+member function.
+
+> \centering{}
+| Class / Function    | `operator[]` | `front()` | `back()`  | `pop_front()` | `pop_back()` |
+| :--------------:    | :----------: | :-------: | :------:  | :-----------: | :----------: |
+| `array`             | ✅           | ✅        | ✅        | -             | -            |
+| `basic_string`      | ✅           | ✅        | ✅        | -             | ✅           |
+| `deque`             | ✅           | ✅        | ✅        | ✅            | ✅           |
+| `forward_list`      | -            | ✅        | -         | ✅            | -            |
+| `inplace_vector`    | ✅           | ✅        | ✅        | -             | ✅           |
+| `list`              | -            | ✅        | ✅        | ✅            | ✅           |
+| `vector`            | ✅           | ✅        | ✅        | -             | ✅           |
+| `span`              | ✅           | ✅        | ✅        | -             | -            |
+| `basic_string_view` | ✅           | ✅        | ✅        | -             | -            |
+| `mdspan`            | ✅           | -         | -         | -             | -            |
+| `bitset`            | ✅           | -         | -         | -             | -            |
+| `valarray`          | ✅           | -         | -         | -             | -            |
+
+| Class / Function | `operator->` | `operator*` | `error`  |
+| :--------------: | :----------: | :-------:   | :------: |
+| `optional`       | ✅           | ✅          | -        |
+| `expected`       | ✅           | ✅          | ✅       |
+
+In addition to the tables above, hardened preconditions are added to the following functions:
+
+- `span::first` (all overloads);
+- `span::last` (all overloads);
+- `span::subspan` (all overloads);
+- `basic_string_view::remove_prefix`;
+- `basic_string_view::remove_suffix`;
+- `span` constructors that take a range (including another `span`) of which the size is not statically known;
+- the `mdspan` constructor taking another `mdspan` with different template arguments.
+
+-->
+<h1 data-number="9" id="faq"><span class="header-section-number">9</span> FAQ<a href="#faq" class="self-link"></a></h1>
+<h2 data-number="9.1" id="notable-omissions"><span class="header-section-number">9.1</span> Notable omissions<a href="#notable-omissions" class="self-link"></a></h2>
+<h3 data-number="9.1.1" id="erase-member-functions"><span class="header-section-number">9.1.1</span>
+<code class="sourceCode cpp">erase</code> member functions<a href="#erase-member-functions" class="self-link"></a></h3>
+<p>Most containers have an <code class="sourceCode cpp">erase</code>
+member function that takes an iterator into the container and erases the
+element it points to. These functions have an implicit precondition that
+comes from the fact that the iterator argument is defined to denote “a
+valid dereferenceable constant iterator to [the container]”.</p>
+<p>Unfortunately, this precondition can only be checked for some
+containers and not others. For a contiguous container, the iterator can
+be lowered to a pointer; the pointer can then be tested to check whether
+it points within the bounds of the container’s underlying storage (using
+<code class="sourceCode cpp">std<span class="op">::</span>less</code>
+and the related function object classes). There is, however, no feasible
+way to do a similar check for a non-contiguous container (without
+requiring an ABI break and significant overhead). In this paper, we
+would prefer to focus on preconditions that can be checked in a clear
+and straightforward way across all applicable classes; less obvious
+cases would be better served by a separate dedicated paper.</p>
+<h3 data-number="9.1.2" id="associative-containers"><span class="header-section-number">9.1.2</span> Associative containers<a href="#associative-containers" class="self-link"></a></h3>
+<p>Most preconditions of associative containers do not map clearly to
+spatial safety; moreover, associative containers have a significantly
+different interface and implementation compared to the containers
+covered by this paper. Since specifying preconditions that are relevant
+for memory safety in the associative containers is less straightforward
+than for sequence containers and since we don’t have sufficient
+implementation experience hardening those, we prefer to explore
+hardening for associative containers in a dedicated paper.</p>
+<h3 data-number="9.1.3" id="algorithms"><span class="header-section-number">9.1.3</span> Algorithms<a href="#algorithms" class="self-link"></a></h3>
+<p>All algorithms (in fact, all library functions) that operate on
+ranges have an implicit precondition that the ranges are valid.
+Unfortunately, that precondition can only be checked partially and for
+contiguous iterators, where it is trivial to check that the end of the
+range is reachable from the beginning. In the general case, it is also
+impossible to check that both iterators point into the same container,
+which doesn’t appear to be covered by the “valid range” requirement but
+is required in practice for these algorithms to do something sensible.
+Moreover, since “valid range” is a blanket requirement effectively
+covering all library functions, we have limited implementation
+experience with hardening algorithms, our current approach having
+focused on containers and container-like classes so far.</p>
+<p>Some algorithms taking one range as an input and another as an output
+have a precondition that the two ranges do not overlap. This
+precondition also cannot be checked in the general case (for example,
+the iterators might be input iterators, meaning they cannot be
+“rewinded” after being incremented which would be required to perform a
+check).</p>
+<p>For all of these reasons, we decided to leave hardening of the
+algorithms to a dedicated paper.</p>
+<h3 data-number="9.1.4" id="mdspan-extents-and-layout-classes"><span class="header-section-number">9.1.4</span>
+<code class="sourceCode cpp">mdspan</code> extents and layout classes<a href="#mdspan-extents-and-layout-classes" class="self-link"></a></h3>
+<p>Classes representing the extents and the layout mapping of an
+<code class="sourceCode cpp">mdspan</code>
+(<code class="sourceCode cpp">extents</code>,
+<code class="sourceCode cpp">layout_left</code>,
+<code class="sourceCode cpp">layout_right</code>,
+<code class="sourceCode cpp">layout_stride</code>) contain several
+preconditions that can be considered for hardening. However, these are
+large, complicated classes with non-trivial interactions with the
+<code class="sourceCode cpp">mdspan</code> class itself; it would
+require dedicated effort and research to make sure all relevant cases
+are hardened and there is no redundancy leading to unnecessary overhead.
+As such, we would prefer to keep the initial proposal focused on
+preconditions that are trivial to check and reason about and defer
+<code class="sourceCode cpp">mdspan</code> to a separate paper.</p>
+<h3 data-number="9.1.5" id="valarray"><span class="header-section-number">9.1.5</span>
+<code class="sourceCode cpp">valarray</code><a href="#valarray" class="self-link"></a></h3>
+<p>Similarly to <code class="sourceCode cpp">mdspan</code>,
+<code class="sourceCode cpp">valarray</code> is non-trivial to harden
+properly. Its API is effectively spread across several helper classes
+that interact in non-trivial ways. After surverying our implementation,
+we believe that our implementation experience with
+<code class="sourceCode cpp">valarray</code> hardening is not sufficient
+at this time to include more than basic hardening of <code class="sourceCode cpp"><span class="kw">operator</span><span class="op">[]</span></code>
+in this paper. We would prefer to leave a thorough exploration of
+<code class="sourceCode cpp">valarray</code> to a dedicated paper.</p>
+<h2 data-number="9.2" id="specifying-previously-implicit-preconditions-for-sequence-containers"><span class="header-section-number">9.2</span> Specifying previously implicit
+preconditions for sequence containers<a href="#specifying-previously-implicit-preconditions-for-sequence-containers" class="self-link"></a></h2>
+<p>Before this proposal, several member functions of sequence containers
+(specifically, <code class="sourceCode cpp">front</code>,
+<code class="sourceCode cpp">back</code> and <code class="sourceCode cpp"><span class="kw">operator</span><span class="op">[]</span></code>)
+do not have an explicit precondition. Rather, their preconditions are
+formulated implicitly via a <em>Returns</em> or an <em>Effects</em>
+element of the function description (for example, “<em>Returns</em>:
+<code class="sourceCode cpp"><span class="op">*</span>a<span class="op">.</span>begin<span class="op">()</span></code>”
+implies that <code class="sourceCode cpp">a<span class="op">.</span>begin<span class="op">()</span></code>
+returns a dereferenceable iterator). It might seem that the most natural
+way to express the precondition would be to assume the container is not
+empty (as is the case for some other functions defined in the same
+section, such as <code class="sourceCode cpp">pop_back</code>):</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">.</span>front<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">69</a></span>
+<em>Result</em>: <code class="sourceCode cpp">reference</code>;
+<code class="sourceCode cpp">const_reference</code> for constant
+<code class="sourceCode cpp">a</code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">70</a></span>
+<em>Hardened preconditions</em>:
+<code class="sourceCode default">!a.empty()</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">71</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*</span>a<span class="op">.</span>begin<span class="op">()</span></code></p>
+</blockquote>
+<p>However, this formulation would be subtly different from the existing
+implicit precondition. Consider an implementation that defines, let’s
+say, a deque iterator type such that the singular iterator returned by
+<code class="sourceCode cpp">a<span class="op">.</span>end<span class="op">()</span></code>
+is dereferenceable and returns a reference to some sentinel value
+(perhaps as an attempt to be “user-friendly”). There doesn’t seem to be
+anything in the current text of the Standard that rules out such an
+implementation; thus, under the current specification, calling <code class="sourceCode cpp">a<span class="op">.</span>front<span class="op">()</span></code>
+on an empty <code class="sourceCode cpp">deque</code> would be perfectly
+well-defined when using that implementation. However, if we were to
+formulate the precondition to assume that the container is not empty,
+that would make this previously-valid code run into undefined behavior
+in a non-hardened implementation (and terminate in a hardened
+implementation).</p>
+<p>For this reason, we try to stay as close as possible to the existing
+specification and formulate the precondition in terms of iterator
+validity:</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">.</span>front<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">69</a></span>
+<em>Result</em>: <code class="sourceCode cpp">reference</code>;
+<code class="sourceCode cpp">const_reference</code> for constant
+<code class="sourceCode cpp">a</code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">70</a></span>
+<em>Hardened preconditions</em>:
+<code class="sourceCode default">a.begin()</code> is
+dereferenceable.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">71</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*</span>a<span class="op">.</span>begin<span class="op">()</span></code></p>
+</blockquote>
+<p>While expressing a precondition this way might make it seem
+complicated, in practice an implementation would know exactly when the
+iterator is dereferenceable, making this check easy to implement (most
+implementations can simply check that the container is not empty).</p>
+<h1 data-number="10" id="proposed-wording"><span class="header-section-number">10</span> Proposed wording<a href="#proposed-wording" class="self-link"></a></h1>
+<h2 data-number="10.1" id="introduce-hardened-preconditions"><span class="header-section-number">10.1</span> Introduce hardened
+preconditions<a href="#introduce-hardened-preconditions" class="self-link"></a></h2>
+<!-- Change in 7.5.4.1 [expr.prim.id.unqual] paragraph 2: -->
+<p>Add a new paragraph to <span>4.1
+<a href="https://wg21.link/intro.compliance">[intro.compliance]</a></span>
+after paragraph 7 as indicated:</p>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+Two kinds of implementations are defined: a <em>hosted
+implementation</em> and a <em>freestanding implementation.</em> A
+freestanding implementation is one in which execution may take place
+without the benefit of an operating system. A hosted implementation
+supports all the facilities described in this document, while a
+freestanding implementation supports the entire C++ language described
+in <code class="sourceCode cpp"><span class="op">[</span>lex<span class="op">]</span></code>
+through <code class="sourceCode cpp"><span class="op">[</span>cpp<span class="op">]</span></code>
+and the subset of the library facilities described in <code class="sourceCode cpp"><span class="op">[</span>compliance<span class="op">]</span></code>.</p>
+</blockquote>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+Additionally, an implementation can be a <em>hardened
+implementation</em>. A hardened implementation is one in which violating
+a <em>hardened precondition</em> is a contract violation.</p>
+</blockquote>
+
+</div>
+<p>Add a new element to <span>16.3.2.4
+<a href="https://wg21.link/structure.specifications">[structure.specifications]</a></span>
+after element 3.3 as indicated:</p>
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">(3.3)</a></span>
+<em>Preconditions</em>: the conditions that the function assumes to hold
+whenever it is called; violation of any preconditions results in
+undefined behavior.</p>
+</blockquote>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p><span class="marginalizedparent"><a class="marginalized">(3.4)</a></span>
+<em>Hardened preconditions</em>: the conditions that the function
+assumes to hold whenever it is called; violation of any hardened
+preconditions results in a contract violation in a hardened
+implementation, and undefined behavior otherwise.</p>
+</blockquote>
+
+</div>
+<h2 data-number="10.2" id="span"><span class="header-section-number">10.2</span>
+<code class="sourceCode cpp">span</code><a href="#span" class="self-link"></a></h2>
+<h3 data-number="10.2.1" id="spanoperator"><span class="header-section-number">10.2.1</span> <code class="sourceCode cpp">span<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#spanoperator" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.6
+<a href="https://wg21.link/span.elem">[span.elem]</a></span> paragraph 1
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> reference <span class="kw">operator</span><span class="op">[](</span>size_type idx<span class="op">)</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">idx <span class="op">&lt;</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*(</span>data<span class="op">()</span> <span class="op">+</span> idx<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h3 data-number="10.2.2" id="spanfront"><span class="header-section-number">10.2.2</span>
+<code class="sourceCode cpp">span<span class="op">::</span>front</code><a href="#spanfront" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.6
+<a href="https://wg21.link/span.elem">[span.elem]</a></span> paragraph 6
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> reference front<span class="op">()</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*</span>data<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h3 data-number="10.2.3" id="spanback"><span class="header-section-number">10.2.3</span>
+<code class="sourceCode cpp">span<span class="op">::</span>back</code><a href="#spanback" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.6
+<a href="https://wg21.link/span.elem">[span.elem]</a></span> paragraph 9
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> reference back<span class="op">()</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">empty<span class="op">()</span></code> is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*(</span>data<span class="op">()</span> <span class="op">+</span> <span class="op">(</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">))</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h3 data-number="10.2.4" id="spanfirst"><span class="header-section-number">10.2.4</span>
+<code class="sourceCode cpp">span<span class="op">::</span>first</code><a href="#spanfirst" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.4
+<a href="https://wg21.link/span.sub">[span.sub]</a></span> paragraph 2
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> Count<span class="op">&gt;</span> <span class="kw">constexpr</span> span<span class="op">&lt;</span>element_type, Count<span class="op">&gt;</span> first<span class="op">()</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em>Mandates</em>: <code class="sourceCode cpp">Count <span class="op">&lt;=</span> Extent</code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">Count <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> R<span class="op">{</span>data<span class="op">()</span>, Count<span class="op">}</span>;</code>
+where <code class="sourceCode cpp">R</code> is the return type.</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.4
+<a href="https://wg21.link/span.sub">[span.sub]</a></span> paragraph 11
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> span<span class="op">&lt;</span>element_type, dynamic_extent<span class="op">&gt;</span> first<span class="op">(</span>size_type count<span class="op">)</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">count <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">12</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="op">{</span>data<span class="op">()</span>, count<span class="op">}</span>;</code></p>
+</blockquote>
+<h3 data-number="10.2.5" id="spanlast"><span class="header-section-number">10.2.5</span>
+<code class="sourceCode cpp">span<span class="op">::</span>last</code><a href="#spanlast" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.4
+<a href="https://wg21.link/span.sub">[span.sub]</a></span> paragraph 5
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">template</span><span class="op">&lt;</span><span class="dt">size_t</span> Count<span class="op">&gt;</span> <span class="kw">constexpr</span> span<span class="op">&lt;</span>element_type, Count<span class="op">&gt;</span> last<span class="op">()</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Mandates</em>: <code class="sourceCode cpp">Count <span class="op">&lt;=</span> Extent</code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">Count <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> R<span class="op">{</span>data<span class="op">()</span> <span class="op">+</span> <span class="op">(</span>size<span class="op">()</span> <span class="op">-</span> Count<span class="op">)</span>, Count<span class="op">}</span>;</code>
+where <code class="sourceCode cpp">R</code> is the return type.</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.4
+<a href="https://wg21.link/span.sub">[span.sub]</a></span> paragraph 13
+as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> span<span class="op">&lt;</span>element_type, dynamic_extent<span class="op">&gt;</span> last<span class="op">(</span>size_type count<span class="op">)</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">13</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">count <span class="op">&lt;=</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">14</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="op">{</span>data<span class="op">()</span> <span class="op">+</span> <span class="op">(</span>size<span class="op">()</span> <span class="op">-</span> count<span class="op">)</span>, count<span class="op">}</span>;</code></p>
+</blockquote>
+<h3 data-number="10.2.6" id="spansubspan"><span class="header-section-number">10.2.6</span> <code class="sourceCode cpp">span<span class="op">::</span>subspan</code><a href="#spansubspan" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.4
+<a href="https://wg21.link/span.sub">[span.sub]</a></span> paragraph 8
+as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb2"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>template&lt;size_t Offset, size_t Count = dynamic_extent&gt;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  constexpr span&lt;element_type, <em>see below</em>&gt; subspan() const;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em>Mandates</em>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>  Offset &lt;= Extent &amp;&amp; (Count == dynamic_extent || Count &lt;= Extent - Offset)</span></code></pre></div>
+<p>is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>  Offset &lt;= size() &amp;&amp; (Count == dynamic_extent || Count &lt;= size() - Offset)</span></code></pre></div>
+<p>is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.4
+<a href="https://wg21.link/span.sub">[span.sub]</a></span> paragraph 15
+as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb5"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>constexpr span&lt;element_type, dynamic_extent&gt; subspan(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  size_type offset, size_type count = dynamic_extent) const;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  offset &lt;= size() &amp;&amp; (count == dynamic_extent || count &lt;= size() - offset)</span></code></pre></div>
+<p>is
+<code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+</blockquote>
+<h3 data-number="10.2.7" id="span-constructors"><span class="header-section-number">10.2.7</span>
+<code class="sourceCode cpp">span</code> constructors<a href="#span-constructors" class="self-link"></a></h3>
+<p>Modify <span>23.7.2.2.2
+<a href="https://wg21.link/span.cons">[span.cons]</a></span> around
+paragraph 4 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb7"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>template&lt;class It&gt;</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  constexpr explicit(extent != dynamic_extent) span(It first, size_type count);</span></code></pre></div>
+<p>[…]</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Preconditions</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(4.1)</a></span> -
+<code class="sourceCode cpp"><span class="op">[</span>first, first <span class="op">+</span> count<span class="op">)</span></code>
+is a valid range.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(4.2)</a></span> -
+<code class="sourceCode cpp">It</code> models
+<code class="sourceCode cpp">contiguous_iterator</code>.</p>
+<div class="rm" style="color: #bf0303">
+<p><span class="marginalizedparent"><a class="marginalized">(4.3)</a></span> - If
+<code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">count</code> is equal to
+<code class="sourceCode default">extent</code>.</p>
+</div>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Hardened preconditions</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(5.1)</a></span> - If
+<code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">count</code> is equal to
+<code class="sourceCode default">extent</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
+with <code class="sourceCode cpp">to_address<span class="op">(</span>first<span class="op">)</span></code>
+and <code class="sourceCode cpp">size_</code> with
+<code class="sourceCode cpp">count</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.2
+<a href="https://wg21.link/span.cons">[span.cons]</a></span> around
+paragraph 8 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb8"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>template&lt;class It, class End&gt;</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  constexpr explicit(extent != dynamic_extent) span(It first, End last);</span></code></pre></div>
+<p>[…]</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Preconditions</em>:</p>
+<div class="rm" style="color: #bf0303">
+<p><span class="marginalizedparent"><a class="marginalized">(8.1)</a></span> - If
+<code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">last - first</code> is equal to
+<code class="sourceCode default">extent</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">(8.?)</a></span> -
+<code class="sourceCode cpp"><span class="op">[</span>first, last<span class="op">)</span></code>
+is a valid range.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(8.?)</a></span> -
+<code class="sourceCode cpp">It</code> models
+<code class="sourceCode cpp">contiguous_iterator</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(8.?)</a></span> -
+<code class="sourceCode cpp">End</code> models <code class="sourceCode cpp">sized_sentinel_for<span class="op">&lt;</span>It<span class="op">&gt;</span></code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Hardened preconditions</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span> - If
+<code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">last - first</code> is equal to
+<code class="sourceCode default">extent</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
+with <code class="sourceCode cpp">to_address<span class="op">(</span>first<span class="op">)</span></code>
+and <code class="sourceCode cpp">size_</code> with
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Throws</em>: When and what
+<code class="sourceCode cpp">last <span class="op">-</span> first</code>
+throws.</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.2
+<a href="https://wg21.link/span.cons">[span.cons]</a></span> around
+paragraph 15 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb9"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>template&lt;class R&gt; constexpr explicit(extent != dynamic_extent) span(R&amp;&amp; r);</span></code></pre></div>
+<p>[…]</p>
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span>
+<em>Preconditions</em>:</p>
+<div class="rm" style="color: #bf0303">
+<p><span class="marginalizedparent"><a class="marginalized">(15.1)</a></span> -
+If <code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">ranges::size(r)</code> is equal to
+<code class="sourceCode default">extent</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">(15.?)</a></span> -
+<code class="sourceCode cpp">R</code> models <code class="sourceCode cpp">ranges<span class="op">::</span>contiguous_range</code>
+and <code class="sourceCode cpp">ranges<span class="op">::</span>sized_range</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(15.?)</a></span> -
+If <code class="sourceCode cpp">is_const_v<span class="op">&lt;</span>element_type<span class="op">&gt;</span></code>
+is <code class="sourceCode cpp"><span class="kw">false</span></code>,
+<code class="sourceCode cpp">R</code> models <code class="sourceCode cpp">ranges<span class="op">::</span>borrowed_range</code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">16</a></span>
+<em>Hardened preconditions</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(16.1)</a></span> -
+If <code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>, then
+<code class="sourceCode default">ranges::size(r)</code> is equal to
+<code class="sourceCode default">extent</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Effects</em>: Initializes data_ with <code class="sourceCode cpp">ranges<span class="op">::</span>data<span class="op">(</span>r<span class="op">)</span></code>
+and <code class="sourceCode cpp">size_</code> with <code class="sourceCode cpp">ranges<span class="op">::</span>size<span class="op">(</span>r<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">?</a></span>
+<em>Throws</em>: What and when <code class="sourceCode cpp">ranges<span class="op">::</span>data<span class="op">(</span>r<span class="op">)</span></code>
+and <code class="sourceCode cpp">ranges<span class="op">::</span>size<span class="op">(</span>r<span class="op">)</span></code>
+throw.</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.2
+<a href="https://wg21.link/span.cons">[span.cons]</a></span> paragraph
+19 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb10"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>constexpr explicit(extent != dynamic_extent) span(std::initializer_list&lt;value_type&gt; il);</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">18</a></span>
+<em>Constraints</em>: <code class="sourceCode cpp">is_const_v<span class="op">&lt;</span>element_type<span class="op">&gt;</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">19</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+If <code class="sourceCode cpp">extent</code> is not equal to
+<code class="sourceCode cpp">dynamic_extent</code>, then <code class="sourceCode cpp">il<span class="op">.</span>size<span class="op">()</span></code>
+is equal to <code class="sourceCode cpp">extent</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">20</a></span>
+<em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
+with <code class="sourceCode cpp">il<span class="op">.</span>begin<span class="op">()</span></code>
+and <code class="sourceCode cpp">size_</code> with
+<code class="sourceCode cpp">il</code>.size().</p>
+</blockquote>
+<p>Modify <span>23.7.2.2.2
+<a href="https://wg21.link/span.cons">[span.cons]</a></span> paragraph
+23 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb11"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>template&lt;class OtherElementType, size_t OtherExtent&gt;</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  constexpr explicit(see below) span(const span&lt;OtherElementType, OtherExtent&gt;&amp; s) noexcept;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">22</a></span>
+<em>Constraints</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(22.1)</a></span> -
+<code class="sourceCode cpp">extent <span class="op">==</span> dynamic_extent <span class="op">||</span> OtherExtent <span class="op">==</span> dynamic_extent <span class="op">||</span> extent <span class="op">==</span> OtherExtent</code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>,
+and</p>
+<p><span class="marginalizedparent"><a class="marginalized">(22.2)</a></span> -
+<code class="sourceCode cpp">is_convertible_v<span class="op">&lt;</span>OtherElementType<span class="op">(*)[]</span>, element_type<span class="op">(*)[]&gt;</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p>[<em>Note 6</em>: The intent is to allow only qualification
+conversions of the <code class="sourceCode cpp">OtherElementType</code>
+to <code class="sourceCode cpp">element_type</code>. — <em>end
+note</em>]</p>
+<p><span class="marginalizedparent"><a class="marginalized">23</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+If <code class="sourceCode cpp">extent</code> is not equal to
+<code class="sourceCode cpp">dynamic_extent</code>, then <code class="sourceCode cpp">s<span class="op">.</span>size<span class="op">()</span></code>
+is equal to <code class="sourceCode cpp">extent</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">24</a></span>
+<em>Effects</em>: Constructs a <code class="sourceCode cpp">span</code>
+that is a view over the range <code class="sourceCode cpp"><span class="op">[</span>s<span class="op">.</span>data<span class="op">()</span>, s<span class="op">.</span>data<span class="op">()</span> <span class="op">+</span> s<span class="op">.</span>size<span class="op">())</span></code>.</p>
+</blockquote>
+<h2 data-number="10.3" id="basic_string_view"><span class="header-section-number">10.3</span>
+<code class="sourceCode cpp">basic_string_view</code><a href="#basic_string_view" class="self-link"></a></h2>
+<h3 data-number="10.3.1" id="basic_string_viewoperator"><span class="header-section-number">10.3.1</span> <code class="sourceCode cpp">basic_string_view<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#basic_string_viewoperator" class="self-link"></a></h3>
+<p>Modify <span>27.3.3.6
+<a href="https://wg21.link/string.view.access">[string.view.access]</a></span>
+paragraph 1 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> const_reference <span class="kw">operator</span><span class="op">[](</span>size_type pos<span class="op">)</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">pos <span class="op">&lt;</span> size<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span>pos<span class="op">]</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Throws</em>: Nothing.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+[<em>Note 1</em>: Unlike <code class="sourceCode cpp">basic_string<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code>,
+<code class="sourceCode cpp">basic_string_view<span class="op">::</span><span class="kw">operator</span><span class="op">[](</span>size<span class="op">())</span></code>
+<span class="rm" style="color: #bf0303"><del>has undefined
+behavior</del></span><span class="add" style="color: #006e28"><ins>violates a hardened
+precondition</ins></span> instead of returning
+<code class="sourceCode cpp">charT<span class="op">()</span></code>. —
+<code class="sourceCode cpp">end note</code>]</p>
+</blockquote>
+<h3 data-number="10.3.2" id="basic_string_viewfront"><span class="header-section-number">10.3.2</span> <code class="sourceCode cpp">basic_string_view<span class="op">::</span>front</code><a href="#basic_string_viewfront" class="self-link"></a></h3>
+<p>Modify <span>27.3.3.6
+<a href="https://wg21.link/string.view.access">[string.view.access]</a></span>
+paragraph 7 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> const_reference front<span class="op">()</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h3 data-number="10.3.3" id="basic_string_viewback"><span class="header-section-number">10.3.3</span> <code class="sourceCode cpp">basic_string_view<span class="op">::</span>back</code><a href="#basic_string_viewback" class="self-link"></a></h3>
+<p>Modify <span>27.3.3.6
+<a href="https://wg21.link/string.view.access">[string.view.access]</a></span>
+paragraph 10 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> const_reference back<span class="op">()</span> <span class="kw">const</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">11</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">]</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">12</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h3 data-number="10.3.4" id="basic_string_viewremove_prefix"><span class="header-section-number">10.3.4</span> <code class="sourceCode cpp">basic_string_view<span class="op">::</span>remove_prefix</code><a href="#basic_string_viewremove_prefix" class="self-link"></a></h3>
+<p>Modify <span>27.3.3.7
+<a href="https://wg21.link/string.view.modifiers">[string.view.modifiers]</a></span>
+paragraph 1 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="dt">void</span> remove_prefix<span class="op">(</span>size_type n<span class="op">)</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp">data_ <span class="op">+=</span> n; size_ <span class="op">-=</span> n;</code></p>
+</blockquote>
+<h3 data-number="10.3.5" id="basic_string_viewremove_suffix"><span class="header-section-number">10.3.5</span> <code class="sourceCode cpp">basic_string_view<span class="op">::</span>remove_suffix</code><a href="#basic_string_viewremove_suffix" class="self-link"></a></h3>
+<p>Modify <span>27.3.3.7
+<a href="https://wg21.link/string.view.modifiers">[string.view.modifiers]</a></span>
+paragraph 3 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="dt">void</span> remove_suffix<span class="op">(</span>size_type n<span class="op">)</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Effects</em>: Equivalent to:
+<code class="sourceCode cpp">size_ <span class="op">-=</span> n;</code></p>
+</blockquote>
+<h2 data-number="10.4" id="sequence-containers"><span class="header-section-number">10.4</span> Sequence containers<a href="#sequence-containers" class="self-link"></a></h2>
+<h3 data-number="10.4.1" id="a.front"><span class="header-section-number">10.4.1</span> <code class="sourceCode cpp">a<span class="op">.</span>front<span class="op">()</span></code><a href="#a.front" class="self-link"></a></h3>
+<p>Modify <span>23.2.4
+<a href="https://wg21.link/sequence.reqmts">[sequence.reqmts]</a></span>
+around paragraph 69 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">.</span>front<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">69</a></span>
+<em>Result</em>: <code class="sourceCode cpp">reference</code>;
+<code class="sourceCode cpp">const_reference</code> for constant
+<code class="sourceCode cpp">a</code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">70</a></span>
+<em>Hardened preconditions</em>:
+<code class="sourceCode default">a.begin()</code> is
+dereferenceable.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">71</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*</span>a<span class="op">.</span>begin<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">72</a></span>
+<em>Remarks</em>: Required for
+<code class="sourceCode cpp">basic_string</code>,
+<code class="sourceCode cpp">array</code>,
+<code class="sourceCode cpp">deque</code>,
+<code class="sourceCode cpp">forward_list</code>,
+<code class="sourceCode cpp">inplace_vector</code>,
+<code class="sourceCode cpp">list</code>, and
+<code class="sourceCode cpp">vector</code>.</p>
+<div class="add" style="color: #006e28">
+<p>[<em>Note ?</em>: In most cases, the hardened precondition is
+equivalent to <code class="sourceCode default">!a.empty()</code>. —
+<em>end note</em>]</p>
+</div>
+</blockquote>
+<h3 data-number="10.4.2" id="a.back"><span class="header-section-number">10.4.2</span> <code class="sourceCode cpp">a<span class="op">.</span>back<span class="op">()</span></code><a href="#a.back" class="self-link"></a></h3>
+<p>Modify <span>23.2.4
+<a href="https://wg21.link/sequence.reqmts">[sequence.reqmts]</a></span>
+around paragraph 72 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">.</span>back<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">72</a></span>
+<em>Result</em>: <code class="sourceCode cpp">reference</code>;
+<code class="sourceCode cpp">const_reference</code> for constant
+<code class="sourceCode cpp">a</code>.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">73</a></span>
+<em>Hardened preconditions</em>:
+<code class="sourceCode default">std::prev(a.end())</code> is
+dereferenceable.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">74</a></span>
+<em>Effects</em>: Equivalent to:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a> auto tmp = a.end();</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a> --tmp;</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a> return *tmp;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">75</a></span>
+<em>Remarks</em>: Required for
+<code class="sourceCode cpp">basic_string</code>,
+<code class="sourceCode cpp">array</code>,
+<code class="sourceCode cpp">deque</code>,
+<code class="sourceCode cpp">inplace_vector</code>,
+<code class="sourceCode cpp">list</code>, and
+<code class="sourceCode cpp">vector</code>.</p>
+<div class="add" style="color: #006e28">
+<p>[<em>Note ?</em>: In most cases, the hardened precondition is
+equivalent to <code class="sourceCode default">!a.empty()</code>. —
+<em>end note</em>]</p>
+</div>
+</blockquote>
+<h3 data-number="10.4.3" id="a.pop_front"><span class="header-section-number">10.4.3</span> <code class="sourceCode cpp">a<span class="op">.</span>pop_front<span class="op">()</span></code><a href="#a.pop_front" class="self-link"></a></h3>
+<p>Modify <span>23.2.4
+<a href="https://wg21.link/sequence.reqmts">[sequence.reqmts]</a></span>
+paragraph 110 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">.</span>pop_front<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">109</a></span>
+<em>Result</em>:
+<code class="sourceCode cpp"><span class="dt">void</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">110</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">a<span class="op">.</span>empty<span class="op">()</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">111</a></span>
+<em>Effects</em>: Destroys the first element.</p>
+<p><span class="marginalizedparent"><a class="marginalized">112</a></span>
+<em>Remarks</em>: Required for
+<code class="sourceCode cpp">deque</code>,
+<code class="sourceCode cpp">forward_list</code>, and
+<code class="sourceCode cpp">list</code>.</p>
+</blockquote>
+<h3 data-number="10.4.4" id="a.pop_back"><span class="header-section-number">10.4.4</span> <code class="sourceCode cpp">a<span class="op">.</span>pop_back<span class="op">()</span></code><a href="#a.pop_back" class="self-link"></a></h3>
+<p>Modify <span>23.2.4
+<a href="https://wg21.link/sequence.reqmts">[sequence.reqmts]</a></span>
+paragraph 114 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">.</span>pop_back<span class="op">()</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">113</a></span>
+<em>Result</em>:
+<code class="sourceCode cpp"><span class="dt">void</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">114</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">a<span class="op">.</span>empty<span class="op">()</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">115</a></span>
+<em>Effects</em>: Destroys the last element.</p>
+<p><span class="marginalizedparent"><a class="marginalized">116</a></span>
+<em>Remarks</em>: Required for
+<code class="sourceCode cpp">basic_string</code>,
+<code class="sourceCode cpp">deque</code>,
+<code class="sourceCode cpp">inplace_vector</code>,
+<code class="sourceCode cpp">list</code>, and
+<code class="sourceCode cpp">vector</code>.</p>
+</blockquote>
+<h3 data-number="10.4.5" id="an"><span class="header-section-number">10.4.5</span> <code class="sourceCode cpp">a<span class="op">[</span>n<span class="op">]</span></code><a href="#an" class="self-link"></a></h3>
+<p>Modify <span>23.2.4
+<a href="https://wg21.link/sequence.reqmts">[sequence.reqmts]</a></span>
+around paragraph 117 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp">a<span class="op">[</span>n<span class="op">]</span></code></p>
+<p><span class="marginalizedparent"><a class="marginalized">117</a></span>
+<em>Result</em>: <code class="sourceCode cpp">reference</code>;
+<code class="sourceCode cpp">const_reference</code> for constant
+<code class="sourceCode cpp">a</code></p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">118</a></span>
+<em>Hardened preconditions</em>:
+<code class="sourceCode default">a.begin() + n</code> is
+dereferenceable.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">119</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="op">*(</span>a<span class="op">.</span>begin<span class="op">()</span> <span class="op">+</span> n<span class="op">)</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">120</a></span>
+<em>Remarks</em>: Required for
+<code class="sourceCode cpp">basic_string</code>,
+<code class="sourceCode cpp">array</code>,
+<code class="sourceCode cpp">deque</code>,
+<code class="sourceCode cpp">inplace_vector</code>, and
+<code class="sourceCode cpp">vector</code>.</p>
+</blockquote>
+<div class="add" style="color: #006e28">
+
+<blockquote>
+<p>[<em>Note ?</em>: In most cases, the hardened precondition is
+equivalent to <code class="sourceCode default">n &lt; a.size()</code>. —
+<em>end note</em>]</p>
+</blockquote>
+
+</div>
+<h2 data-number="10.5" id="basic_string"><span class="header-section-number">10.5</span>
+<code class="sourceCode cpp">basic_string</code><a href="#basic_string" class="self-link"></a></h2>
+<h3 data-number="10.5.1" id="basic_stringoperator"><span class="header-section-number">10.5.1</span> <code class="sourceCode cpp">basic_string<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#basic_stringoperator" class="self-link"></a></h3>
+<p>Modify <span>27.4.3.8.1
+<a href="https://wg21.link/string.accessors">[string.accessors]</a></span>
+paragraph 1 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb13"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>constexpr const_reference operator[](size_type pos) const;</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>constexpr reference       operator[](size_type pos);</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">pos <span class="op">&lt;=</span> size<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: <code class="sourceCode cpp"><span class="op">*(</span>begin<span class="op">()</span> <span class="op">+</span> pos<span class="op">)</span></code>
+if <code class="sourceCode cpp">pos <span class="op">&lt;</span> size<span class="op">()</span></code>.
+Otherwise, returns a reference to an object of type
+<code class="sourceCode cpp">charT</code> with value
+<code class="sourceCode cpp">charT<span class="op">()</span></code>,
+where modifying the object to any value other than
+<code class="sourceCode cpp">charT<span class="op">()</span></code>
+leads to undefined behavior.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Throws</em>: Nothing.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Complexity</em>: Constant time.</p>
+</blockquote>
+<h3 data-number="10.5.2" id="basic_stringfront"><span class="header-section-number">10.5.2</span> <code class="sourceCode cpp">basic_string<span class="op">::</span>front</code><a href="#basic_stringfront" class="self-link"></a></h3>
+<p>Modify <span>27.4.3.8.1
+<a href="https://wg21.link/string.accessors">[string.accessors]</a></span>
+paragraph 7 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb14"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>constexpr const charT&amp; front() const;</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>constexpr charT&amp; front();</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="kw">operator</span><span class="op">[](</span><span class="dv">0</span><span class="op">)</span>;</code></p>
+</blockquote>
+<h3 data-number="10.5.3" id="basic_stringback"><span class="header-section-number">10.5.3</span> <code class="sourceCode cpp">basic_string<span class="op">::</span>back</code><a href="#basic_stringback" class="self-link"></a></h3>
+<p>Modify <span>27.4.3.8.1
+<a href="https://wg21.link/string.accessors">[string.accessors]</a></span>
+paragraph 9 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb15"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>constexpr const charT&amp; back() const;</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>constexpr charT&amp; back();</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="kw">operator</span><span class="op">[](</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span>;</code></p>
+</blockquote>
+<h3 data-number="10.5.4" id="basic_stringpop_back"><span class="header-section-number">10.5.4</span> <code class="sourceCode cpp">basic_string<span class="op">::</span>pop_back</code><a href="#basic_stringpop_back" class="self-link"></a></h3>
+<p>Modify <span>27.4.3.7.5
+<a href="https://wg21.link/string.erase">[string.erase]</a></span>
+paragraph 12 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb16"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>constexpr void pop_back();</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">12</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">!</span>empty<span class="op">()</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">13</a></span>
+<em>Effects</em>: Equivalent to <code class="sourceCode cpp">erase<span class="op">(</span>end<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">14</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h2 data-number="10.6" id="mdspan"><span class="header-section-number">10.6</span>
+<code class="sourceCode cpp">mdspan</code><a href="#mdspan" class="self-link"></a></h2>
+<h3 data-number="10.6.1" id="mdspanoperator"><span class="header-section-number">10.6.1</span> <code class="sourceCode cpp">mdspan<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#mdspanoperator" class="self-link"></a></h3>
+<p>Modify <span>23.7.3.6.3
+<a href="https://wg21.link/mdspan.mdspan.members">[mdspan.mdspan.members]</a></span>
+paragraph 3 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb17"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>template&lt;class... OtherIndexTypes&gt;</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  constexpr reference operator[](OtherIndexTypes... indices) const;</span></code></pre></div>
+<p>[…]</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+Let <code class="sourceCode cpp">I</code> be <code class="sourceCode cpp">extents_type<span class="op">::</span><em>index-cast</em><span class="op">(</span>std<span class="op">::</span>move<span class="op">(</span>indices<span class="op">))</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">I</code> is a multidimensional index in
+<code class="sourceCode cpp">extents<span class="op">()</span></code>.</p>
+<p>[<em>Note 1</em>: This implies that <code class="sourceCode cpp">map_<span class="op">(</span>I<span class="op">)</span> <span class="op">&lt;</span> map_<span class="op">.</span>required_span_size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>. —
+<em>end note</em>]</p>
+</blockquote>
+<h3 data-number="10.6.2" id="mdspan-constructor"><span class="header-section-number">10.6.2</span>
+<code class="sourceCode cpp">mdspan</code> constructor<a href="#mdspan-constructor" class="self-link"></a></h3>
+<p>Modify <span>23.7.3.6.2
+<a href="https://wg21.link/mdspan.mdspan.cons">[mdspan.mdspan.cons]</a></span>
+around paragraph 21 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb18"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>template&lt;class OtherElementType, class OtherExtents,</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>         class OtherLayoutPolicy, class OtherAccessor&gt;</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  constexpr explicit(<em>see below</em>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    mdspan(const mdspan&lt;OtherElementType, OtherExtents,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                        OtherLayoutPolicy, OtherAccessor&gt;&amp; other);</span></code></pre></div>
+<p>[…]</p>
+<p><span class="marginalizedparent"><a class="marginalized">21</a></span>
+<em>Preconditions</em>:</p>
+<div class="rm" style="color: #bf0303">
+<p><span class="marginalizedparent"><a class="marginalized">(21.1)</a></span> -
+For each rank index <code class="sourceCode default">r</code> of
+<code class="sourceCode default">extents_type</code>, <code class="sourceCode default">static_extent(r) == dynamic_extent || static_extent(r) == other.extent(r)</code>
+is <code class="sourceCode default">true</code>.</p>
+</div>
+<p><span class="marginalizedparent"><a class="marginalized">(21.?)</a></span> -
+<code class="sourceCode cpp"><span class="op">[</span><span class="dv">0</span>, map_<span class="op">.</span>required_span_size<span class="op">())</span></code>
+is an accessible range of <code class="sourceCode cpp">ptr_</code> and
+<code class="sourceCode cpp">acc_</code> for values of
+<code class="sourceCode cpp">ptr_</code>,
+<code class="sourceCode cpp">map_</code>, and
+<code class="sourceCode cpp">acc_</code> after the invocation of this
+constructor.</p>
+<div class="add" style="color: #006e28">
+<p><span class="marginalizedparent"><a class="marginalized">2?</a></span>
+<em>Hardened preconditions</em>:</p>
+<p><span class="marginalizedparent"><a class="marginalized">(2?.1)</a></span> -
+For each rank index <code class="sourceCode default">r</code> of
+<code class="sourceCode default">extents_type</code>, <code class="sourceCode default">static_extent(r) == dynamic_extent || static_extent(r) == other.extent(r)</code>
+is <code class="sourceCode default">true</code>.</p>
+</div>
+</blockquote>
+<h2 data-number="10.7" id="bitset"><span class="header-section-number">10.7</span>
+<code class="sourceCode cpp">bitset</code><a href="#bitset" class="self-link"></a></h2>
+<h3 data-number="10.7.1" id="bitsetoperator"><span class="header-section-number">10.7.1</span> <code class="sourceCode cpp">bitset<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#bitsetoperator" class="self-link"></a></h3>
+<p>Modify <span>22.9.2.3
+<a href="https://wg21.link/bitset.members">[bitset.members]</a></span>
+paragraph 30 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb19"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>constexpr bool operator[](size_t pos) const;</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">30</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">pos</code> is valid.</p>
+<p><span class="marginalizedparent"><a class="marginalized">31</a></span>
+<em>Returns</em>:
+<code class="sourceCode cpp"><span class="kw">true</span></code> if the
+bit at position <code class="sourceCode cpp">pos</code> in <code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
+has the value one, otherwise
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">32</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<p>Modify <span>22.9.2.3
+<a href="https://wg21.link/bitset.members">[bitset.members]</a></span>
+paragraph 33 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb20"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>constexpr bitset::reference operator[](size_t pos);</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">33</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">pos</code> is valid.</p>
+<p><span class="marginalizedparent"><a class="marginalized">34</a></span>
+<em>Returns</em>: An object of type <code class="sourceCode cpp">bitset<span class="op">::</span>reference</code>
+such that <code class="sourceCode cpp"><span class="op">(*</span><span class="kw">this</span><span class="op">)[</span>pos<span class="op">]</span> <span class="op">==</span> <span class="kw">this</span><span class="op">-&gt;</span>test<span class="op">(</span>pos<span class="op">)</span></code>,
+and such that <code class="sourceCode cpp"><span class="op">(*</span><span class="kw">this</span><span class="op">)[</span>pos<span class="op">]</span> <span class="op">=</span> val</code>
+is equivalent to <code class="sourceCode cpp"><span class="kw">this</span><span class="op">-&gt;</span>set<span class="op">(</span>pos, val<span class="op">)</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">35</a></span>
+<em>Throws</em>: Nothing.</p>
+</blockquote>
+<h2 data-number="10.8" id="valarray-1"><span class="header-section-number">10.8</span>
+<code class="sourceCode cpp">valarray</code><a href="#valarray-1" class="self-link"></a></h2>
+<h3 data-number="10.8.1" id="valarrayoperator"><span class="header-section-number">10.8.1</span> <code class="sourceCode cpp">valarray<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#valarrayoperator" class="self-link"></a></h3>
+<p>Modify <span>29.6.2.4
+<a href="https://wg21.link/valarray.access">[valarray.access]</a></span>
+paragraph 1 as indicated:</p>
+<blockquote>
+<div class="sourceCode" id="cb21"><pre class="sourceCode default"><code class="sourceCode default"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>const T&amp;  operator[](size_t n) const;</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>T&amp; operator[](size_t n);</span></code></pre></div>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">n <span class="op">&lt;</span> size<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: A reference to the corresponding element of the
+array.</p>
+</blockquote>
+<h2 data-number="10.9" id="optional"><span class="header-section-number">10.9</span>
+<code class="sourceCode cpp">optional</code><a href="#optional" class="self-link"></a></h2>
+<h3 data-number="10.9.1" id="optionaloperator-"><span class="header-section-number">10.9.1</span> <code class="sourceCode cpp">optional<span class="op">::</span><span class="kw">operator</span><span class="op">-&gt;</span></code><a href="#optionaloperator-" class="self-link"></a></h3>
+<p>Modify <span>22.5.3.7
+<a href="https://wg21.link/optional.observe">[optional.observe]</a></span>
+paragraph 1 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> T<span class="op">*</span> <span class="kw">operator</span><span class="op">-&gt;()</span> <span class="kw">const</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> T<span class="op">*</span> <span class="kw">operator</span><span class="op">-&gt;()</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
+contains a value.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>:
+<code class="sourceCode cpp"><span class="op">*</span>val</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em>Remarks</em>: These functions are
+<code class="sourceCode cpp"><span class="kw">constexpr</span></code>
+functions.</p>
+</blockquote>
+<h3 data-number="10.9.2" id="optionaloperator"><span class="header-section-number">10.9.2</span> <code class="sourceCode cpp">optional<span class="op">::</span><span class="kw">operator</span><span class="op">*</span></code><a href="#optionaloperator" class="self-link"></a></h3>
+<p>Modify <span>22.5.3.7
+<a href="https://wg21.link/optional.observe">[optional.observe]</a></span>
+paragraph 4 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> T<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="kw">const</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> T<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
+contains a value.</p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em>Returns</em>:
+<code class="sourceCode cpp"><span class="op">*</span>val</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Remarks</em>: These functions are
+<code class="sourceCode cpp"><span class="kw">constexpr</span></code>
+functions.</p>
+</blockquote>
+<p>Modify <span>22.5.3.7
+<a href="https://wg21.link/optional.observe">[optional.observe]</a></span>
+paragraph 7 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> T<span class="op">&amp;&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> T<span class="op">&amp;&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="kw">const</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp"><span class="op">*</span><span class="kw">this</span></code>
+contains a value.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> std<span class="op">::</span>move<span class="op">(*</span>val<span class="op">)</span>;</code></p>
+</blockquote>
+<h2 data-number="10.10" id="expected"><span class="header-section-number">10.10</span>
+<code class="sourceCode cpp">expected</code><a href="#expected" class="self-link"></a></h2>
+<h3 data-number="10.10.1" id="expectedoperator-"><span class="header-section-number">10.10.1</span> <code class="sourceCode cpp">expected<span class="op">::</span><span class="kw">operator</span><span class="op">-&gt;</span></code><a href="#expectedoperator-" class="self-link"></a></h3>
+<p>Modify <span>22.8.6.6
+<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
+paragraph 1 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> T<span class="op">*</span> <span class="kw">operator</span><span class="op">-&gt;()</span> <span class="kw">const</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> T<span class="op">*</span> <span class="kw">operator</span><span class="op">-&gt;()</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">1</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">addressof<span class="op">(</span>val<span class="op">)</span></code>.</p>
+</blockquote>
+<h3 data-number="10.10.2" id="expectedoperator"><span class="header-section-number">10.10.2</span> <code class="sourceCode cpp">expected<span class="op">::</span><span class="kw">operator</span><span class="op">*</span></code><a href="#expectedoperator" class="self-link"></a></h3>
+<p>Modify <span>22.8.6.6
+<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
+paragraph 3 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> T<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="kw">const</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> T<span class="op">&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">3</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">4</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">val</code>.</p>
+</blockquote>
+<p>Modify <span>22.8.6.6
+<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
+paragraph 5 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> T<span class="op">&amp;&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> T<span class="op">&amp;&amp;</span> <span class="kw">operator</span><span class="op">*()</span> <span class="kw">const</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">5</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">6</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">std<span class="op">::</span>move<span class="op">(</span>val<span class="op">)</span></code>.</p>
+</blockquote>
+<p>Modify <span>22.8.7.6
+<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span>
+paragraph 2 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="dt">void</span> <span class="kw">operator</span><span class="op">*()</span> <span class="kw">const</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">2</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+</blockquote>
+<h3 data-number="10.10.3" id="expectederror"><span class="header-section-number">10.10.3</span> <code class="sourceCode cpp">expected<span class="op">::</span>error<span class="op">()</span></code><a href="#expectederror" class="self-link"></a></h3>
+<p>Modify <span>22.8.6.6
+<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
+paragraph 14 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> E<span class="op">&amp;</span> error<span class="op">()</span> <span class="kw">const</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> E<span class="op">&amp;</span> error<span class="op">()</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">14</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">15</a></span>
+<em>Returns</em>: <em><code class="sourceCode cpp">unex</code></em>.</p>
+</blockquote>
+<p>Modify <span>22.8.6.6
+<a href="https://wg21.link/expected.object.obs">[expected.object.obs]</a></span>
+paragraph 16 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> E<span class="op">&amp;&amp;</span> error<span class="op">()</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> E<span class="op">&amp;&amp;</span> error<span class="op">()</span> <span class="kw">const</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">16</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">17</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">std<span class="op">::</span>move<span class="op">(</span></code><em><code class="sourceCode cpp">unex</code></em><code class="sourceCode cpp"><span class="op">)</span></code>.</p>
+</blockquote>
+<p>Modify <span>22.8.7.6
+<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span>
+paragraph 7 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> E<span class="op">&amp;</span> error<span class="op">()</span> <span class="kw">const</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> E<span class="op">&amp;</span> error<span class="op">()</span> <span class="op">&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">7</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">8</a></span>
+<em>Returns</em>: <em><code class="sourceCode cpp">unex</code></em>.</p>
+</blockquote>
+<p>Modify <span>22.8.7.6
+<a href="https://wg21.link/expected.void.obs">[expected.void.obs]</a></span>
+paragraph 9 as indicated:</p>
+<blockquote>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> E<span class="op">&amp;&amp;</span> error<span class="op">()</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><code class="sourceCode cpp"><span class="kw">constexpr</span> <span class="kw">const</span> E<span class="op">&amp;&amp;</span> error<span class="op">()</span> <span class="kw">const</span> <span class="op">&amp;&amp;</span> <span class="kw">noexcept</span>;</code></p>
+<p><span class="marginalizedparent"><a class="marginalized">9</a></span>
+<em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
+<span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
+<code class="sourceCode cpp">has_value<span class="op">()</span></code>
+is
+<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">10</a></span>
+<em>Returns</em>: <code class="sourceCode cpp">std<span class="op">::</span>move<span class="op">(</span></code><em><code class="sourceCode cpp">unex</code></em><code class="sourceCode cpp"><span class="op">)</span></code>.</p>
+</blockquote>
+<h2 data-number="10.11" id="feature-test-macros"><span class="header-section-number">10.11</span> Feature-test macros<a href="#feature-test-macros" class="self-link"></a></h2>
+<p>(Authors’ note: we are not attached to any particular way of defining
+the feature-test macros. The proposed wording adds a macro for each
+class that would now contain hardened preconditions, but we are very
+open to suggestions on how these macros may be combined or split
+further, as well as naming)</p>
+<p>Modify <span>17.3.2
+<a href="https://wg21.link/version.syn">[version.syn]</a></span> as
+indicated:</p>
+<div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode diff"><code class="sourceCode diff"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_generator                         202207L // also in &lt;generator&gt;</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_generic_associative_lookup        201304L // also in &lt;map&gt;, &lt;set&gt;</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_generic_unordered_lookup          201811L // also in &lt;unordered_map&gt;, &lt;unordered_set&gt;</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_array                    20????L // also in &lt;array&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_basic_string             20????L // also in &lt;string&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_basic_string_view        20????L // also in &lt;string_view&gt;</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_bitset                   20????L // also in &lt;bitset&gt;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_deque                    20????L // also in &lt;deque&gt;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_expected                 20????L // also in &lt;expected&gt;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_forward_list             20????L // also in &lt;forward_list&gt;</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_inplace_vector           20????L // also in &lt;inplace_vector&gt;</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_list                     20????L // also in &lt;list&gt;</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_mdspan                   20????L // also in &lt;mdspan&gt;</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_optional                 20????L // also in &lt;optional&gt;</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_span                     20????L // also in &lt;span&gt;</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_valarray                 20????L // also in &lt;valarray&gt;</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="va">+ #define __cpp_lib_hardened_vector                   20????L // also in &lt;vector&gt;</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_hardware_interference_size        201703L // freestanding, also in &lt;new&gt;</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_has_unique_object_representations 201606L // freestanding, also in &lt;type_traits&gt;</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_hazard_pointer                    202306L // also in &lt;hazard_pointer&gt;</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  #define __cpp_lib_hypot                             201603L // also in &lt;cmath&gt;</span></code></pre></div>
+</div>
+</div>
+</div>
+</body>
+</html>
