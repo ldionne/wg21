@@ -911,17 +911,19 @@ undefined behavior.</p>
 <blockquote>
 <p><span class="marginalizedparent"><a class="marginalized">(3.4)</a></span>
 <em>Hardened preconditions</em>: the conditions that the function
-assumes to hold whenever it is called; when invoking the function in a
-hardened implementation, a contract assertion is evaluated with a
-checking semantic
-(<code class="sourceCode default">[basic.contract.eval]</code>) whose
-predicate is as described in the hardened precondition, prior to any
-other observable side effects of the function; violation of any hardened
-precondition in a non-hardened implementation, or a contract violation
-resulting from a contract assertion introduced by a hardened
-precondition evaluated having the observe semantic after the
-contract-violation handler returns normally, results in undefined
-behavior.</p>
+assumes to hold whenever it is called.</p>
+<ul>
+<li><p>When invoking the function in a hardened implementation, prior to
+any other observable side effects of the function, one or more contract
+assertions whose predicates are as described in the hardened
+precondition are evaluated with a checking semantic
+(<code class="sourceCode default">[basic.contract.eval]</code>). If any
+of these assertions is evaluated with a non-terminating semantic and the
+violation handler returns, the program has undefined behavior.</p></li>
+<li><p>When invoking the function in a non-hardened implementation, if
+any hardened precondition is violated, the program has undefined
+behavior.</p></li>
+</ul>
 </blockquote>
 
 </div>
