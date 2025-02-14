@@ -1280,8 +1280,10 @@ paragraph 7 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">empty<span class="op">()</span></code> is
-<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">!empty()</code></span></del></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">empty()</code></span>
+is
+<span><code class="sourceCode default">false</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span><span class="dv">0</span><span class="op">]</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
@@ -1296,8 +1298,10 @@ paragraph 10 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">empty<span class="op">()</span></code> is
-<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">!empty()</code></span></del></span>
+<span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">empty()</code></span>
+is
+<span><code class="sourceCode default">false</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">11</a></span>
 <em>Returns</em>: <code class="sourceCode cpp">data_<span class="op">[</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">]</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">12</a></span>
@@ -1313,7 +1317,8 @@ paragraph 1 as indicated:</p>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
 <code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>
-is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<span class="add" style="color: #006e28"><ins>is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp">data_ <span class="op">+=</span> n; size_ <span class="op">-=</span> n;</code></p>
 </blockquote>
@@ -1327,7 +1332,8 @@ paragraph 3 as indicated:</p>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
 <code class="sourceCode cpp">n <span class="op">&lt;=</span> size<span class="op">()</span></code>
-is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<span class="add" style="color: #006e28"><ins>is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">4</a></span>
 <em>Effects</em>: Equivalent to:
 <code class="sourceCode cpp">size_ <span class="op">-=</span> n;</code></p>
@@ -1478,7 +1484,8 @@ paragraph 1 as indicated:</p>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
 <code class="sourceCode cpp">pos <span class="op">&lt;=</span> size<span class="op">()</span></code>
-is <code class="sourceCode cpp"><span class="kw">true</span></code>.</p>
+<span class="add" style="color: #006e28"><ins>is
+<span><code class="sourceCode default">true</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">2</a></span>
 <em>Returns</em>: <code class="sourceCode cpp"><span class="op">*(</span>begin<span class="op">()</span> <span class="op">+</span> pos<span class="op">)</span></code>
 if <code class="sourceCode cpp">pos <span class="op">&lt;</span> size<span class="op">()</span></code>.
@@ -1503,8 +1510,9 @@ paragraph 7 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">7</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">empty<span class="op">()</span></code> is
-<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">!empty()</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">empty()</code></span>
+is
+<span><code class="sourceCode default">false</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">8</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="kw">operator</span><span class="op">[](</span><span class="dv">0</span><span class="op">)</span>;</code></p>
 </blockquote>
@@ -1518,8 +1526,9 @@ paragraph 9 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">empty<span class="op">()</span></code> is
-<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">!empty()</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">empty()</code></span>
+is
+<span><code class="sourceCode default">false</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">10</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="kw">operator</span><span class="op">[](</span>size<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span>;</code></p>
 </blockquote>
@@ -1532,8 +1541,9 @@ paragraph 12 as indicated:</p>
 <p><span class="marginalizedparent"><a class="marginalized">12</a></span>
 <em><span class="add" style="color: #006e28"><ins>Hardened</ins></span>
 <span class="rm" style="color: #bf0303"><del>P</del></span><span class="add" style="color: #006e28"><ins>p</ins></span>reconditions</em>:
-<code class="sourceCode cpp">empty<span class="op">()</span></code> is
-<code class="sourceCode cpp"><span class="kw">false</span></code>.</p>
+<span class="rm" style="color: #bf0303"><del><span><code class="sourceCode default">!empty()</code></span></del></span><span class="add" style="color: #006e28"><ins><span><code class="sourceCode default">empty()</code></span>
+is
+<span><code class="sourceCode default">false</code></span></ins></span>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">13</a></span>
 <em>Effects</em>: Equivalent to <code class="sourceCode cpp">erase<span class="op">(</span>end<span class="op">()</span> <span class="op">-</span> <span class="dv">1</span><span class="op">)</span></code>.</p>
 <p><span class="marginalizedparent"><a class="marginalized">14</a></span>
