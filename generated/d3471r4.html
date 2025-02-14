@@ -1333,8 +1333,7 @@ around paragraph 69 as indicated:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">70</a></span>
 <em>Hardened preconditions</em>:
-<code class="sourceCode default">a.begin()</code> is
-dereferenceable.</p>
+<code class="sourceCode default">!a.empty()</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">71</a></span>
 <em>Returns</em>: <code class="sourceCode cpp"><span class="op">*</span>a<span class="op">.</span>begin<span class="op">()</span></code></p>
@@ -1366,8 +1365,7 @@ around paragraph 72 as indicated:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">73</a></span>
 <em>Hardened preconditions</em>:
-<code class="sourceCode default">std::prev(a.end())</code> is
-dereferenceable.</p>
+<code class="sourceCode default">!a.empty()</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">74</a></span>
 <em>Effects</em>: Equivalent to:</p>
@@ -1449,8 +1447,7 @@ around paragraph 117 as indicated:</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">118</a></span>
 <em>Hardened preconditions</em>:
-<code class="sourceCode default">a.begin() + n</code> is
-dereferenceable.</p>
+<code class="sourceCode default">n &lt; a.size()</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">119</a></span>
 <em>Effects</em>: Equivalent to: <code class="sourceCode cpp"><span class="cf">return</span> <span class="op">*(</span>a<span class="op">.</span>begin<span class="op">()</span> <span class="op">+</span> n<span class="op">)</span>;</code></p>
@@ -1462,15 +1459,6 @@ dereferenceable.</p>
 <code class="sourceCode cpp">inplace_vector</code>, and
 <code class="sourceCode cpp">vector</code>.</p>
 </blockquote>
-<div class="add" style="color: #006e28">
-
-<blockquote>
-<p>[<em>Note ?</em>: In most cases, the hardened precondition is
-equivalent to <code class="sourceCode default">n &lt; a.size()</code>. —
-<em>end note</em>]</p>
-</blockquote>
-
-</div>
 <h2 data-number="10.5" id="basic_string"><span class="header-section-number">10.5</span>
 <code class="sourceCode cpp">basic_string</code><a href="#basic_string" class="self-link"></a></h2>
 <h3 data-number="10.5.1" id="basic_stringoperator"><span class="header-section-number">10.5.1</span> <code class="sourceCode cpp">basic_string<span class="op">::</span><span class="kw">operator</span><span class="op">[]</span></code><a href="#basic_stringoperator" class="self-link"></a></h3>
