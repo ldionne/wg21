@@ -1092,11 +1092,10 @@ is a valid range.</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">5</a></span>
 <em>Hardened preconditions</em>:</p>
-<p><span class="marginalizedparent"><a class="marginalized">(5.1)</a></span> - If
+<p><span class="marginalizedparent"><a class="marginalized">(5.1)</a></span> If
 <code class="sourceCode default">extent</code> is not equal to
-<code class="sourceCode default">dynamic_extent</code>, then
-<code class="sourceCode default">count</code> is equal to
-<code class="sourceCode default">extent</code>.</p>
+<code class="sourceCode default">dynamic_extent</code>,
+<code class="sourceCode default">count == extent</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
@@ -1133,11 +1132,10 @@ is a valid range.</p>
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">9</a></span>
 <em>Hardened preconditions</em>:</p>
-<p><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span> - If
+<p><span class="marginalizedparent"><a class="marginalized">(9.1)</a></span> If
 <code class="sourceCode default">extent</code> is not equal to
-<code class="sourceCode default">dynamic_extent</code>, then
-<code class="sourceCode default">last - first</code> is equal to
-<code class="sourceCode default">extent</code>.</p>
+<code class="sourceCode default">dynamic_extent</code>,
+<code class="sourceCode default">(last - first) == extent</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Initializes <code class="sourceCode cpp">data_</code>
@@ -1174,11 +1172,10 @@ is <code class="sourceCode cpp"><span class="kw">false</span></code>,
 <div class="add" style="color: #006e28">
 <p><span class="marginalizedparent"><a class="marginalized">16</a></span>
 <em>Hardened preconditions</em>:</p>
-<p><span class="marginalizedparent"><a class="marginalized">(16.1)</a></span> -
-If <code class="sourceCode default">extent</code> is not equal to
-<code class="sourceCode default">dynamic_extent</code>, then
-<code class="sourceCode default">ranges::size(r)</code> is equal to
-<code class="sourceCode default">extent</code>.</p>
+<p><span class="marginalizedparent"><a class="marginalized">(16.1)</a></span> If
+<code class="sourceCode default">extent</code> is not equal to
+<code class="sourceCode default">dynamic_extent</code>,
+<code class="sourceCode default">ranges::size(r) == extent</code>.</p>
 </div>
 <p><span class="marginalizedparent"><a class="marginalized">?</a></span>
 <em>Effects</em>: Initializes data_ with <code class="sourceCode cpp">ranges<span class="op">::</span>data<span class="op">(</span>r<span class="op">)</span></code>
@@ -1346,11 +1343,6 @@ around paragraph 69 as indicated:</p>
 <code class="sourceCode cpp">inplace_vector</code>,
 <code class="sourceCode cpp">list</code>, and
 <code class="sourceCode cpp">vector</code>.</p>
-<div class="add" style="color: #006e28">
-<p>[<em>Note ?</em>: In most cases, the hardened precondition is
-equivalent to <code class="sourceCode default">!a.empty()</code>. —
-<em>end note</em>]</p>
-</div>
 </blockquote>
 <h3 data-number="10.4.2" id="a.back"><span class="header-section-number">10.4.2</span> <code class="sourceCode cpp">a<span class="op">.</span>back<span class="op">()</span></code><a href="#a.back" class="self-link"></a></h3>
 <p>Modify <span>23.2.4
@@ -1380,11 +1372,6 @@ around paragraph 72 as indicated:</p>
 <code class="sourceCode cpp">inplace_vector</code>,
 <code class="sourceCode cpp">list</code>, and
 <code class="sourceCode cpp">vector</code>.</p>
-<div class="add" style="color: #006e28">
-<p>[<em>Note ?</em>: In most cases, the hardened precondition is
-equivalent to <code class="sourceCode default">!a.empty()</code>. —
-<em>end note</em>]</p>
-</div>
 </blockquote>
 <h3 data-number="10.4.3" id="a.pop_front"><span class="header-section-number">10.4.3</span> <code class="sourceCode cpp">a<span class="op">.</span>pop_front<span class="op">()</span></code><a href="#a.pop_front" class="self-link"></a></h3>
 <p>Modify <span>23.2.4
