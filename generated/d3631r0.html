@@ -541,12 +541,16 @@ with trivially relocatable types only, what you have is exactly <code class="sou
 <li>Making <code class="sourceCode cpp">std<span class="op">::</span>trivially_relocate</code>
 an exposition-only helper. We don’t want to encourage users to call it,
 instead they should make use of the (safer) algorithms that take
-allocators and handle exceptions properly. We do not lose any
+iterators and handle exceptions properly. We do not lose any
 functionality, since <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate</code>
 is basically equivalent to it for trivially relocatable types (modulo
 the detection of overlap). Note that we need to keep that function as
-exposition-only because <a href="https://wg21.link/P3516">P3516</a> uses
-it.</li>
+exposition-only because it defines important core-language wording for
+trivial relocation, and <a href="https://wg21.link/P3516">P3516</a> uses
+it. We could potentially make it a function working on a single element
+instead, since that’s what <a href="https://wg21.link/P3516">P3516</a>’s
+<code class="sourceCode cpp">std<span class="op">::</span>relocate_at</code>
+requires, but we are not attached to that.</li>
 </ul>
 </div>
 </div>
