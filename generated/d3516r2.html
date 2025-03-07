@@ -1124,7 +1124,7 @@ entities</ins></span>:</li>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="va">+template&lt;class T&gt;</span></span>
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="va">+ requires move_constructible&lt;T&gt;</span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="va">+  constexpr T* <em>relocate-via-move-and-destroy</em>(T* dest, T* source) {</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    struct guard { T *t; ~guard() { destroy_at(t); } } g(source);</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    struct guard { T* t; constexpr ~guard() { destroy_at(t); } } g(source);</span></span>
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="va">+    return ::new (<em>voidify</em>(*dest)) T(std::move(*source));</span></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="va">+  }</span></span></code></pre></div>
 </div>
@@ -1156,7 +1156,7 @@ header synopsis (after <code class="sourceCode cpp"><span class="op">[</span>spe
 <div class="sourceCode" id="cb12"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// [specialized.relocate], relocate_at</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a> <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>T, T<span class="op">&gt;</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> T<span class="op">*</span> relocate_at<span class="op">(</span>T<span class="op">*</span> dest, T<span class="op">*</span> source<span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> T<span class="op">*</span> relocate_at<span class="op">(</span>T<span class="op">*</span> dest, T<span class="op">*</span> source<span class="op">)</span>                                    <span class="co">// freestanding</span></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">noexcept</span><span class="op">(</span>is_nothrow_relocatable_v<span class="op">&lt;</span>T<span class="op">&gt;)</span>;</span></code></pre></div>
 <p>In <span>20.2.2
 <a href="https://wg21.link/memory.syn">[memory.syn]</a></span>, add to
