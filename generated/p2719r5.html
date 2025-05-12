@@ -508,17 +508,21 @@ for types that cannot have intrusive class-scoped operators
 specified.</p>
 <p>At a high level, this allows defining allocation and deallocation
 functions like:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>mylib<span class="op">::</span>Foo<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span> n<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>mylib<span class="op">::</span>Foo<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span> ptr<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>mylib<span class="op">::</span>Foo<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span> n, std<span class="op">::</span>align_val_t align<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>mylib<span class="op">::</span>Foo<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span> ptr, std<span class="op">::</span><span class="dt">size_t</span> n, std<span class="op">::</span>align_val_t align<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">...</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>However, it also allows providing these functions for a family of
 types, which is where this feature becomes interesting:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> use_special_allocation_scheme<span class="op">&lt;</span>T<span class="op">&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span> n<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span><span class="op">*</span> <span class="kw">operator</span> <span class="kw">new</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, std<span class="op">::</span><span class="dt">size_t</span> n, std<span class="op">::</span>align_val_t align<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">requires</span> use_special_allocation_scheme<span class="op">&lt;</span>T<span class="op">&gt;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span> ptr<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="kw">operator</span> <span class="kw">delete</span><span class="op">(</span>std<span class="op">::</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;</span>, <span class="dt">void</span><span class="op">*</span> ptr, std<span class="op">::</span><span class="dt">size_t</span> n, std<span class="op">::</span>align_val_t align<span class="op">)</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span></code></pre></div>
 <h1 data-number="2" id="revision-history"><span class="header-section-number">2</span> Revision history<a href="#revision-history" class="self-link"></a></h1>
 <ul>
 <li>R0 (St-Louis): Initial version</li>
@@ -580,6 +584,8 @@ were replaceable global allocation functions during consteval</li>
 delete/delete[] is ill formed</li>
 <li>Make all currently implicit parameters mandatory</li>
 </ul></li>
+<li>Updated introduction examples to adopt correct signature following
+Hagenberg</li>
 <li>Updated overload resolutions examples in <span><a href="https://wg21.link/expr.new">[expr.new]</a></span>
 <ul>
 <li>Existing examples were updated to include the type aware
@@ -787,7 +793,7 @@ the compiler checks (in order):</p>
 
 <div class="sourceCode" id="cb10"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// T not overaligned</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>T<span class="op">-</span><span class="kw">or</span><span class="op">-</span>Base<span class="op">*</span>, destroying_delete_t<span class="op">{}</span>, <span class="op">...)</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">(</span>type_identity<span class="op">&lt;</span>T<span class="op">&gt;{}</span>, <span class="op">(</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">)</span>, align_val_t<span class="op">{</span><span class="kw">alignof</span><span class="op">(</span>T<span class="op">)})</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr, <span class="kw">sizeof</span><span class="op">(</span>T<span class="op">))</span></span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>DELETE<span class="op">((</span><span class="dt">void</span><span class="op">*)</span>ptr<span class="op">)</span></span></code></pre></div>
 
