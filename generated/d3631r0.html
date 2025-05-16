@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2025-02-13" />
+  <meta name="dcterms.date" content="2025-05-13" />
   <title>Cleaning up the trivial relocation APIs in C++26</title>
   <style>
       code{white-space: pre-wrap;}
@@ -445,7 +445,7 @@ relocation APIs in C++26</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2025-02-13</td>
+    <td>2025-05-13</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -454,7 +454,7 @@ relocation APIs in C++26</h1>
   <tr>
     <td style="vertical-align:top">Audience:</td>
     <td>
-      LEWG<br>
+      LEWG, LWG<br>
     </td>
   </tr>
   <tr>
@@ -472,60 +472,64 @@ relocation APIs in C++26</h1>
 <ul>
 <li><a href="#introduction" id="toc-introduction"><span class="toc-section-number">1</span> Introduction<span></span></a></li>
 <li><a href="#proposal" id="toc-proposal"><span class="toc-section-number">2</span> Proposal<span></span></a></li>
+<li><a href="#wording-changes" id="toc-wording-changes"><span class="toc-section-number">3</span> Wording changes<span></span></a>
+<ul>
+<li><a href="#synopsis-of-relocation-functions-20.2.2-memory.syn" id="toc-synopsis-of-relocation-functions-20.2.2-memory.syn"><span class="toc-section-number">3.1</span> Synopsis of relocation functions
+20.2.2 [memory.syn]<span></span></a></li>
+<li><a href="#definitions-for-relocation-functions-20.2.6-obj.lifetime" id="toc-definitions-for-relocation-functions-20.2.6-obj.lifetime"><span class="toc-section-number">3.2</span> Definitions for relocation
+functions (20.2.6 [obj.lifetime])<span></span></a></li>
+</ul></li>
 </ul>
 </div>
 <h1 data-number="1" id="introduction"><span class="header-section-number">1</span> Introduction<a href="#introduction" class="self-link"></a></h1>
 <p><a href="https://wg21.link/P3516">P3516</a> was design-approved by
 LEWG in Hagenberg. As part of that discussion, we also discussed
 cleaning up the relocation-related APIs provided in the library (since
-<a href="https://wg21.link/P2786">P2786</a> also added some), but we
-decided to punt it to a separate paper to allow P3516 to progress. This
-is the cleanup paper.</p>
+<a href="https://wg21.link/P2786">P2786</a> also added some). There was
+a fair amount of consensus in the room that the introduction of <a href="https://wg21.link/P3516">P3516</a> removed the need for some of
+the APIs added by <a href="https://wg21.link/P2786">P2786</a>. However,
+we decided to punt it to a separate paper to allow P3516 to progress.
+This is the cleanup paper.</p>
 <h1 data-number="2" id="proposal"><span class="header-section-number">2</span> Proposal<a href="#proposal" class="self-link"></a></h1>
-<p>The current state of the APIs that have been design-approved by LEWG
-is this:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// P2786 APIs</span></span>
+<p>The current state of the APIs that have been voted into the draft or
+design approved in Hagenberg is this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// P2786 APIs (in draft)</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>T<span class="op">*</span> trivially_relocate<span class="op">(</span>T<span class="op">*</span> first, T<span class="op">*</span> last, T<span class="op">*</span> result<span class="op">)</span>;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>T<span class="op">*</span> trivially_relocate<span class="op">(</span>T<span class="op">*</span> first, T<span class="op">*</span> last, T<span class="op">*</span> result<span class="op">)</span>; <span class="co">// freestanding</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>T<span class="op">*</span> trivially_relocate_at<span class="op">(</span>T<span class="op">*</span> location, T<span class="op">*</span> source<span class="op">)</span>;</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> T<span class="op">*</span> relocate<span class="op">(</span>T<span class="op">*</span> first, T<span class="op">*</span> last, T<span class="op">*</span> result<span class="op">)</span>; <span class="co">// freestanding</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span> <span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> T<span class="op">*</span> relocate<span class="op">(</span>T<span class="op">*</span> first, T<span class="op">*</span> last, T<span class="op">*</span> result<span class="op">)</span>;</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">// P3516 APIs</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a> <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>T, T<span class="op">&gt;</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> T<span class="op">*</span> relocate_at<span class="op">(</span>T<span class="op">*</span> dest, T<span class="op">*</span> source<span class="op">)</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">noexcept</span><span class="op">(</span>is_nothrow_relocatable_v<span class="op">&lt;</span>T<span class="op">&gt;)</span>;</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowForwardIterator1 first,</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>;</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowForwardIterator1 first,</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>;</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>;</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co">// ... also std::execution_policy overloads ...</span></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... similar overloads here ...</span></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p>We propose:</p>
-<ul>
-<li>Removing <code class="sourceCode cpp">std<span class="op">::</span>relocate<span class="op">(...)</span></code>.
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">// P3516 APIs (design approved)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> T<span class="op">&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a> <span class="kw">requires</span> <em>relocatable-from</em><span class="op">&lt;</span>T, T<span class="op">&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> T<span class="op">*</span> relocate_at<span class="op">(</span>T<span class="op">*</span> dest, T<span class="op">*</span> source<span class="op">)</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">noexcept</span><span class="op">(</span>is_nothrow_relocatable_v<span class="op">&lt;</span>T<span class="op">&gt;)</span>;</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowForwardIterator2</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate<span class="op">(</span>NoThrowForwardIterator1 first,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator1 last,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                           NoThrowForwardIterator2 result<span class="op">)</span>; <span class="co">// freestanding</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowForwardIterator1, <span class="kw">class</span> Size, <span class="kw">class</span> NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> pair<span class="op">&lt;</span>NoThrowForwardIterator1, NoThrowForwardIterator2<span class="op">&gt;</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_n<span class="op">(</span>NoThrowForwardIterator1 first,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>                             Size n,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                             NoThrowForwardIterator2 result<span class="op">)</span>; <span class="co">// freestanding</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">template</span><span class="op">&lt;</span><span class="kw">class</span> NoThrowBidirectionalIterator1, <span class="kw">class</span> NoThrowBidirectionalIterator2<span class="op">&gt;</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="kw">constexpr</span> NoThrowBidirectionalIterator2</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    uninitialized_relocate_backward<span class="op">(</span>NoThrowBidirectionalIterator1 first,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator1 last,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                                    NoThrowBidirectionalIterator2 result<span class="op">)</span>; <span class="co">// freestanding</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co">// ... also std::execution_policy overloads ...</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> ranges <span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... similar overloads here ...</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>To clean things up, we propose removing <code class="sourceCode cpp">std<span class="op">::</span>relocate<span class="op">(...)</span></code>.
 It was introduced before we had proper relocation algorithms, and it’s
 basically a less capable version of the uninitialized algorithms above
 since it doesn’t support iterators and potentially-throwing move
@@ -533,25 +537,80 @@ constructors. One difference is that <code class="sourceCode cpp">std<span class
 does detect overlaps and decides to relocate forward or backward, which
 <a href="https://wg21.link/P3516">P3516</a> handles by having a
 <code class="sourceCode cpp">_backward</code> variant instead (which is
-consistent with existing uninitialized algorithms).</li>
-<li>Removing <code class="sourceCode cpp">std<span class="op">::</span>trivially_relocate_at</code>.
-It’s a less capable version of <code class="sourceCode cpp">std<span class="op">::</span>relocate_at</code>.
-If you use <code class="sourceCode cpp">std<span class="op">::</span>relocate_at</code>
-with trivially relocatable types only, what you have is exactly <code class="sourceCode cpp">std<span class="op">::</span>trivially_relocate_at</code>.</li>
-<li>Making <code class="sourceCode cpp">std<span class="op">::</span>trivially_relocate</code>
-an exposition-only helper. We don’t want to encourage users to call it,
-instead they should make use of the (safer) algorithms that take
-iterators and handle exceptions properly. We do not lose any
-functionality, since <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_relocate</code>
-is basically equivalent to it for trivially relocatable types (modulo
-the detection of overlap). Note that we need to keep that function as
-exposition-only because it defines important core-language wording for
-trivial relocation, and <a href="https://wg21.link/P3516">P3516</a> uses
-it. We could potentially make it a function working on a single element
-instead, since that’s what <a href="https://wg21.link/P3516">P3516</a>’s
-<code class="sourceCode cpp">std<span class="op">::</span>relocate_at</code>
-requires, but we are not attached to that.</li>
+consistent with existing uninitialized algorithms).</p>
+<p>Note that we <em>do not</em> propose removing <code class="sourceCode cpp">std<span class="op">::</span>trivially_relocate</code>
+or making it an exposition-only helper, although the idea was explored.
+While we don’t want to encourage users to call it, we decided that the
+function had a useful role as a low level object manipulation function,
+similarly to
+<code class="sourceCode cpp">std<span class="op">::</span>memmove</code>.
+This will be a simple wrapper over the compiler builtin that all
+compilers are expected to provide, which may be helpful to write some
+low level APIs portably. General users are still expected to use the
+higher level <code class="sourceCode cpp">std<span class="op">::</span>uninitialized_xxx</code>
+algorithms instead.</p>
+<h1 data-number="3" id="wording-changes"><span class="header-section-number">3</span> Wording changes<a href="#wording-changes" class="self-link"></a></h1>
+<h2 data-number="3.1" id="synopsis-of-relocation-functions-20.2.2-memory.syn"><span class="header-section-number">3.1</span> Synopsis of relocation
+functions 20.2.2 [memory.syn]<a href="#synopsis-of-relocation-functions-20.2.2-memory.syn" class="self-link"></a></h2>
+<p>Remove <code class="sourceCode cpp">std<span class="op">::</span>relocate</code> from
+the synopsis:</p>
+<div class="rm" style="color: #bf0303">
+
+<blockquote>
+<div class="sourceCode" id="cb2"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>template &lt;class T&gt;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  constexpr T* relocate(T* first, T* last, T* result);                        // freestanding</span></code></pre></div>
+</blockquote>
+
+</div>
+<h2 data-number="3.2" id="definitions-for-relocation-functions-20.2.6-obj.lifetime"><span class="header-section-number">3.2</span> Definitions for relocation
+functions (20.2.6 [obj.lifetime])<a href="#definitions-for-relocation-functions-20.2.6-obj.lifetime" class="self-link"></a></h2>
+<p>Remove <code class="sourceCode cpp">std<span class="op">::</span>relocate</code>. In
+<em>Explicit lifetime management</em> <span>20.2.6
+<a href="https://wg21.link/obj.lifetime">[obj.lifetime]</a></span>:</p>
+<div class="rm" style="color: #bf0303">
+
+<blockquote>
+<div class="sourceCode" id="cb3"><pre class="sourceCode default cpp"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>template &lt;class T&gt;</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> constexpr T* relocate(T* first, T* last, T* result);</span></code></pre></div>
+</blockquote>
+<p><em>Mandates</em>: <code class="sourceCode default">is_nothrow_relocatable_v&lt;T&gt; &amp;&amp; !is_const_v&lt;T&gt;</code>
+is <code class="sourceCode default">true</code>.
+<code class="sourceCode default">T</code> is not an array of unknown
+bound.</p>
+<p><em>Preconditions</em>:</p>
+<ul>
+<li><code class="sourceCode default">[first, last)</code> is a valid
+range.</li>
+<li><code class="sourceCode default">[result, result + (last - first))</code>
+denotes a region of storage that is a subset of the region reachable
+through result (6.8.4 [basic.compound]) and suitably aligned for the
+type <code class="sourceCode default">T</code>.</li>
+<li>No element in the range
+<code class="sourceCode default">[first, last)</code> is a
+potentially-overlapping subobject.</li>
 </ul>
+<p><em>Effects</em>:</p>
+<ul>
+<li>If <code class="sourceCode default">result == first</code> is
+<code class="sourceCode default">true</code>, no effect;</li>
+<li>otherwise, if not called during constant evaluation and <code class="sourceCode default">is_trivially_relocatable_v&lt;T&gt;</code> is
+<code class="sourceCode default">true</code>, then has effects
+equivalent to: <code class="sourceCode default">trivially_relocate(first, last, result);</code></li>
+<li>otherwise, for each integer
+<code class="sourceCode default">i</code> in
+<code class="sourceCode default">[0, last - first)</code>,
+<ul>
+<li>if <code class="sourceCode default">T</code> is an array type,
+equivalent to: <code class="sourceCode default">relocate(begin(first[i]), end(first[i]), *start_lifetime_as&lt;T&gt;(result + i));</code></li>
+<li>otherwise, equivalent to: <code class="sourceCode default">construct_at(result + i, std::move(first[i])); destroy_at(first + i);</code></li>
+</ul></li>
+</ul>
+<p><em>Returns</em>:
+<code class="sourceCode default">result + (last-first)</code>.</p>
+<p><em>Throws</em>: Nothing.</p>
+<p><span class="note"><span>[ <em>Note:</em> </span>Overlapping ranges
+are supported.<span> — <em>end note</em> ]</span></span></p>
+</div>
 </div>
 </div>
 </body>
