@@ -594,13 +594,12 @@ implies
 <p>A
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>
 function is implicitly
-<code class="sourceCode cpp"><span class="kw">inline</span></code>.
-Combined with the header-only requirement, the compiler sees the body at
-every call site which changes its inlining and code-layout decisions.
-Code that previously referenced a single dylib symbol may now be
-duplicated or inlined at every caller, with effects on binary size,
-runtime performance, and debugging experience. This happens even when no
-caller ever runs the function during constant evaluation.</p>
+<code class="sourceCode cpp"><span class="kw">inline</span></code>. Even
+though this is not required, in practice this causes compilers to more
+aggressively inline these functions (even when they were previously
+defined in headers). This has an effect on binary size, runtime
+performance, and debugging experience. This happens even when no caller
+ever runs the function during constant evaluation.</p>
 <h2 data-number="2.3" id="constexpr-reduces-implementation-freedom"><span class="header-section-number">2.3</span>
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>
 reduces implementation freedom<a href="#constexpr-reduces-implementation-freedom" class="self-link"></a></h2>
@@ -645,7 +644,21 @@ been specified as
 from the start, this implementation choice would never have been
 available. Hence, there is also a hidden opportunity cost in most of
 these proposals.</p>
-<h2 data-number="2.5" id="the-specification-cost-is-a-poor-proxy-for-implementation-cost"><span class="header-section-number">2.5</span> The specification cost is a
+<h2 data-number="2.5" id="constexpr-can-slow-down-compilation-in-unexpected-ways"><span class="header-section-number">2.5</span>
+<code class="sourceCode cpp"><span class="kw">constexpr</span></code>
+can slow down compilation in unexpected ways<a href="#constexpr-can-slow-down-compilation-in-unexpected-ways" class="self-link"></a></h2>
+<p>When the compiler performs trial constant evaluation
+(e.g. initialization of global variables), it instantiates any constexpr
+function encountered, which can have suprising consequences. For
+example, this defeats attempts to reduce compilation times with explicit
+template instantiations, which was observed to cause a noticeable
+compilation-time regression in libstdc++’s
+<code class="sourceCode cpp">std<span class="op">::</span>format</code>,
+even to pre-existing code that did not intend to use
+<code class="sourceCode cpp">std<span class="op">::</span>format</code>
+in
+<code class="sourceCode cpp"><span class="kw">constexpr</span></code>.</p>
+<h2 data-number="2.6" id="the-specification-cost-is-a-poor-proxy-for-implementation-cost"><span class="header-section-number">2.6</span> The specification cost is a
 poor proxy for implementation cost<a href="#the-specification-cost-is-a-poor-proxy-for-implementation-cost" class="self-link"></a></h2>
 <p>Constexpr
 <code class="sourceCode cpp"><span class="op">&lt;</span>cmath<span class="op">&gt;</span></code>
