@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2026-06-11" />
+  <meta name="dcterms.date" content="2026-06-15" />
   <title>Implementation considerations of library
 constexpr-ification</title>
   <style>
@@ -518,7 +518,7 @@ considerations of library constexpr-ification</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2026-06-11</td>
+    <td>2026-06-15</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -623,6 +623,13 @@ branches, but some can’t. Also,
 <code class="sourceCode cpp"><span class="cf">if</span> <span class="kw">consteval</span></code>
 effectively means duplicated implementations, which also increases the
 maintenance and testing burden and the likelihood of bugs.</p>
+<p>The same constraints apply to tests themselves. Standard library
+tests often rely on techniques that are not
+<code class="sourceCode cpp"><span class="kw">constexpr</span></code>-friendly,
+for example using global state to count how many times a function is
+called. Refactoring tests to be
+<code class="sourceCode cpp"><span class="kw">constexpr</span></code>-friendly
+is often non-trivial.</p>
 <h2 data-number="2.4" id="libraries-are-constrained-by-underlying-system-apis"><span class="header-section-number">2.4</span> Libraries are constrained by
 underlying system APIs<a href="#libraries-are-constrained-by-underlying-system-apis" class="self-link"></a></h2>
 <p>Some standard library facilities are thin wrappers over OS
