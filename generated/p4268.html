@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="mpark/wg21" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="dcterms.date" content="2026-06-15" />
+  <meta name="dcterms.date" content="2026-06-16" />
   <title>Implementation considerations of library
 constexpr-ification</title>
   <style>
@@ -518,7 +518,7 @@ considerations of library constexpr-ification</h1>
   </tr>
   <tr>
     <td>Date:</td>
-    <td>2026-06-15</td>
+    <td>2026-06-16</td>
   </tr>
   <tr>
     <td style="vertical-align:top">Project:</td>
@@ -619,39 +619,24 @@ representational tricks.</li>
 </ul>
 <p>Some of these can be worked around with
 <code class="sourceCode cpp"><span class="cf">if</span> <span class="kw">consteval</span></code>
-branches, but some can’t. Also,
+branches, but some can’t. In particular, adding
+<code class="sourceCode cpp"><span class="cf">if</span> <span class="kw">consteval</span></code>
+can force opening the body of a function that was previously defaulted,
+which has an impact on the triviality of the function and the generation
+of special member functions, amongst other things. Furthermore,
 <code class="sourceCode cpp"><span class="cf">if</span> <span class="kw">consteval</span></code>
 effectively means duplicated implementations, which also increases the
 maintenance and testing burden and the likelihood of bugs.</p>
-<p>The same constraints apply to tests themselves. Standard library
-tests often rely on techniques that are not
+<p>Finally, the same constraints apply to tests themselves. Standard
+library tests often rely on techniques that are not
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>-friendly,
 for example using global state to count how many times a function is
 called. Refactoring tests to be
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>-friendly
-is often non-trivial.</p>
-<h2 data-number="2.4" id="libraries-are-constrained-by-underlying-system-apis"><span class="header-section-number">2.4</span> Libraries are constrained by
-underlying system APIs<a href="#libraries-are-constrained-by-underlying-system-apis" class="self-link"></a></h2>
-<p>Some standard library facilities are thin wrappers over OS
-primitives, and their representation is dictated by the platform.</p>
-<p><code class="sourceCode cpp">std<span class="op">::</span>mutex</code>
-is a good example. On some platforms, the underlying
-<code class="sourceCode cpp">pthread_mutex_t</code> (or equivalent)
-permits trivial destruction, and libc++ provides a trivial destructor to
-<code class="sourceCode cpp">std<span class="op">::</span>mutex</code>
-as a quality-of-implementation choice. Making the destructor
+is often non-trivial, and sometimes the
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>
-requires defining a destructor body (containing an
-<code class="sourceCode cpp"><span class="cf">if</span> <span class="kw">consteval</span></code>
-branch), which makes the destructor non-trivial. Hence, that change is
-ABI breaking on these platforms. Furthermore, had
-<code class="sourceCode cpp">std<span class="op">::</span>mutex</code>
-been specified as
-<code class="sourceCode cpp"><span class="kw">constexpr</span></code>
-from the start, this implementation choice would never have been
-available. Hence, there is also a hidden opportunity cost in most of
-these proposals.</p>
-<h2 data-number="2.5" id="constexpr-can-slow-down-compilation-in-unexpected-ways"><span class="header-section-number">2.5</span>
+version can’t be fully tested.</p>
+<h2 data-number="2.4" id="constexpr-can-slow-down-compilation-in-unexpected-ways"><span class="header-section-number">2.4</span>
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>
 can slow down compilation in unexpected ways<a href="#constexpr-can-slow-down-compilation-in-unexpected-ways" class="self-link"></a></h2>
 <p>When the compiler performs trial constant evaluation
@@ -665,7 +650,7 @@ even to pre-existing code that did not intend to use
 <code class="sourceCode cpp">std<span class="op">::</span>format</code>
 in
 <code class="sourceCode cpp"><span class="kw">constexpr</span></code>.</p>
-<h2 data-number="2.6" id="the-specification-cost-is-a-poor-proxy-for-implementation-cost"><span class="header-section-number">2.6</span> The specification cost is a
+<h2 data-number="2.5" id="the-specification-cost-is-a-poor-proxy-for-implementation-cost"><span class="header-section-number">2.5</span> The specification cost is a
 poor proxy for implementation cost<a href="#the-specification-cost-is-a-poor-proxy-for-implementation-cost" class="self-link"></a></h2>
 <p>Constexpr
 <code class="sourceCode cpp"><span class="op">&lt;</span>cmath<span class="op">&gt;</span></code>
